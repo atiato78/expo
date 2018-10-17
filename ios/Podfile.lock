@@ -301,7 +301,7 @@ PODS:
     - EXPermissionsInterface
   - EXPermissionsInterface (1.2.0):
     - EXCore
-  - EXPrint (1.2.0):
+  - EXPrint (2.0.0-alpha.0):
     - EXCore
   - EXReactNativeAdapter (1.2.0):
     - EXCore
@@ -1671,6 +1671,6 @@ SPEC CHECKSUMS:
   yogaABI30_0_0: 4c86e39466368a6b018b8b78aeb654b6620512a1
   yogaABI31_0_0: 7978689ddccec43cffd5914889304cf3b7fd7c77
 
-PODFILE CHECKSUM: f976f1913ee3e3825829e9322e995671b5298c62
+PODFILE CHECKSUM: f20b5f408c8f28c277c317652d864cc5c12fd764
 
 COCOAPODS: 1.5.3
