@@ -6,8 +6,6 @@
 
 @interface EXUserNotificationRequester ()
 
-@property (nonatomic, strong) EXPromiseResolveBlock resolve;
-@property (nonatomic, strong) EXPromiseRejectBlock reject;
 @property (nonatomic, weak) id<EXPermissionRequesterDelegate> delegate;
 @property (nonatomic, weak) EXModuleRegistry * moduleRegistry;
 
@@ -69,31 +67,27 @@
 
 - (void)requestPermissionsWithResolver:(EXPromiseResolveBlock)resolve rejecter:(EXPromiseRejectBlock)reject
 {
-  if (_resolve != nil || _reject != nil) {
-    reject(@"E_AWAIT_PROMISE", @"Another request for the same permission is already being handled.", nil);
-    return;
-  }
-
-  _resolve = resolve;
-  _reject = reject;
-
   __weak EXUserNotificationRequester *weakSelf = self;
 
   UNAuthorizationOptions options = UNAuthorizationOptionAlert + UNAuthorizationOptionSound + UNAuthorizationOptionBadge;
   id<EXUserNotificationCenterProxyInterface> notificationCenter = [EXUserNotificationRequester getCenterWithModuleRegistry:_moduleRegistry];
   [notificationCenter requestAuthorizationWithOptions:options completionHandler:^(BOOL granted, NSError * _Nullable error) {
-    dispatch_async(dispatch_get_main_queue(), ^{
-      [weakSelf _consumeResolverWithCurrentPermissions];
+    id<EXPermissionsModule> permissionsModule = [weakSelf.moduleRegistry getModuleImplementingProtocol:@protocol(EXPermissionsModule)];
+    NSAssert(permissionsModule, @"Permissions module is required to properly consume result.");
+    dispatch_async(permissionsModule.methodQueue, ^{
+      if (error) {
+        reject(@"E_PERM_REQ", error.description, error);
+      } else {
+        [weakSelf _consumeResolverWithCurrentPermissions:resolve];
+      }
     });
   }];
 }
 
-- (void)_consumeResolverWithCurrentPermissions
+- (void)_consumeResolverWithCurrentPermissions:(EXPromiseResolveBlock)resolver
 {
-  if (_resolve) {
-    _resolve([[self class] permissionsWithModuleRegistry:_moduleRegistry]);
-    _resolve = nil;
-    _reject = nil;
+  if (resolver) {
+    resolver([[self class] permissionsWithModuleRegistry:_moduleRegistry]);
   }
   if (_delegate) {
     [_delegate permissionRequesterDidFinish:self];
