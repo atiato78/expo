@@ -151,7 +151,7 @@ platform :android do
     verify_changelog_exists(version_code: build_gradle.match(/versionCode (\d+)/)[1])
     verify_upload_to_staging(version_name: build_gradle.match(/versionName '([\d\.]+)'/)[1])
 
-    supply(
+    upload_to_play_store(
       package_name: "host.exp.exponent",
       metadata_path: "./fastlane/android/metadata",
       apk: "./android/app/build/outputs/apk/prodKernel/release/app-prodKernel-release.apk",
@@ -159,6 +159,19 @@ platform :android do
       skip_upload_images: true,
       skip_upload_screenshots: true
     )
+    slack(
+      channel: "#android",
+      message: "Successfully deployed to Google Play",
+    )
   end
 
+  error do |lane, exception|
+    if is_ci && lane.name == :prod_release
+      slack(
+        channel: "#android",
+        success: false,
+        message: exception.message,
+      )
+    end
+  end
 end
