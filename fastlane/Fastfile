@@ -143,6 +143,12 @@ platform :android do
       flavor: "ProdKernel",
       build_type: build_type,
     )
+    if is_ci && git_branch.match(/^sdk-\d+$/)
+      slack(
+        channel: "#android",
+        message: "Client build successful! <https://circleci.com/workflow-run/#{ENV["CIRCLE_WORKFLOW_ID"]}|[approve workflow]>",
+      )
+    end
   end
 
   lane :prod_release do
