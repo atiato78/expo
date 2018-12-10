@@ -58,6 +58,7 @@ allprojects {
       dirs 'libs'
       // dirs project(':expoview').file('libs')
     }
+    maven { url "https://google.bintray.com/exoplayer" }
     maven { url "https://jitpack.io" }
 
     // Want this last so that we never end up with a stale cache
