@@ -10,12 +10,16 @@ DangerZone.Branch.subscribe(bundle => {
 });
 
 export default class ExpoApisScreen extends React.Component {
+  static path = '';
+
   static navigationOptions = {
     title: 'APIs in Expo SDK',
   };
 
   componentWillMount() {
-    this._notificationSubscription = Notifications.addListener(this._handleNotification);
+    if (Platform.OS !== 'web') {
+      this._notificationSubscription = Notifications.addListener(this._handleNotification);
+    }
   }
 
   componentWillUnmount() {
@@ -66,44 +70,85 @@ export default class ExpoApisScreen extends React.Component {
   }
 
   _getApis = () => {
-    return [
-      'AppAuth',
-      'AuthSession',
-      'Branch',
-      'Calendars',
-      'Constants',
-      'Contacts',
-      'DocumentPicker',
-      'FacebookLogin',
-      'FileSystem',
-      'Font',
-      'Geocoding',
-      'Google',
-      'GoogleSignIn',
-      'Haptic',
-      'ImagePicker',
-      'ImageManipulator',
-      'IntentLauncher',
-      'KeepAwake',
-      'LocalAuthentication',
-      'Localization',
-      'Location',
-      'MailComposer',
-      'MediaLibrary',
-      'Notification',
-      'Pedometer',
-      'Permissions',
-      'Print',
-      'MediaLibrary',
-      'ScreenOrientation',
-      'Sensor',
-      'SecureStore',
-      'SMS',
-      'StoreReview',
-      'TextToSpeech',
-      'Util',
-      'WebBrowser',
-      'ViewShot',
-    ];
+    return Platform.select({
+      web: [
+        // 'AppAuth',
+        'AuthSession',
+        // 'Branch',
+        // 'Calendars',
+        'Constants',
+        // 'Contacts',
+        'DocumentPicker',
+        // 'FacebookLogin',
+        'FileSystem',
+        'Font',
+        'Geocoding',
+        'Google',
+        'GoogleSignIn',
+        // 'Haptic',
+        // 'ImagePicker',
+        'ImageManipulator',
+        // 'IntentLauncher',
+        // 'KeepAwake',
+        // 'LocalAuthentication',
+        'Localization',
+        'Location',
+        'MailComposer',
+        // 'MediaLibrary',
+        'Notification',
+        // 'Pedometer',
+        'Permissions',
+        'Print',
+        // 'MediaLibrary',
+        'ScreenOrientation',
+        'Sensor',
+        // 'SecureStore',
+        'SMS',
+        // 'StoreReview',
+        'TextToSpeech',
+        'Util',
+        // 'WebBrowser',
+        // 'ViewShot',
+      ],
+      default: [
+        'AppAuth',
+        'AuthSession',
+        'Branch',
+        'Calendars',
+        'Constants',
+        'Contacts',
+        'DocumentPicker',
+        'FacebookLogin',
+        'FileSystem',
+        'Font',
+        'Geocoding',
+        'Google',
+        'GoogleSignIn',
+        'Haptic',
+        'ImagePicker',
+        'ImageManipulator',
+        'IntentLauncher',
+        'KeepAwake',
+        'LocalAuthentication',
+        'Localization',
+        'Location',
+        'MailComposer',
+        'MediaLibrary',
+        'Notification',
+        'Pedometer',
+        'Permissions',
+        'Print',
+        'MediaLibrary',
+        'ScreenOrientation',
+        'Sensor',
+        'SecureStore',
+        'SMS',
+        'StoreReview',
+        'TextToSpeech',
+        'Util',
+        'WebBrowser',
+        'ViewShot',
+      ],
+    });
   };
 }

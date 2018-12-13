@@ -1,9 +1,7 @@
 import { Platform } from 'expo-core';
-import ExpoSMS from './ExpoSMS';
 
-type SMSResponse = {
-  result: 'sent' | 'cancelled';
-};
+import ExpoSMS from './ExpoSMS';
+import { SMSResponse } from './SMS.types';
 
 export async function sendSMSAsync(
   addresses: string | string[],

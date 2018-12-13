@@ -20,11 +20,33 @@ const createTabNavigator = Platform.select({
   android: createMaterialBottomTabNavigator,
 });
 
+ExpoApisStackNavigator.path = '';
+ExpoComponentsStackNavigator.path = '';
+ReactNativeCoreStackNavigator.path = '';
+
 const MainTabNavigator = createTabNavigator(
   {
-    ExpoApis: ExpoApisStackNavigator,
-    ExpoComponents: ExpoComponentsStackNavigator,
-    ReactNativeCore: ReactNativeCoreStackNavigator,
+    ExpoApis: {
+      screen: ExpoApisStackNavigator,
+      navigationOptions: {
+        title: 'Expo API',
+        linkName: 'Expo API',
+      },
+    },
+    ExpoComponents: {
+      screen: ExpoComponentsStackNavigator,
+      navigationOptions: {
+        title: 'Expo Components',
+        linkName: 'Expo Components',
+      },
+    },
+    ReactNativeCore: {
+      screen: ReactNativeCoreStackNavigator,
+      navigationOptions: {
+        title: 'React Native Core',
+        linkName: 'React Native Core',
+      },
+    },
   },
   {
     defaultNavigationOptions: ({ navigation }) => {
@@ -71,5 +93,12 @@ const MainTabNavigator = createTabNavigator(
     },
   }
 );
+
+MainTabNavigator.path = '';
+
+MainTabNavigator.navigationOptions = {
+  title: 'Home',
+  linkName: 'home',
+};
 
 export default MainTabNavigator;
