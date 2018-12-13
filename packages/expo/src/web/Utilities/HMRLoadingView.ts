@@ -1,7 +1,5 @@
-class HMRLoadingView {
-  static showMessage(message: string) {}
+export default class HMRLoadingView {
+  static showMessage() {}
 
   static hide() {}
 }
-
-export default HMRLoadingView;
