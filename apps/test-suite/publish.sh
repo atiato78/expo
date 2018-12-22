@@ -1,5 +1,5 @@
 #!/usr/bin/env nix-shell
-#!nix-shell -I nixpkgs=../../nix --packages expo-cli git yarn -i bash
+#!nix-shell -I nixpkgs=../../nix --packages git yarn -i bash
 
 set -eo pipefail
 
