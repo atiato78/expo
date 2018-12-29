@@ -96,7 +96,6 @@ export async function getOrientationLockAsync(): Promise<OrientationLock> {
   return await ExponentScreenOrientation.getOrientationLockAsync();
 }
 
-// TODO: do we want to expose this?
 export async function getPlatformOrientationLockAsync(): Promise<String> {
   const platformOrientationLock = await ExponentScreenOrientation.getPlatformOrientationLockAsync();
   return await platformOrientationLock.toString();
@@ -161,7 +160,6 @@ export async function removeOrientationChangeListenersAsync(): Promise<void> {
   }
 }
 
-// TODO: should we introduce a remove-by-subscription?
 export async function removeOrientationChangeListenerAsync(subscription: EmitterSubscription): Promise<void> {
   if (!subscription){
     throw new TypeError(`Must pass in a valid subscription`);
