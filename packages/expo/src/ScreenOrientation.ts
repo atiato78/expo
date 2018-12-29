@@ -1,5 +1,4 @@
-import invariant from 'invariant';
-import { Platform, NativeModules, NativeEventEmitter, EmitterSubscription } from 'react-native';
+import { EmitterSubscription, NativeEventEmitter, NativeModules, Platform } from 'react-native';
 
 const { ExpoScreenOrientation } = NativeModules;
 
@@ -21,101 +20,152 @@ export enum OrientationLock {
   LANDSCAPE_LEFT = 'LANDSCAPE_LEFT',
   LANDSCAPE_RIGHT = 'LANDSCAPE_RIGHT',
   OTHER = 'OTHER',
+  ALL_BUT_UPSIDE_DOWN = 'ALL_BUT_UPSIDE_DOWN', // deprecated
 }
 
-// TODO: should this be exported?
 type PlatformOptions = {
   screenOrientationConstantAndroid?: number;
-  screenOrientationArrayIOS?: Array<Orientation>;
+  screenOrientationArrayIOS?: Orientation[];
 };
 
-const _orientationChangeEmitter = new NativeEventEmitter(); // TODO: docs 4 why We dont pass in a manager
-let _orientationChangeSubscribers: Array<EmitterSubscription> = [];
+type OrientationChangeListener = (event: OrientationChangeEvent) => void;
 
-export function allowAsync(orientationLock: OrientationLock): Promise<void> {
-  return lockAsync(orientationLock);
+type OrientationChangeEvent = {
+  orientationLock: OrientationLock;
+  orientation: Orientation;
+};
+
+// todo: make this conditional
+const _orientationChangeEmitter = new NativeEventEmitter(ExpoScreenOrientation);
+let _orientationChangeSubscribers: EmitterSubscription[] = [];
+
+export function allow(orientationLock: OrientationLock): void {
+  console.warn("'ScreenOrientation.allow' is deprecated in favour of 'ScreenOrientation.lockAsync'");
+  lockAsync(orientationLock);
 }
 
-export function lockAsync(orientationLock: OrientationLock): Promise<void> {
+export async function allowAsync(orientationLock: OrientationLock): Promise<void> {
+  console.warn("'ScreenOrientation.allowAsync' is deprecated in favour of 'ScreenOrientation.lockAsync'");
+  await lockAsync(orientationLock);
+}
+
+export async function lockAsync(orientationLock: OrientationLock): Promise<void> {
   if (typeof orientationLock !== 'string'){
     throw new TypeError(`lockAsync cannot be called with ${orientationLock}`);
   }
   
-  return ExpoScreenOrientation.lockAsync(orientationLock);
+  await ExpoScreenOrientation.lockAsync(orientationLock);
 }
 
-export function lockPlatformAsync(options: PlatformOptions): Promise<void> {
+export async function lockPlatformAsync(options: PlatformOptions): Promise<void> {
   const {screenOrientationConstantAndroid, screenOrientationArrayIOS} = options;
   let platformOrientationParam;
   if (Platform.OS === 'android' && screenOrientationConstantAndroid) {
     if (isNaN(screenOrientationConstantAndroid)){
-      throw new TypeError(`lockPlatformAsync Android platform: screenOrientationConstantAndroid cannot be called with ${screenOrientationConstantAndroid}`)
+      throw new TypeError(`lockPlatformAsync Android platform: screenOrientationConstantAndroid cannot be called with ${screenOrientationConstantAndroid}`);
     }
     platformOrientationParam = screenOrientationConstantAndroid;
   } else if (Platform.OS === 'ios' && screenOrientationArrayIOS){
-    // TODO: implement me
+    if (!Array.isArray(screenOrientationArrayIOS)){
+      throw new TypeError(`lockPlatformAsync iOS platform: screenOrientationArrayIOS cannot be called with ${screenOrientationArrayIOS}`);
+    }
+    for (let orientation of screenOrientationArrayIOS){
+      const orientations = Object.values(Orientation);
+      if (!orientations.includes(orientation)) {
+        throw new TypeError(`lockPlatformAsync iOS platform: ${orientation} is not a valid Orientation`);
+      }
+    }
+    platformOrientationParam = screenOrientationArrayIOS;
   }
-  return ExpoScreenOrientation.lockPlatformAsync(platformOrientationParam);
+  await ExpoScreenOrientation.lockPlatformAsync(platformOrientationParam);
 }
 
-export function unlockAsync(): Promise<void> {
-  return ExpoScreenOrientation.unlockAsync();
+export async function unlockAsync(): Promise<void> {
+  await ExpoScreenOrientation.unlockAsync();
 }
 
-export function getOrientationAsync(): Promise<Orientation> {
-  return ExpoScreenOrientation.getOrientationAsync();
+export async function getOrientationAsync(): Promise<Orientation> {
+  return await ExpoScreenOrientation.getOrientationAsync();
 }
 
-export function getOrientationLockAsync(): Promise<OrientationLock> {
-  return ExpoScreenOrientation.getOrientationLockAsync();
+export async function getOrientationLockAsync(): Promise<OrientationLock> {
+  return await ExpoScreenOrientation.getOrientationLockAsync();
 }
 
 // TODO: do we want to expose this?
-export async function getOrientationLockPlatformAsync(): Promise<String> {
-  const platformOrientationLock = await ExpoScreenOrientation.getOrientationLockPlatformAsync();
-  return platformOrientationLock.toString();
+export async function getPlatformOrientationLockAsync(): Promise<String> {
+  const platformOrientationLock = await ExpoScreenOrientation.getPlatformOrientationLockAsync();
+  return await platformOrientationLock.toString();
 }
 
-export function supportsOrientationLock(orientationLock: OrientationLock): Boolean {
+export async function supportsOrientationLockAsync(orientationLock: OrientationLock): Promise<boolean> {
+  //TODO: make this native
   const orientationLocks = Object.values(OrientationLock);
-  return orientationLocks.includes(orientationLock);
+  return await orientationLocks.includes(orientationLock);
 }
 
-export function doesSupportAsync(orientationLock: OrientationLock): Boolean {
-  return supportsOrientationLock(orientationLock);
+export async function doesSupportAsync(orientationLock: OrientationLock): Promise<boolean> {
+  return await supportsOrientationLockAsync(orientationLock);
 }
 
 // We rely on RN to emit `didUpdateDimensions`
 // If this method no longer works, it's possible that the underlying RN implementation has changed
 // see https://github.com/facebook/react-native/blob/c31f79fe478b882540d7fd31ee37b53ddbd60a17/ReactAndroid/src/main/java/com/facebook/react/modules/deviceinfo/DeviceInfoModule.java#L90
-export function addOrientationChangeListener(listener: Function): EmitterSubscription {
+export async function addOrientationChangeListenerAsync(listener: OrientationChangeListener): Promise<EmitterSubscription> {
   if (typeof listener !== 'function'){
     throw new TypeError(`addOrientationChangeListener cannot be called with ${listener}`);
   }
 
-  const subscription = _orientationChangeEmitter.addListener('didUpdateDimensions', async update => {
-    const orientationLock = await ExpoScreenOrientation.getOrientationLockAsync();
-    const orientation = await ExpoScreenOrientation.getOrientationAsync();
-    listener({orientationLock, orientation});
+  // TODO: consolidate this later
+  const eventName = Platform.OS === 'ios' ? 'expoDidUpdateDimensions' : 'didUpdateDimensions';
+  const subscription = _orientationChangeEmitter.addListener(eventName, async update => {
+    let orientation, orientationLock;
+    if (Platform.OS === 'ios'){
+      // TODO: let the bridge carry this info in the Update instead of having to fetch it again
+      // RN relies on a deprecated thing in ios so we make our own implementation
+      //orientationLock = update.orientationLock;
+      orientationLock = update.orientationLock;
+      orientation = update.orientation;
+    } else {
+      // We rely on the RN `didUpdateDimensions` event on Android
+      [orientationLock, orientation] = await Promise.all([ExpoScreenOrientation.getOrientationLockAsync(), ExpoScreenOrientation.getOrientationAsync()])
+    }
+    listener ({orientation, orientationLock});
   });
   _orientationChangeSubscribers.push(subscription);
+
+  if (Platform.OS === 'ios'){
+    await ExpoScreenOrientation.addOrientationChangeListener();
+  }
   return subscription;
 }
 
-export function removeOrientationChangeListeners(): void {
+export async function removeOrientationChangeListenersAsync(): Promise<void> {
   // Remove listener by subscription instead of eventType to avoid clobbering Dimension module's subscription of didUpdateDimensions
   let i = _orientationChangeSubscribers.length;
   while (i--) {
     const subscriber = _orientationChangeSubscribers[i];
-    _orientationChangeEmitter.removeSubscription(subscriber);
+    subscriber.remove();
 
     // remove after a successful unsuscribe
     _orientationChangeSubscribers.pop(); 
   }
+  if (Platform.OS === 'ios'){
+    // remove module listener if we have no more subscribers
+    // TODO: should this be better named
+    await ExpoScreenOrientation.removeOrientationChangeListener();
+  }
 }
 
 // TODO: should we introduce a remove-by-subscription?
-export function removeOrientationChangeListener(subscription: EmitterSubscription): void {
-  _orientationChangeEmitter.removeSubscription(subscription);
+export async function removeOrientationChangeListenerAsync(subscription: EmitterSubscription): Promise<void> {
+  if (!subscription){
+    throw new TypeError(`Must pass in a valid subscription`);
+  }
+  subscription.remove();
   _orientationChangeSubscribers = _orientationChangeSubscribers.filter(sub => sub !== subscription);
+
+  if (Platform.OS === 'ios' && _orientationChangeSubscribers.length === 0) {
+    await ExpoScreenOrientation.removeOrientationChangeListener();
+  }
 }
