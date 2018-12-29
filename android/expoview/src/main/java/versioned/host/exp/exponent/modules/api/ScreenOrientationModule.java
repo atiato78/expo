@@ -6,7 +6,6 @@ import android.util.DisplayMetrics;
 import android.view.Surface;
 import android.view.WindowManager;
 
-import com.facebook.react.bridge.JSApplicationIllegalArgumentException;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -60,7 +59,7 @@ public class ScreenOrientationModule extends ReactContextBaseJavaModule implemen
   }
 
   @ReactMethod
-  public void lockAsync(String orientationLock, Promise promise) {
+  public void lockAsync(String orientationLockStr, Promise promise) {
     Activity activity = getCurrentActivity();
     if (activity == null) {
       promise.reject(ANDROID_NO_ACTIVITY, ANDROID_NO_ACTIVITY_MSG);
@@ -68,10 +67,11 @@ public class ScreenOrientationModule extends ReactContextBaseJavaModule implemen
     }
 
     try {
-      int orientationAttr = convertToOrientationAttr(orientationLock);
+      OrientationLock orientationLock = OrientationLock.valueOf(orientationLockStr);
+      int orientationAttr = orientationLockJSToNative(orientationLock);
       activity.setRequestedOrientation(orientationAttr);
-    } catch (JSApplicationIllegalArgumentException e) {
-      promise.reject(ERR_SCREEN_ORIENTATION_INVALID_ORIENTATION_LOCK, ERR_SCREEN_ORIENTATION_INVALID_ORIENTATION_LOCK_MSG);
+    } catch (IllegalArgumentException e) {
+      promise.reject("ERR_SCREEN_ORIENTATION_INVALID_ORIENTATION_LOCK", "An invalid OrientationLock was passed in: " + orientationLockStr);
       return;
     } catch (Exception e) {
       promise.reject(GENERIC_ANDROID_ERROR, e.toString());
@@ -100,7 +100,7 @@ public class ScreenOrientationModule extends ReactContextBaseJavaModule implemen
 
   @ReactMethod
   public void unlockAsync(Promise promise) {
-    lockAsync(DEFAULT, promise);
+    lockAsync(OrientationLock.DEFAULT.toString(), promise);
   }
 
   @ReactMethod
@@ -112,10 +112,8 @@ public class ScreenOrientationModule extends ReactContextBaseJavaModule implemen
     }
 
     try {
-      promise.resolve(getScreenOrientation(activity));
-    } catch (IllegalStateException e) {
-      // We don't know what the screen orientation is from surface rotation
-      promise.resolve(UNKNOWN);
+      Orientation orientation = getScreenOrientation(activity);
+      promise.resolve(orientation.toString());
     } catch (Exception e) {
       promise.reject(GENERIC_ANDROID_ERROR, e.toString());
     }
@@ -130,11 +128,12 @@ public class ScreenOrientationModule extends ReactContextBaseJavaModule implemen
     }
 
     int orientationAttr = activity.getRequestedOrientation();
-    promise.resolve(convertToOrientationLock(orientationAttr));
+    OrientationLock orientationLock = orientationLockNativeToJS(orientationAttr);
+    promise.resolve(orientationLock.toString());
   }
 
   @ReactMethod
-  public void getOrientationLockPlatformAsync(Promise promise) {
+  public void getPlatformOrientationLockAsync(Promise promise) {
     Activity activity = getCurrentActivity();
     if (activity == null) {
       promise.reject(ANDROID_NO_ACTIVITY, ANDROID_NO_ACTIVITY_MSG);
@@ -146,14 +145,14 @@ public class ScreenOrientationModule extends ReactContextBaseJavaModule implemen
 
   // https://stackoverflow.com/questions/10380989/how-do-i-get-the-current-orientation-activityinfo-screen-orientation-of-an-a
   // Will not work in all cases as surface rotation is not standardized across android devices, but this is best effort
-  private String getScreenOrientation(Activity activity) throws IllegalStateException {
+  private Orientation getScreenOrientation(Activity activity) {
     WindowManager windowManager = activity.getWindowManager();
     int rotation = windowManager.getDefaultDisplay().getRotation();
     DisplayMetrics dm = new DisplayMetrics();
     windowManager.getDefaultDisplay().getMetrics(dm);
     int width = dm.widthPixels;
     int height = dm.heightPixels;
-    String orientation;
+    Orientation orientation;
     // if the device's natural orientation is portrait:
     if ((rotation == Surface.ROTATION_0
         || rotation == Surface.ROTATION_180) && height > width ||
@@ -161,19 +160,20 @@ public class ScreenOrientationModule extends ReactContextBaseJavaModule implemen
             || rotation == Surface.ROTATION_270) && width > height) {
       switch (rotation) {
         case Surface.ROTATION_0:
-          orientation = PORTRAIT_UP;
+          orientation = Orientation.PORTRAIT_UP;
           break;
         case Surface.ROTATION_90:
-          orientation = LANDSCAPE_LEFT;
+          orientation = Orientation.LANDSCAPE_LEFT;
           break;
         case Surface.ROTATION_180:
-          orientation = PORTRAIT_DOWN;
+          orientation = Orientation.PORTRAIT_DOWN;
           break;
         case Surface.ROTATION_270:
-          orientation = LANDSCAPE_RIGHT;
+          orientation = Orientation.LANDSCAPE_RIGHT;
           break;
         default:
-          throw new IllegalStateException("Unknown screen orientation.");
+          orientation = Orientation.UNKNOWN;
+          break;
       }
     }
 
@@ -182,22 +182,22 @@ public class ScreenOrientationModule extends ReactContextBaseJavaModule implemen
     else {
       switch (rotation) {
         case Surface.ROTATION_0:
-          orientation = LANDSCAPE_LEFT;
+          orientation = Orientation.LANDSCAPE_LEFT;
           break;
         case Surface.ROTATION_90:
-          orientation = PORTRAIT_UP;
+          orientation = Orientation.PORTRAIT_UP;
           break;
         case Surface.ROTATION_180:
-          orientation = LANDSCAPE_RIGHT;
+          orientation = Orientation.LANDSCAPE_RIGHT;
           break;
         case Surface.ROTATION_270:
-          orientation = LANDSCAPE_RIGHT;
+          orientation = Orientation.PORTRAIT_DOWN;
           break;
         default:
-          throw new IllegalStateException("Unknown screen orientation.");
+          orientation = Orientation.UNKNOWN;
+          break;
       }
     }
-
     return orientation;
   }
 
@@ -206,45 +206,51 @@ public class ScreenOrientationModule extends ReactContextBaseJavaModule implemen
   static final String ANDROID_NO_ACTIVITY_MSG = "There is no current activity available.";
   static final String GENERIC_ANDROID_ERROR = "GENERIC_ANDROID_ERROR";
 
-  static final String ERR_SCREEN_ORIENTATION_INVALID_ORIENTATION_LOCK = "ERR_SCREEN_ORIENTATION_INVALID_ORIENTATION_LOCK";
-  static final String ERR_SCREEN_ORIENTATION_INVALID_ORIENTATION_LOCK_MSG = "an invalid OrientationLock was passed in";
+  public enum Orientation {
+    PORTRAIT_UP,
+    PORTRAIT_DOWN,
+    LANDSCAPE_LEFT,
+    LANDSCAPE_RIGHT,
+    UNKNOWN;
+  }
 
-  static final String UNKNOWN = "UNKNOWN";
-  static final String DEFAULT = "DEFAULT";
-  static final String ALL = "ALL";
-  static final String ALL_BUT_UPSIDE_DOWN = "ALL_BUT_UPSIDE_DOWN";
-  static final String PORTRAIT = "PORTRAIT";
-  static final String PORTRAIT_UP = "PORTRAIT_UP";
-  static final String PORTRAIT_DOWN = "PORTRAIT_DOWN";
-  static final String LANDSCAPE = "LANDSCAPE";
-  static final String LANDSCAPE_LEFT = "LANDSCAPE_LEFT";
-  static final String LANDSCAPE_RIGHT = "LANDSCAPE_RIGHT";
-  static final String OTHER = "OTHER";
+  public enum OrientationLock {
+    DEFAULT,
+    ALL,
+    PORTRAIT,
+    PORTRAIT_UP,
+    PORTRAIT_DOWN,
+    LANDSCAPE,
+    LANDSCAPE_LEFT,
+    LANDSCAPE_RIGHT,
+    OTHER,
+    ALL_BUT_UPSIDE_DOWN; // deprecated
+  }
 
-  private String convertToOrientationLock(int orientationAttr) {
+  private OrientationLock orientationLockNativeToJS(int orientationAttr) {
     switch (orientationAttr) {
       case ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED:
-        return DEFAULT;
+        return OrientationLock.DEFAULT;
       case ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR:
-        return ALL;
+        return OrientationLock.ALL;
       case ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT:
-        return PORTRAIT;
+        return OrientationLock.PORTRAIT;
       case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
-        return PORTRAIT_UP;
+        return OrientationLock.PORTRAIT_UP;
       case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
-        return PORTRAIT_DOWN;
+        return OrientationLock.PORTRAIT_DOWN;
       case ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE:
-        return LANDSCAPE;
+        return OrientationLock.LANDSCAPE;
       case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
-        return LANDSCAPE_LEFT;
+        return OrientationLock.LANDSCAPE_LEFT;
       case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
-        return LANDSCAPE_RIGHT;
+        return OrientationLock.LANDSCAPE_RIGHT;
       default:
-        return OTHER;
+        return OrientationLock. OTHER;
     }
   }
 
-  private int convertToOrientationAttr(String orientationLock) throws JSApplicationIllegalArgumentException {
+  private int orientationLockJSToNative(OrientationLock orientationLock) {
     switch (orientationLock) {
       case DEFAULT:
         return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -265,7 +271,7 @@ public class ScreenOrientationModule extends ReactContextBaseJavaModule implemen
       case LANDSCAPE_RIGHT:
         return ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
       default:
-        throw new JSApplicationIllegalArgumentException("Invalid screen orientation " + orientationLock);
+        throw new IllegalArgumentException("OrientationLock " + orientationLock.toString() + " is not mapped to a native Android orientation attr");
     }
   }
 }
