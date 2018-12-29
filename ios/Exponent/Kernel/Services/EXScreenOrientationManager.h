@@ -7,6 +7,13 @@
 - (void)setSupportInterfaceOrientations:(UIInterfaceOrientationMask)supportedInterfaceOrientations
                          forExperienceId:(NSString *)experienceId;
 
-@property (nonatomic, assign) UIInterfaceOrientationMask supportedInterfaceOrientationsForVisibleApp;
+- (void) handleScreenOrientationChange: (nullable UITraitCollection *) traitCollection windowRectangle: (CGRect) windowRectangle;
+
+- (UITraitCollection *) getTraitCollection;
+
+// should this be weak?
+@property (nonatomic, strong) NSMapTable<NSString *, id> *subscribedModules;
+
+- (UIInterfaceOrientationMask) supportedInterfaceOrientationsForVisibleApp;
 
 @end
