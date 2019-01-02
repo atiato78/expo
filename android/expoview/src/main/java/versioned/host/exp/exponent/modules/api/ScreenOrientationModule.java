@@ -12,11 +12,14 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 
+import expo.errors.InvalidArgumentException;
+
 import javax.annotation.Nullable;
 
 public class ScreenOrientationModule extends ReactContextBaseJavaModule implements LifecycleEventListener {
   private @Nullable
   Integer mInitialOrientation = null;
+  static final String ERR_SCREEN_ORIENTATION = "ERR_SCREEN_ORIENTATION";
 
   public ScreenOrientationModule(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -61,20 +64,19 @@ public class ScreenOrientationModule extends ReactContextBaseJavaModule implemen
   @ReactMethod
   public void lockAsync(String orientationLockStr, Promise promise) {
     Activity activity = getCurrentActivity();
-    if (activity == null) {
-      promise.reject(ANDROID_NO_ACTIVITY, ANDROID_NO_ACTIVITY_MSG);
-      return;
-    }
 
     try {
       OrientationLock orientationLock = OrientationLock.valueOf(orientationLockStr);
       int orientationAttr = orientationLockJSToNative(orientationLock);
       activity.setRequestedOrientation(orientationAttr);
     } catch (IllegalArgumentException e) {
-      promise.reject("ERR_SCREEN_ORIENTATION_INVALID_ORIENTATION_LOCK", "An invalid OrientationLock was passed in: " + orientationLockStr);
+      promise.reject("ERR_SCREEN_ORIENTATION_INVALID_ORIENTATION_LOCK", "An invalid OrientationLock was passed in: " + orientationLockStr, e);
+      return;
+    } catch (InvalidArgumentException e) {
+      promise.reject(e);
       return;
     } catch (Exception e) {
-      promise.reject(GENERIC_ANDROID_ERROR, e.toString());
+      promise.reject(ERR_SCREEN_ORIENTATION, "Could not apply the ScreenOrientation lock: " + orientationLockStr, e);
       return;
     }
     promise.resolve(null);
@@ -83,15 +85,11 @@ public class ScreenOrientationModule extends ReactContextBaseJavaModule implemen
   @ReactMethod
   public void lockPlatformAsync(int orientationAttr, Promise promise) {
     Activity activity = getCurrentActivity();
-    if (activity == null) {
-      promise.reject(ANDROID_NO_ACTIVITY, ANDROID_NO_ACTIVITY_MSG);
-      return;
-    }
 
     try {
       activity.setRequestedOrientation(orientationAttr);
     } catch (Exception e) {
-      promise.reject(GENERIC_ANDROID_ERROR, e.toString());
+      promise.reject(ERR_SCREEN_ORIENTATION, "Could not apply the ScreenOrientation platform lock: " + orientationAttr, e);
       return;
     }
     promise.resolve(null);
@@ -106,41 +104,50 @@ public class ScreenOrientationModule extends ReactContextBaseJavaModule implemen
   @ReactMethod
   public void getOrientationAsync(Promise promise) {
     Activity activity = getCurrentActivity();
-    if (activity == null) {
-      promise.reject(ANDROID_NO_ACTIVITY, ANDROID_NO_ACTIVITY_MSG);
-      return;
-    }
 
     try {
       Orientation orientation = getScreenOrientation(activity);
       promise.resolve(orientation.toString());
     } catch (Exception e) {
-      promise.reject(GENERIC_ANDROID_ERROR, e.toString());
+      promise.reject(ERR_SCREEN_ORIENTATION, "Could not get the current screen orientation", e);
     }
   }
 
   @ReactMethod
   public void getOrientationLockAsync(Promise promise) {
     Activity activity = getCurrentActivity();
-    if (activity == null) {
-      promise.reject(ANDROID_NO_ACTIVITY, ANDROID_NO_ACTIVITY_MSG);
-      return;
+
+    try {
+      int orientationAttr = activity.getRequestedOrientation();
+      OrientationLock orientationLock = orientationLockNativeToJS(orientationAttr);
+      promise.resolve(orientationLock.toString());
+    } catch (Exception e) {
+      promise.reject(ERR_SCREEN_ORIENTATION, "Could not get the current screen orientation lock", e);
     }
 
-    int orientationAttr = activity.getRequestedOrientation();
-    OrientationLock orientationLock = orientationLockNativeToJS(orientationAttr);
-    promise.resolve(orientationLock.toString());
   }
 
   @ReactMethod
   public void getPlatformOrientationLockAsync(Promise promise) {
     Activity activity = getCurrentActivity();
-    if (activity == null) {
-      promise.reject(ANDROID_NO_ACTIVITY, ANDROID_NO_ACTIVITY_MSG);
-      return;
+    try {
+      promise.resolve(activity.getRequestedOrientation());
+    } catch (Exception e) {
+      promise.reject(ERR_SCREEN_ORIENTATION, "Could not get the current screen orientation platform lock", e);
     }
 
-    promise.resolve(activity.getRequestedOrientation());
+  }
+
+  @ReactMethod
+  public void supportsOrientationLockAsync(String orientationLockStr, Promise promise){
+    try {
+      // If we can get the native orientation value from the given string without throwing, we resolve with true
+      OrientationLock lockJS = OrientationLock.valueOf(orientationLockStr);
+      orientationLockJSToNative(lockJS);
+      promise.resolve(true);
+    } catch (Exception e) {
+      promise.resolve(false);
+    }
   }
 
   // https://stackoverflow.com/questions/10380989/how-do-i-get-the-current-orientation-activityinfo-screen-orientation-of-an-a
@@ -200,11 +207,6 @@ public class ScreenOrientationModule extends ReactContextBaseJavaModule implemen
     }
     return orientation;
   }
-
-  // TODO: is there a shared place to put these things
-  static final String ANDROID_NO_ACTIVITY = "ANDROID_NO_ACTIVITY";
-  static final String ANDROID_NO_ACTIVITY_MSG = "There is no current activity available.";
-  static final String GENERIC_ANDROID_ERROR = "GENERIC_ANDROID_ERROR";
 
   public enum Orientation {
     PORTRAIT_UP,
@@ -271,7 +273,7 @@ public class ScreenOrientationModule extends ReactContextBaseJavaModule implemen
       case LANDSCAPE_RIGHT:
         return ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
       default:
-        throw new IllegalArgumentException("OrientationLock " + orientationLock.toString() + " is not mapped to a native Android orientation attr");
+        throw new InvalidArgumentException("OrientationLock " + orientationLock.toString() + " is not mapped to a native Android orientation attr");
     }
   }
 }

@@ -21,7 +21,7 @@ didChangeSupportedInterfaceOrientations:(UIInterfaceOrientationMask)supportedInt
 
 @interface EXScreenOrientation : EXScopedEventEmitter <RCTBridgeModule>
 
-- (void) handleScreenOrientationChange:(nullable UITraitCollection *) traitCollection windowRectangle:(CGRect) windowRectangle;
+- (void) handleScreenOrientationChange:(nullable UITraitCollection *) traitCollection;
 
 @property (nonatomic, strong) NSMutableSet<NSString *> *activeModules;
 

@@ -5,18 +5,48 @@ import { Platform } from 'react-native';
 
 export const name = 'ScreenOrientation';
 
+const convertToCoarseOrientation = orientation => {
+  if (
+    orientation === ScreenOrientation.Orientation.PORTRAIT_UP ||
+    orientation === ScreenOrientation.Orientation.PORTRAIT_DOWN
+  ) {
+    return ScreenOrientation.Orientation.PORTRAIT;
+  } else if (
+    orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
+    orientation === ScreenOrientation.Orientation.LANDSCAPE_RIGHT
+  ) {
+    return ScreenOrientation.Orientation.LANDSCAPE;
+  } else {
+    return orientation;
+  }
+};
+
 // Wait until we are in desiredOrientation
 // Fail if we are not in a validOrientation
 const applyAsync = ({ desiredOrientationLock, desiredOrientations, validOrientations }) => {
+  if (Platform.OS === 'ios' && desiredOrientations) {
+    // ios can only detect orientation of coarse granularity (ie) 'PORTRAIT'/'LANDSCAPE'
+    desiredOrientations = desiredOrientations.map(orientation =>
+      convertToCoarseOrientation(orientation)
+    );
+  }
+  if (Platform.OS === 'ios' && validOrientations) {
+    // ios can only detect orientation of coarse granularity (ie) 'PORTRAIT'/'LANDSCAPE'
+    validOrientations = validOrientations.map(orientation =>
+      convertToCoarseOrientation(orientation)
+    );
+  }
   return new Promise(async function(resolve, reject) {
+    let subscriptionCancelled = false;
     const subscription = await ScreenOrientation.addOrientationChangeListenerAsync(async update => {
-      console.log(`Received update of ${JSON.stringify(update)}`);
-      const { orientation, orientationLock } = update;
+      console.log(`GOT UPDATE: ${JSON.stringify(update)}`);
+      const { orientationInfo, orientationLock } = update;
+      const { orientation } = orientationInfo;
       if (validOrientations && !validOrientations.includes(orientation)) {
         reject(new Error(`Should not have received an orientation of ${orientation}`));
       }
 
-      if (!desiredOrientations.includes(orientation)) {
+      if (desiredOrientations && !desiredOrientations.includes(orientation)) {
         return;
       } else if (desiredOrientationLock && orientationLock !== desiredOrientationLock) {
         return;
@@ -24,7 +54,11 @@ const applyAsync = ({ desiredOrientationLock, desiredOrientations, validOrientat
 
       // We have met all the desired orientation conditions
       // remove itself
-      await ScreenOrientation.removeOrientationChangeListenerAsync(subscription);
+      if (!subscriptionCancelled && subscription) {
+        console.log(`LISTENER SUB WAS ${subscription}`);
+        await ScreenOrientation.removeOrientationChangeListenerAsync(subscription);
+        subscriptionCancelled = true;
+      }
 
       // resolve promise
       resolve();
@@ -35,18 +69,23 @@ const applyAsync = ({ desiredOrientationLock, desiredOrientations, validOrientat
       await ScreenOrientation.lockAsync(desiredOrientationLock);
     }
 
-    const orientation = await ScreenOrientation.getOrientationAsync();
+    const orientationInfo = await ScreenOrientation.getOrientationAsync();
+    const { orientation } = orientationInfo;
     const orientationLock = await ScreenOrientation.getOrientationLockAsync();
 
-    if (!desiredOrientations.includes(orientation)) {
+    if (desiredOrientations && !desiredOrientations.includes(orientation)) {
       return;
-    } else if (orientationLock !== desiredOrientationLock) {
+    } else if (desiredOrientationLock && orientationLock !== desiredOrientationLock) {
       return;
     }
 
     // We have met all the desired orientation conditions
     // remove previous subscription
-    await ScreenOrientation.removeOrientationChangeListenerAsync(subscription);
+    if (!subscriptionCancelled) {
+      console.log(`CHECK SUB WAS ${subscription}`);
+      await ScreenOrientation.removeOrientationChangeListenerAsync(subscription);
+      subscriptionCancelled = true;
+    }
     resolve();
   });
 };
@@ -56,15 +95,17 @@ export function test(t) {
     t.describe('Screen Orientation locking, getters, setters, listeners, etc', () => {
       t.beforeEach(async () => {
         // Put the screen back to PORTRAIT_UP
+        const desiredOrientation = ScreenOrientation.Orientation.PORTRAIT_UP;
+
         await applyAsync({
           desiredOrientationLock: ScreenOrientation.OrientationLock.PORTRAIT_UP,
-          desiredOrientations: [ScreenOrientation.Orientation.PORTRAIT_UP],
+          desiredOrientations: [desiredOrientation],
         });
       });
       t.afterEach(async () => {
         await ScreenOrientation.removeOrientationChangeListenersAsync();
       });
-      t.it(
+      /*       t.it(
         'Sets screen to landscape orientation and gets the correct orientationLock',
         async () => {
           try {
@@ -94,8 +135,13 @@ export function test(t) {
             validOrientations,
           });
 
-          const orientation = await ScreenOrientation.getOrientationAsync();
-          t.expect(orientation).toBe(ScreenOrientation.Orientation.LANDSCAPE_LEFT);
+          const orientationInfo = await ScreenOrientation.getOrientationAsync();
+          const { orientation } = orientationInfo;
+          // ios can only detect orientation with coarse granularity
+          t.expect([
+            ScreenOrientation.Orientation.LANDSCAPE_LEFT,
+            ScreenOrientation.Orientation.LANDSCAPE,
+          ]).toContain(orientation);
         } catch (error) {
           t.fail(error);
         }
@@ -111,10 +157,17 @@ export function test(t) {
             const callListenerAsync = new Promise(async function(resolve, reject) {
               // Register for screen orientation changes
               await ScreenOrientation.addOrientationChangeListenerAsync(async update => {
-                const { orientation } = update;
-                if (orientation === ScreenOrientation.Orientation.PORTRAIT_UP) {
+                const { orientationInfo } = update;
+                const { orientation } = orientationInfo;
+                if (
+                  orientation === ScreenOrientation.Orientation.PORTRAIT_UP ||
+                  orientation === ScreenOrientation.Orientation.PORTRAIT // ios can only detect orientation with coarse granularity
+                ) {
                   // orientation update has not happened yet
-                } else if (orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT) {
+                } else if (
+                  orientation === ScreenOrientation.Orientation.LANDSCAPE_LEFT ||
+                  orientation === ScreenOrientation.Orientation.LANDSCAPE // ios can only detect orientation with coarse granularity
+                ) {
                   resolve();
                 } else {
                   reject(new Error(`Should not be in orientation: ${orientation}`));
@@ -147,16 +200,6 @@ export function test(t) {
           // detect the correct orientationLock policy immediately
           const orientationLock = await ScreenOrientation.getOrientationLockAsync();
           t.expect(orientationLock).toBe(ScreenOrientation.OrientationLock.DEFAULT);
-
-          // expect there to be some lag for orientation update to take place
-          // wait until we receive a PORTRAIT_UP orientation from the callback
-          const desiredOrientations = [ScreenOrientation.Orientation.PORTRAIT_UP];
-          const validOrientations = [
-            ScreenOrientation.OrientationLock.LANDSCAPE_LEFT,
-            ScreenOrientation.Orientation.PORTRAIT_UP,
-          ];
-
-          await applyAsync({ desiredOrientations, validOrientations });
         } catch (error) {
           t.fail(error);
         }
@@ -178,7 +221,7 @@ export function test(t) {
           t.expect(orientationLock).toBe(ScreenOrientation.OrientationLock.OTHER);
 
           // expect the native platform getter to return correctly
-          const nativeOrientationLock = await ScreenOrientation.getOrientationLockPlatformAsync();
+          const nativeOrientationLock = await ScreenOrientation.getPlatformOrientationLockAsync();
           t.expect(nativeOrientationLock).toBe('11');
 
           // expect there to be some lag for orientation update to take place
@@ -196,7 +239,7 @@ export function test(t) {
         } catch (error) {
           t.fail(error);
         }
-      });
+      }); */
 
       t.it('Remove all listeners and expect them never to be called', async () => {
         try {
@@ -248,6 +291,7 @@ export function test(t) {
           });
 
           // remove subscription1 ONLY
+          console.log(`REGISTER TEST SUB WAS ${subscription1}`);
           await ScreenOrientation.removeOrientationChangeListenerAsync(subscription1);
 
           // set the screen orientation to LANDSCAPE LEFT lock
@@ -255,7 +299,7 @@ export function test(t) {
 
           // If we set a different lock and wait for it to be applied without ever having the
           // listeners invoked, we assume they've been successfully removed
-          const desiredOrientations = ScreenOrientation.Orientation.LANDSCAPE_LEFT;
+          const desiredOrientations = [ScreenOrientation.Orientation.LANDSCAPE_LEFT];
           const validOrientations = [
             ScreenOrientation.Orientation.LANDSCAPE_LEFT,
             ScreenOrientation.Orientation.PORTRAIT_UP,
@@ -272,24 +316,33 @@ export function test(t) {
         }
       });
 
-      t.it('ensureAsync that we correctly detect our supported orientationLocks', async () => {
-        const someAcceptedLocks = [
-          ScreenOrientation.OrientationLock.OTHER,
+      t.it('ensure that we correctly detect our supported orientationLocks', async () => {
+        // orientation locks that we should be able to apply
+        const acceptedLocks = [
           ScreenOrientation.OrientationLock.ALL,
           ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT,
         ];
 
-        for (let lock of someAcceptedLocks) {
-          const supported = await ScreenOrientation.supportsOrientationLock(lock);
-          console.log(`lock: ${lock} status: ${supported}`);
+        for (let lock of acceptedLocks) {
+          const supported = await ScreenOrientation.supportsOrientationLockAsync(lock);
           t.expect(supported).toBe(true);
         }
 
-        const notLocks = ['FOO', 3, ScreenOrientation.Orientation.UNKNOWN];
+        // This is not a lock policy that we can apply
+        const unsupportedLock = ScreenOrientation.OrientationLock.OTHER;
+        const supported = await ScreenOrientation.supportsOrientationLockAsync(unsupportedLock);
+        t.expect(supported).toBe(false);
 
+        // Expect non-lock values to throw an error
+        const notLocks = ['FOO', ScreenOrientation.Orientation.UNKNOWN, 3];
         for (let notLock of notLocks) {
-          const supported = await ScreenOrientation.supportsOrientationLock(notLock);
-          t.expect(supported).toBe(false);
+          let hasError = false;
+          try {
+            await ScreenOrientation.supportsOrientationLockAsync(notLock);
+          } catch (e) {
+            hasError = true;
+          }
+          t.expect(hasError).toBe(true);
         }
       });
     });

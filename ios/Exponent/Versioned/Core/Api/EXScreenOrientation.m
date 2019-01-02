@@ -40,7 +40,7 @@ RCT_EXPORT_METHOD(lockAsync:(NSString *)orientationLock
 {
   UIInterfaceOrientationMask orientationMask = [self orientationMaskFromOrientationLock:orientationLock];
   if (orientationMask == INVALID_MASK) {
-    return reject(@"E_INVALID_ORIENTATION", [NSString stringWithFormat:@"Invalid screen orientation %@", orientationLock], nil);
+    return reject(@"E_INVALID_ORIENTATION", [NSString stringWithFormat:@"Invalid screen orientation lock %@", orientationLock], nil);
   }
   if (![self doesSupportOrientationMask:orientationMask]) {
     return reject(@"E_UNSUPPORTED_ORIENTATION", [NSString stringWithFormat:@"This device does not support this orientation %@", orientationLock], nil);
@@ -81,7 +81,6 @@ RCT_EXPORT_METHOD(lockPlatformAsync:(NSArray *)allowedOrientations
   resolve(nil);
 }
 
-// TODO: make this native in android too
 RCT_EXPORT_METHOD(doesSupportAsync:(NSString *)orientationLock
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
@@ -95,9 +94,8 @@ RCT_EXPORT_METHOD(supportsOrientationLockAsync:(NSString *)orientationLock
 {
   UIInterfaceOrientationMask orientationMask = [self orientationMaskFromOrientationLock:orientationLock];
   if (orientationMask == INVALID_MASK) {
-    return reject(@"E_INVALID_ORIENTATION", [NSString stringWithFormat:@"Invalid screen orientation %@", orientationLock], nil);
-  }
-  if ([self doesSupportOrientationMask:orientationMask]) {
+    resolve(@NO);
+  } else if ([self doesSupportOrientationMask:orientationMask]) {
     resolve(@YES);
   } else {
     resolve(@NO);
@@ -125,40 +123,26 @@ RCT_REMAP_METHOD(getOrientationAsync,
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
   UITraitCollection * traitCollection = [_kernelOrientationServiceDelegate getTraitCollection];
+  resolve([self getOrientationInformation:traitCollection]);
+}
+
+- (void) handleScreenOrientationChange: (UITraitCollection *)traitCollection {
+  
+  UIInterfaceOrientationMask orientationMask = [_kernelOrientationServiceDelegate supportedInterfaceOrientationsForVisibleApp];
+  
+  [self sendEventWithName:@"expoDidUpdateDimensions" body:@{
+                                                        @"orientationInfo": [self getOrientationInformation:traitCollection],
+                                                        @"orientationLock": [self orientationLockFromOrientationMask:orientationMask]
+                                                        }];
+}
+
+- (NSDictionary *) getOrientationInformation: (UITraitCollection *)traitCollection {
   NSString * orientation = [self orientationFromTraitCollection:traitCollection];
-  resolve(@{
+  return @{
             @"orientation": orientation,
             @"verticalSizeClass": [self sizeClassToString: traitCollection.verticalSizeClass],
             @"horizontalSizeClass": [self sizeClassToString: traitCollection.horizontalSizeClass]
-            });
-}
-
-- (void) handleScreenOrientationChange: (UITraitCollection *)traitCollection windowRectangle:(CGRect) windowRectangle {
-  UIScreen *mainScreen = UIScreen.mainScreen;
-  CGSize screenSize = mainScreen.bounds.size;
-  CGFloat fontSize = self.bridge.accessibilityManager.multiplier;
-  
-  CGFloat windowWidth = windowRectangle.size.width;
-  CGFloat windowHeight = windowRectangle.size.height;
-  
-  NSDictionary<NSString *, NSNumber *> *screenDims = @{
-                                                 @"width": @(screenSize.width),
-                                                 @"height": @(screenSize.height),
-                                                 @"scale": @(mainScreen.scale),
-                                                 @"fontScale": @(fontSize)
-                                                 };
-  
-  NSDictionary<NSString *, NSNumber *> *windowDims = @{
-                                                       @"width": @(windowWidth),
-                                                       @"height": @(windowHeight),
-                                                       @"scale": @(mainScreen.scale),
-                                                       @"fontScale": @(fontSize)
-                                                       };
-  
-  [self sendEventWithName:@"expoDidUpdateDimensions" body:@{
-                                                        @"window": windowDims,
-                                                        @"screen": screenDims
-                                                        }];
+            };
 }
 
 - (NSArray<NSString *> *)supportedEvents {

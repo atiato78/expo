@@ -7,7 +7,7 @@
 - (void)setSupportInterfaceOrientations:(UIInterfaceOrientationMask)supportedInterfaceOrientations
                          forExperienceId:(NSString *)experienceId;
 
-- (void) handleScreenOrientationChange: (nullable UITraitCollection *) traitCollection windowRectangle: (CGRect) windowRectangle;
+- (void) handleScreenOrientationChange: (nullable UITraitCollection *) traitCollection;
 
 - (UITraitCollection *) getTraitCollection;
 

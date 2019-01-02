@@ -33,11 +33,11 @@ NSNotificationName kEXChangeForegroundTaskSupportedOrientationsNotification = @"
   return [visibleApp.viewController supportedInterfaceOrientations];
 }
 
-- (void)handleScreenOrientationChange:(UITraitCollection *)traitCollection windowRectangle:(CGRect) windowRectangle
+- (void)handleScreenOrientationChange:(UITraitCollection *)traitCollection
 {
   for(NSString *experienceId in _subscribedModules) {
     EXScreenOrientation * subscribedModule = [_subscribedModules objectForKey:experienceId];
-    [subscribedModule handleScreenOrientationChange:traitCollection windowRectangle:windowRectangle];
+    [subscribedModule handleScreenOrientationChange:traitCollection];
   }
 }
 

@@ -336,7 +336,7 @@ NS_ASSUME_NONNULL_BEGIN
   [super traitCollectionDidChange: previousTraitCollection];
   if ((self.traitCollection.verticalSizeClass != previousTraitCollection.verticalSizeClass)
       || (self.traitCollection.horizontalSizeClass != previousTraitCollection.horizontalSizeClass)) {
-    [[EXKernel sharedInstance].serviceRegistry.screenOrientationManager handleScreenOrientationChange:self.traitCollection windowRectangle:self.view.window.frame];
+    [[EXKernel sharedInstance].serviceRegistry.screenOrientationManager handleScreenOrientationChange:self.traitCollection];
   }
 }
 
