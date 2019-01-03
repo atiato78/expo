@@ -15,7 +15,8 @@ typedef NS_ENUM(NSInteger, EXOrientationLock) {
   LANDSCAPE,
   LANDSCAPE_LEFT,
   LANDSCAPE_RIGHT,
-  OTHER
+  OTHER,
+  ALL_BUT_UPSIDE_DOWN // deprecated
 };
 
 @interface RCTConvert (OrientationLock)
@@ -42,5 +43,7 @@ didChangeSupportedInterfaceOrientations:(UIInterfaceOrientationMask)supportedInt
 @interface EXScreenOrientation : EXScopedEventEmitter <RCTBridgeModule>
 
 - (void) handleScreenOrientationChange:(nullable UITraitCollection *) traitCollection;
+
++ (NSDictionary *)constantsToExport;
 
 @end
