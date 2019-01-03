@@ -37,7 +37,7 @@ type OrientationInfo = {
   horizontalSizeClass?: iOSSizeClass;
 };
 
-type PlatformOptions = {
+type PlatformInfo = {
   screenOrientationConstantAndroid?: number;
   screenOrientationArrayIOS?: Orientation[];
 };
@@ -75,7 +75,7 @@ export async function lockAsync(orientationLock: OrientationLock): Promise<void>
   await ExponentScreenOrientation.lockAsync(orientationLock);
 }
 
-export async function lockPlatformAsync(options: PlatformOptions): Promise<void> {
+export async function lockPlatformAsync(options: PlatformInfo): Promise<void> {
   if (!ExponentScreenOrientation.lockPlatformAsync) {
     throw new UnavailabilityError('ScreenOrientation', 'lockPlatformAsync');
   }
@@ -129,9 +129,19 @@ export async function getOrientationLockAsync(): Promise<OrientationLock> {
   return await ExponentScreenOrientation.getOrientationLockAsync();
 }
 
-export async function getPlatformOrientationLockAsync(): Promise<String> {
+export async function getPlatformOrientationLockAsync(): Promise<PlatformInfo> {
   const platformOrientationLock = await ExponentScreenOrientation.getPlatformOrientationLockAsync();
-  return await platformOrientationLock.toString();
+  if (Platform.OS === 'android'){
+    return {
+      screenOrientationConstantAndroid: platformOrientationLock,
+    };
+  } else if (Platform.OS === 'ios'){
+    return {
+      screenOrientationArrayIOS: platformOrientationLock,
+    };
+  } else {
+    throw new UnavailabilityError('ScreenOrientation', 'getPlatformOrientationLockAsync');
+  }
 }
 
 export async function supportsOrientationLockAsync(orientationLock: OrientationLock): Promise<boolean> {
@@ -164,9 +174,7 @@ export async function addOrientationChangeListenerAsync(listener: OrientationCha
   const subscription = _orientationChangeEmitter.addListener(eventName, async update => {
     let orientationInfo, orientationLock;
     if (Platform.OS === 'ios'){
-      // TODO: let the bridge carry this info in the Update instead of having to fetch it again
       // RN relies on a deprecated thing in ios so we make our own implementation
-      //orientationLock = update.orientationLock;
       orientationLock = update.orientationLock;
       orientationInfo = update.orientationInfo;
     } else {
@@ -177,12 +185,12 @@ export async function addOrientationChangeListenerAsync(listener: OrientationCha
   });
   _orientationChangeSubscribers.push(subscription);
 
-  if (Platform.OS === 'ios'){
+/*   if (Platform.OS === 'ios'){
     if (!ExponentScreenOrientation.addOrientationChangeListener) {
       throw new UnavailabilityError('ScreenOrientation', 'addOrientationChangeListener');
     }
     await ExponentScreenOrientation.addOrientationChangeListener();
-  }
+  } */
   return subscription;
 }
 
@@ -196,7 +204,7 @@ export async function removeOrientationChangeListenersAsync(): Promise<void> {
     // remove after a successful unsuscribe
     _orientationChangeSubscribers.pop(); 
   }
-  if (Platform.OS === 'ios'){
+/*   if (Platform.OS === 'ios'){
     if (!ExponentScreenOrientation.removeOrientationChangeListener) {
       throw new UnavailabilityError('ScreenOrientation', 'removeOrientationChangeListener');
     }
@@ -204,7 +212,7 @@ export async function removeOrientationChangeListenersAsync(): Promise<void> {
     // remove module listener if we have no more subscribers
     // TODO: should this be better named
     await ExponentScreenOrientation.removeOrientationChangeListener();
-  }
+  } */
 }
 
 export async function removeOrientationChangeListenerAsync(subscription: EmitterSubscription): Promise<void> {
@@ -215,11 +223,11 @@ export async function removeOrientationChangeListenerAsync(subscription: Emitter
   subscription.remove();
   _orientationChangeSubscribers = _orientationChangeSubscribers.filter(sub => sub !== subscription);
 
-  if (Platform.OS === 'ios' && _orientationChangeSubscribers.length === 0) {
+/*   if (Platform.OS === 'ios' && _orientationChangeSubscribers.length === 0) {
     if (!ExponentScreenOrientation.removeOrientationChangeListener) {
       throw new UnavailabilityError('ScreenOrientation', 'removeOrientationChangeListener');
     }
 
     await ExponentScreenOrientation.removeOrientationChangeListener();
-  }
+  } */
 }

@@ -1,8 +1,28 @@
 // Copyright 2015-present 650 Industries. All rights reserved.
 
 #import <React/RCTBridgeModule.h>
+#import <React/RCTConvert.h>s
 
 #import "EXScopedEventEmitter.h"
+
+
+typedef NS_ENUM(NSInteger, EXOrientationLock) {
+  DEFAULT,
+  ALL,
+  PORTRAIT,
+  PORTRAIT_UP,
+  PORTRAIT_DOWN,
+  LANDSCAPE,
+  LANDSCAPE_LEFT,
+  LANDSCAPE_RIGHT,
+  OTHER
+};
+
+@interface RCTConvert (OrientationLock)
+
++ (EXOrientationLock)EXOrientationLock:(id)json;
+
+@end
 
 @protocol EXScreenOrientationScopedModuleDelegate
 
@@ -22,7 +42,5 @@ didChangeSupportedInterfaceOrientations:(UIInterfaceOrientationMask)supportedInt
 @interface EXScreenOrientation : EXScopedEventEmitter <RCTBridgeModule>
 
 - (void) handleScreenOrientationChange:(nullable UITraitCollection *) traitCollection;
-
-@property (nonatomic, strong) NSMutableSet<NSString *> *activeModules;
 
 @end

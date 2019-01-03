@@ -39,7 +39,6 @@ const applyAsync = ({ desiredOrientationLock, desiredOrientations, validOrientat
   return new Promise(async function(resolve, reject) {
     let subscriptionCancelled = false;
     const subscription = await ScreenOrientation.addOrientationChangeListenerAsync(async update => {
-      console.log(`GOT UPDATE: ${JSON.stringify(update)}`);
       const { orientationInfo, orientationLock } = update;
       const { orientation } = orientationInfo;
       if (validOrientations && !validOrientations.includes(orientation)) {
@@ -54,8 +53,7 @@ const applyAsync = ({ desiredOrientationLock, desiredOrientations, validOrientat
 
       // We have met all the desired orientation conditions
       // remove itself
-      if (!subscriptionCancelled && subscription) {
-        console.log(`LISTENER SUB WAS ${subscription}`);
+      if (!subscriptionCancelled) {
         await ScreenOrientation.removeOrientationChangeListenerAsync(subscription);
         subscriptionCancelled = true;
       }
@@ -82,7 +80,6 @@ const applyAsync = ({ desiredOrientationLock, desiredOrientations, validOrientat
     // We have met all the desired orientation conditions
     // remove previous subscription
     if (!subscriptionCancelled) {
-      console.log(`CHECK SUB WAS ${subscription}`);
       await ScreenOrientation.removeOrientationChangeListenerAsync(subscription);
       subscriptionCancelled = true;
     }
@@ -105,7 +102,7 @@ export function test(t) {
       t.afterEach(async () => {
         await ScreenOrientation.removeOrientationChangeListenersAsync();
       });
-      /*       t.it(
+      t.it(
         'Sets screen to landscape orientation and gets the correct orientationLock',
         async () => {
           try {
@@ -221,11 +218,10 @@ export function test(t) {
           t.expect(orientationLock).toBe(ScreenOrientation.OrientationLock.OTHER);
 
           // expect the native platform getter to return correctly
-          const nativeOrientationLock = await ScreenOrientation.getPlatformOrientationLockAsync();
-          t.expect(nativeOrientationLock).toBe('11');
+          const platformInfo = await ScreenOrientation.getPlatformOrientationLockAsync();
+          const { screenOrientationConstantAndroid } = platformInfo;
+          t.expect(screenOrientationConstantAndroid).toBe(11);
 
-          // expect there to be some lag for orientation update to take place
-          // poll until we receive a LANDSCAPE orientation from the callback
           const desiredOrientations = [
             ScreenOrientation.Orientation.LANDSCAPE_RIGHT,
             ScreenOrientation.Orientation.LANDSCAPE_LEFT,
@@ -239,7 +235,48 @@ export function test(t) {
         } catch (error) {
           t.fail(error);
         }
-      }); */
+      });
+
+      t.it('Apply a native ios lock', async () => {
+        // This test only applies to ios devices
+        if (Platform.OS !== 'ios') {
+          return;
+        }
+
+        try {
+          // Allow only PORTRAIT_UP and LANDSCAPE_RIGHT
+          await ScreenOrientation.lockPlatformAsync({
+            screenOrientationArrayIOS: [
+              ScreenOrientation.Orientation.PORTRAIT_UP,
+              ScreenOrientation.Orientation.LANDSCAPE_RIGHT,
+            ],
+          });
+
+          // detect the correct orientationLock policy immediately
+          const orientationLock = await ScreenOrientation.getOrientationLockAsync();
+          t.expect(orientationLock).toBe(ScreenOrientation.OrientationLock.OTHER);
+
+          // expect the native platform getter to return correctly
+          const platformInfo = await ScreenOrientation.getPlatformOrientationLockAsync();
+          const { screenOrientationArrayIOS } = platformInfo;
+          t.expect(screenOrientationArrayIOS).toContain(
+            ScreenOrientation.Orientation.LANDSCAPE_RIGHT
+          );
+          t.expect(screenOrientationArrayIOS).toContain(ScreenOrientation.Orientation.PORTRAIT_UP);
+
+          const desiredOrientations = [
+            ScreenOrientation.Orientation.PORTRAIT_UP,
+            ScreenOrientation.Orientation.LANDSCAPE_RIGHT,
+          ];
+          const validOrientations = [
+            ScreenOrientation.Orientation.PORTRAIT_UP,
+            ScreenOrientation.Orientation.LANDSCAPE_RIGHT,
+          ];
+          await applyAsync({ desiredOrientations, validOrientations });
+        } catch (error) {
+          t.fail(error);
+        }
+      });
 
       t.it('Remove all listeners and expect them never to be called', async () => {
         try {
@@ -291,7 +328,6 @@ export function test(t) {
           });
 
           // remove subscription1 ONLY
-          console.log(`REGISTER TEST SUB WAS ${subscription1}`);
           await ScreenOrientation.removeOrientationChangeListenerAsync(subscription1);
 
           // set the screen orientation to LANDSCAPE LEFT lock
