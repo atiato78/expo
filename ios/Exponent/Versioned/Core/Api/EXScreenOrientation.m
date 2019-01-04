@@ -48,10 +48,10 @@ RCT_EXPORT_METHOD(lockAsync:(EXOrientationLock)orientationLock
 {
   UIInterfaceOrientationMask orientationMask = [self orientationLockJSToNative:orientationLock];
   if (orientationMask == INVALID_MASK) {
-    return reject(@"E_INVALID_ORIENTATION", [NSString stringWithFormat:@"Invalid screen orientation lock %@", [self orientationLockToString:orientationLock]], nil);
+    return reject(@"ERR_SCREEN_ORIENTATION_INVALID_ORIENTATION_LOCK", [NSString stringWithFormat:@"Invalid screen orientation lock %@", [self orientationLockToString:orientationLock]], nil);
   }
   if (![self doesSupportOrientationMask:orientationMask]) {
-    return reject(@"E_UNSUPPORTED_ORIENTATION", [NSString stringWithFormat:@"This device does not support this orientation %@", [self orientationLockToString:orientationLock]], nil);
+    return reject(@"ERR_SCREEN_ORIENTATION_UNSUPPORTED_ORIENTATION_LOCK", [NSString stringWithFormat:@"Cannot apply orientation lock %@ because this device does not support the PORTRAIT_DOWN orientation", [self orientationLockToString:orientationLock]], nil);
   }
   [_kernelOrientationServiceDelegate screenOrientationModule:self
                      didChangeSupportedInterfaceOrientations:orientationMask];

@@ -163,7 +163,7 @@ export async function doesSupportAsync(orientationLock: OrientationLock): Promis
 // We rely on RN to emit `didUpdateDimensions`
 // If this method no longer works, it's possible that the underlying RN implementation has changed
 // see https://github.com/facebook/react-native/blob/c31f79fe478b882540d7fd31ee37b53ddbd60a17/ReactAndroid/src/main/java/com/facebook/react/modules/deviceinfo/DeviceInfoModule.java#L90
-export async function addOrientationChangeListenerAsync(listener: OrientationChangeListener): Promise<EmitterSubscription> {
+export function addOrientationChangeListener(listener: OrientationChangeListener): EmitterSubscription {
   if (typeof listener !== 'function'){
     throw new TypeError(`addOrientationChangeListener cannot be called with ${listener}`);
   }
@@ -188,7 +188,7 @@ export async function addOrientationChangeListenerAsync(listener: OrientationCha
   return subscription;
 }
 
-export async function removeOrientationChangeListenersAsync(): Promise<void> {
+export function removeOrientationChangeListeners(): void {
   // Remove listener by subscription instead of eventType to avoid clobbering Dimension module's subscription of didUpdateDimensions
   let i = _orientationChangeSubscribers.length;
   while (i--) {
@@ -200,7 +200,7 @@ export async function removeOrientationChangeListenersAsync(): Promise<void> {
   }
 }
 
-export async function removeOrientationChangeListenerAsync(subscription: EmitterSubscription): Promise<void> {
+export function removeOrientationChangeListener(subscription: EmitterSubscription): void {
   // TODO: better way to check for valid subscription?
   if (!subscription || !subscription.remove){
     throw new TypeError(`Must pass in a valid subscription`);

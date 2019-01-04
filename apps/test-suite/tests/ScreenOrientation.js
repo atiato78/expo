@@ -38,7 +38,7 @@ const applyAsync = ({ desiredOrientationLock, desiredOrientations, validOrientat
   }
   return new Promise(async function(resolve, reject) {
     let subscriptionCancelled = false;
-    const subscription = await ScreenOrientation.addOrientationChangeListenerAsync(async update => {
+    const subscription = ScreenOrientation.addOrientationChangeListener(async update => {
       const { orientationInfo, orientationLock } = update;
       const { orientation } = orientationInfo;
       if (validOrientations && !validOrientations.includes(orientation)) {
@@ -54,7 +54,7 @@ const applyAsync = ({ desiredOrientationLock, desiredOrientations, validOrientat
       // We have met all the desired orientation conditions
       // remove itself
       if (!subscriptionCancelled) {
-        await ScreenOrientation.removeOrientationChangeListenerAsync(subscription);
+        ScreenOrientation.removeOrientationChangeListener(subscription);
         subscriptionCancelled = true;
       }
 
@@ -80,7 +80,7 @@ const applyAsync = ({ desiredOrientationLock, desiredOrientations, validOrientat
     // We have met all the desired orientation conditions
     // remove previous subscription
     if (!subscriptionCancelled) {
-      await ScreenOrientation.removeOrientationChangeListenerAsync(subscription);
+      ScreenOrientation.removeOrientationChangeListener(subscription);
       subscriptionCancelled = true;
     }
     resolve();
@@ -100,7 +100,7 @@ export function test(t) {
         });
       });
       t.afterEach(async () => {
-        await ScreenOrientation.removeOrientationChangeListenersAsync();
+        ScreenOrientation.removeOrientationChangeListeners();
       });
       t.it(
         'Sets screen to landscape orientation and gets the correct orientationLock',
@@ -153,7 +153,7 @@ export function test(t) {
           try {
             const callListenerAsync = new Promise(async function(resolve, reject) {
               // Register for screen orientation changes
-              await ScreenOrientation.addOrientationChangeListenerAsync(async update => {
+              ScreenOrientation.addOrientationChangeListener(async update => {
                 const { orientationInfo } = update;
                 const { orientation } = orientationInfo;
                 if (
@@ -282,15 +282,15 @@ export function test(t) {
         try {
           // Register for screen orientation changes
           let listenerWasCalled = false;
-          await ScreenOrientation.addOrientationChangeListenerAsync(async () => {
+          ScreenOrientation.addOrientationChangeListener(async () => {
             listenerWasCalled = true;
           });
 
-          await ScreenOrientation.addOrientationChangeListenerAsync(async () => {
+          ScreenOrientation.addOrientationChangeListener(async () => {
             listenerWasCalled = true;
           });
 
-          await ScreenOrientation.removeOrientationChangeListenersAsync();
+          ScreenOrientation.removeOrientationChangeListeners();
 
           // set the screen orientation to LANDSCAPE LEFT lock
           await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_LEFT);
@@ -317,18 +317,16 @@ export function test(t) {
           let subscription1Called = false;
           let subscription2Called = false;
 
-          const subscription1 = await ScreenOrientation.addOrientationChangeListenerAsync(
-            async () => {
-              subscription1Called = true;
-            }
-          );
+          const subscription1 = ScreenOrientation.addOrientationChangeListener(async () => {
+            subscription1Called = true;
+          });
 
-          await ScreenOrientation.addOrientationChangeListenerAsync(async () => {
+          ScreenOrientation.addOrientationChangeListener(async () => {
             subscription2Called = true;
           });
 
           // remove subscription1 ONLY
-          await ScreenOrientation.removeOrientationChangeListenerAsync(subscription1);
+          ScreenOrientation.removeOrientationChangeListener(subscription1);
 
           // set the screen orientation to LANDSCAPE LEFT lock
           await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_LEFT);
