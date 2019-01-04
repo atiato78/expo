@@ -49,7 +49,6 @@ type OrientationChangeEvent = {
   orientationInfo: OrientationInfo;
 };
 
-// todo: make this conditional
 const _orientationChangeEmitter = new NativeEventEmitter(ExponentScreenOrientation);
 let _orientationChangeSubscribers: EmitterSubscription[] = [];
 
@@ -169,28 +168,21 @@ export async function addOrientationChangeListenerAsync(listener: OrientationCha
     throw new TypeError(`addOrientationChangeListener cannot be called with ${listener}`);
   }
 
-  // TODO: consolidate this later
   const eventName = Platform.OS === 'ios' ? 'expoDidUpdateDimensions' : 'didUpdateDimensions';
   const subscription = _orientationChangeEmitter.addListener(eventName, async update => {
     let orientationInfo, orientationLock;
     if (Platform.OS === 'ios'){
-      // RN relies on a deprecated thing in ios so we make our own implementation
+      // RN relies on statusBarOrientation (deprecated) to emit `didUpdateDimensions` event, so we emit our own `expoDidUpdateDimensions` event instead
       orientationLock = update.orientationLock;
       orientationInfo = update.orientationInfo;
     } else {
-      // We rely on the RN `didUpdateDimensions` event on Android
+      // We rely on the RN Dimensions to emit the `didUpdateDimensions` event on Android
       [orientationLock, orientationInfo] = await Promise.all([ExponentScreenOrientation.getOrientationLockAsync(), ExponentScreenOrientation.getOrientationAsync()])
     }
     listener ({orientationInfo, orientationLock});
   });
   _orientationChangeSubscribers.push(subscription);
 
-/*   if (Platform.OS === 'ios'){
-    if (!ExponentScreenOrientation.addOrientationChangeListener) {
-      throw new UnavailabilityError('ScreenOrientation', 'addOrientationChangeListener');
-    }
-    await ExponentScreenOrientation.addOrientationChangeListener();
-  } */
   return subscription;
 }
 
@@ -204,30 +196,13 @@ export async function removeOrientationChangeListenersAsync(): Promise<void> {
     // remove after a successful unsuscribe
     _orientationChangeSubscribers.pop(); 
   }
-/*   if (Platform.OS === 'ios'){
-    if (!ExponentScreenOrientation.removeOrientationChangeListener) {
-      throw new UnavailabilityError('ScreenOrientation', 'removeOrientationChangeListener');
-    }
-
-    // remove module listener if we have no more subscribers
-    // TODO: should this be better named
-    await ExponentScreenOrientation.removeOrientationChangeListener();
-  } */
 }
 
 export async function removeOrientationChangeListenerAsync(subscription: EmitterSubscription): Promise<void> {
-  // TODO: maybe be more specific about this constraint
-  if (!subscription){
+  // TODO: better way to check for valid subscription?
+  if (!subscription || !subscription.remove){
     throw new TypeError(`Must pass in a valid subscription`);
   }
   subscription.remove();
   _orientationChangeSubscribers = _orientationChangeSubscribers.filter(sub => sub !== subscription);
-
-/*   if (Platform.OS === 'ios' && _orientationChangeSubscribers.length === 0) {
-    if (!ExponentScreenOrientation.removeOrientationChangeListener) {
-      throw new UnavailabilityError('ScreenOrientation', 'removeOrientationChangeListener');
-    }
-
-    await ExponentScreenOrientation.removeOrientationChangeListener();
-  } */
 }

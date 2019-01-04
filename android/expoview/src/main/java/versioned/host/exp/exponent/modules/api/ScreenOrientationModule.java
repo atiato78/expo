@@ -32,7 +32,6 @@ public class ScreenOrientationModule extends ReactContextBaseJavaModule implemen
     return "ExpoScreenOrientation";
   }
 
-  //TODO: think abt this
   @Override
   public void onHostResume() {
     Activity activity = getCurrentActivity();
@@ -209,8 +208,10 @@ public class ScreenOrientationModule extends ReactContextBaseJavaModule implemen
   }
 
   public enum Orientation {
+    PORTRAIT,
     PORTRAIT_UP,
     PORTRAIT_DOWN,
+    LANDSCAPE,
     LANDSCAPE_LEFT,
     LANDSCAPE_RIGHT,
     UNKNOWN;
