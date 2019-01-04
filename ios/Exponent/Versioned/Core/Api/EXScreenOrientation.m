@@ -16,48 +16,14 @@
 static int INVALID_MASK = 0;
 
 @implementation RCTConvert (OrientationLock)
-RCT_ENUM_CONVERTER(EXOrientationLock, [EXScreenOrientation constantsToExport],
-                   DEFAULT, integerValue)
+RCT_ENUM_CONVERTER(EXOrientationLock, [EXScreenOrientation getStrToOrientationLockDict],
+                   DEFAULT_LOCK, integerValue)
 @end
 
 
 @implementation EXScreenOrientation
 
 bool hasListeners;
-
-+ (NSDictionary *)constantsToExport
-{
-  static NSDictionary* orientationLockDict = nil;
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    orientationLockDict = @{ @"DEFAULT" : @(DEFAULT),
-                      @"ALL" : @(ALL),
-                      @"PORTRAIT" : @(PORTRAIT),
-                      @"PORTRAIT_UP" : @(PORTRAIT_UP),
-                      @"PORTRAIT_DOWN" : @(PORTRAIT_DOWN),
-                      @"LANDSCAPE" : @(LANDSCAPE),
-                      @"LANDSCAPE_LEFT" : @(LANDSCAPE_LEFT),
-                      @"LANDSCAPE_RIGHT" : @(LANDSCAPE_RIGHT),
-                      @"OTHER" : @(OTHER),
-                      @"ALL_BUT_UPSIDE_DOWN": @(ALL_BUT_UPSIDE_DOWN)
-                      };
-  });
-  return orientationLockDict;
-}
-
-- (EXOrientationLock) stringToOrientationLock:(NSString *) orientationLockStr
-{
-  return (EXOrientationLock) [self constantsToExport][orientationLockStr];
-}
-
-- (NSString *) orientationLockToString:(EXOrientationLock) orientationLock
-{
-  NSArray * orientationLocks = [[self constantsToExport] allKeysForObject:@(orientationLock)];
-  if ([orientationLocks count] != 1){
-    return nil;
-  }
-  return orientationLocks[0];
-}
 
 EX_EXPORT_SCOPED_MODULE(ExpoScreenOrientation, ScreenOrientationManager);
 
@@ -92,11 +58,28 @@ RCT_EXPORT_METHOD(lockAsync:(EXOrientationLock)orientationLock
   resolve(nil);
 }
 
+
+RCT_EXPORT_METHOD(lockPlatformAsync:(NSArray *)allowedOrientations
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+  // combine all the allowedOrientations into one bitmask
+  UIInterfaceOrientationMask allowedOrientationsMask = 0;
+  for (NSString * allowedOrientation in allowedOrientations ){
+    UIInterfaceOrientationMask orientationMask = [self orientationJSToNative: [self stringToOrientation:allowedOrientation]];
+    allowedOrientationsMask = allowedOrientationsMask | orientationMask;
+  }
+  
+  [_kernelOrientationServiceDelegate screenOrientationModule:self
+                     didChangeSupportedInterfaceOrientations:allowedOrientationsMask];
+  resolve(nil);
+}
+
 RCT_REMAP_METHOD(unlockAsync,
                   unlockAsyncWithResolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-  [self lockAsync:DEFAULT resolver:resolve rejecter:reject];
+  [self lockAsync:DEFAULT_LOCK resolver:resolve rejecter:reject];
 }
 
 RCT_REMAP_METHOD(getOrientationLockAsync,
@@ -108,46 +91,26 @@ RCT_REMAP_METHOD(getOrientationLockAsync,
   resolve([self orientationLockToString:orientationLock]);
 }
 
-// TODO: this should map orientations, not locks
 RCT_REMAP_METHOD(getPlatformOrientationLockAsync,
                  getPlatformOrientationLockAsyncResolver:(RCTPromiseResolveBlock)resolve
                  rejecter:(RCTPromiseRejectBlock)reject)
 {
   UIInterfaceOrientationMask orientationMask = [_kernelOrientationServiceDelegate supportedInterfaceOrientationsForVisibleApp];
-  UIInterfaceOrientationMask orientations[] = {
-    UIInterfaceOrientationMaskPortrait,
-    UIInterfaceOrientationMaskPortraitUpsideDown,
-    UIInterfaceOrientationMaskLandscapeLeft,
-    UIInterfaceOrientationMaskLandscapeRight
-  };
-  
+  NSArray * singleOrientations = @[@(UIInterfaceOrientationMaskPortrait),
+                            @(UIInterfaceOrientationMaskPortraitUpsideDown),
+                            @(UIInterfaceOrientationMaskLandscapeLeft),
+                            @(UIInterfaceOrientationMaskLandscapeRight)];
   // If the particular orientation is supported, we add it to the array of allowedOrientations
   NSMutableArray * allowedOrientations = [[NSMutableArray alloc] init];
-  for (int i = 0; i < sizeof(orientations)/sizeof(orientations[0]); ++i) {
-    UIInterfaceOrientationMask orientation = orientations[i];
-    UIInterfaceOrientationMask supportedOrientation = orientationMask & orientation;
-    if (supportedOrientation == orientation){
-      EXOrientationLock orientationLock = [self orientationLockNativeToJS: (UIInterfaceOrientationMask) orientation];
-      [allowedOrientations addObject:[self orientationLockToString:orientationLock]];
+  for (NSNumber * wrappedSingleOrientation in singleOrientations) {
+    UIInterfaceOrientationMask singleOrientationMask = [wrappedSingleOrientation intValue];
+    UIInterfaceOrientationMask supportedOrientation = orientationMask & singleOrientationMask;
+    if (supportedOrientation == singleOrientationMask){
+      EXOrientation orientation = [self orientationNativeToJS: (UIInterfaceOrientationMask) singleOrientationMask];
+      [allowedOrientations addObject:[self orientationToString:orientation]];
     }
   }
   resolve([allowedOrientations copy]);
-}
-
-RCT_EXPORT_METHOD(lockPlatformAsync:(NSArray *)allowedOrientations
-                  resolver:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject)
-{
-  // combine all the allowedOrientations into one bitmask
-  UIInterfaceOrientationMask allowedOrientationsMask = 0;
-  for (NSString * allowedOrientation in allowedOrientations ){
-    UIInterfaceOrientationMask orientationMask = [self orientationLockJSToNative: [self stringToOrientationLock:allowedOrientation]];
-    allowedOrientationsMask = allowedOrientationsMask | orientationMask;
-  }
-  
-  [_kernelOrientationServiceDelegate screenOrientationModule:self
-                     didChangeSupportedInterfaceOrientations:allowedOrientationsMask];
-  resolve(nil);
 }
 
 RCT_EXPORT_METHOD(doesSupportAsync:(EXOrientationLock)orientationLock
@@ -179,6 +142,73 @@ RCT_REMAP_METHOD(getOrientationAsync,
   resolve([self getOrientationInformation:traitCollection]);
 }
 
++ (NSDictionary *)getStrToOrientationDict
+{
+  static NSDictionary* strToOrientationDict = nil;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    strToOrientationDict = @{@"PORTRAIT" : @(PORTRAIT),
+                             @"PORTRAIT_UP" : @(PORTRAIT_UP),
+                             @"PORTRAIT_DOWN" : @(PORTRAIT_DOWN),
+                             @"LANDSCAPE" : @(LANDSCAPE),
+                             @"LANDSCAPE_LEFT" : @(LANDSCAPE_LEFT),
+                             @"LANDSCAPE_RIGHT" : @(LANDSCAPE_RIGHT),
+                             @"UNKNOWN": @(UNKNOWN)
+                             };
+  });
+  return strToOrientationDict;
+}
+
++ (NSDictionary *)getOrientationToStrDict
+{
+  static NSMutableDictionary* orientationToStrDict = nil;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    orientationToStrDict = [[NSMutableDictionary alloc] init];
+    NSDictionary * strToOrientation = [EXScreenOrientation getStrToOrientationDict];
+    for(NSString * str in strToOrientation) {
+      NSNumber * wrappedOrientation = [strToOrientation objectForKey:str];
+      orientationToStrDict[wrappedOrientation] = str;
+    }
+  });
+  return orientationToStrDict;
+}
+
++ (NSDictionary *)getStrToOrientationLockDict
+{
+  static NSDictionary* strToOrientationLockDict = nil;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    strToOrientationLockDict = @{ @"DEFAULT" : @(DEFAULT_LOCK),
+                                  @"ALL" : @(ALL_LOCK),
+                                  @"PORTRAIT" : @(PORTRAIT_LOCK),
+                                  @"PORTRAIT_UP" : @(PORTRAIT_UP_LOCK),
+                                  @"PORTRAIT_DOWN" : @(PORTRAIT_DOWN_LOCK),
+                                  @"LANDSCAPE" : @(LANDSCAPE_LOCK),
+                                  @"LANDSCAPE_LEFT" : @(LANDSCAPE_LEFT_LOCK),
+                                  @"LANDSCAPE_RIGHT" : @(LANDSCAPE_RIGHT_LOCK),
+                                  @"OTHER" : @(OTHER_LOCK),
+                                  @"ALL_BUT_UPSIDE_DOWN": @(ALL_BUT_UPSIDE_DOWN_LOCK)
+                                  };
+  });
+  return strToOrientationLockDict;
+}
+
++ (NSDictionary *)getOrientationLockToStrDict
+{
+  static NSMutableDictionary* orientationLockToStrDict = nil;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    orientationLockToStrDict = [[NSMutableDictionary alloc] init];
+    NSDictionary * strToOrientationLock = [EXScreenOrientation getStrToOrientationLockDict];
+    for(NSString * str in strToOrientationLock) {
+      NSNumber * wrappedOrientationLock = [strToOrientationLock objectForKey:str];
+      orientationLockToStrDict[wrappedOrientationLock] = str;
+    }
+  });
+  return orientationLockToStrDict;
+}
+
 // Will be called when this module's first listener is added.
 -(void)startObserving {
   hasListeners = YES;
@@ -204,9 +234,9 @@ RCT_REMAP_METHOD(getOrientationAsync,
 }
 
 - (NSDictionary *) getOrientationInformation: (UITraitCollection *)traitCollection {
-  NSString * orientation = [self traitCollectionToOrientation:traitCollection];
+  EXOrientation orientation = [self traitCollectionToOrientation:traitCollection];
   return @{
-            @"orientation": orientation,
+           @"orientation": [self orientationToString:orientation],
             @"verticalSizeClass": [self sizeClassToString: traitCollection.verticalSizeClass],
             @"horizontalSizeClass": [self sizeClassToString: traitCollection.horizontalSizeClass]
             };
@@ -272,29 +302,25 @@ RCT_REMAP_METHOD(getOrientationAsync,
   }
 }
 
-- (NSString *) traitCollectionToOrientation: (UITraitCollection *) traitCollection
+- (EXOrientation) traitCollectionToOrientation: (UITraitCollection *) traitCollection
 {
   UIUserInterfaceSizeClass verticalSizeClass = traitCollection.verticalSizeClass;
   UIUserInterfaceSizeClass horizontalSizeClass = traitCollection.horizontalSizeClass;
   
   if (verticalSizeClass == UIUserInterfaceSizeClassRegular && horizontalSizeClass == UIUserInterfaceSizeClassCompact){
-    return @"PORTRAIT";
+    return PORTRAIT;
   } else if (verticalSizeClass == UIUserInterfaceSizeClassCompact && horizontalSizeClass == UIUserInterfaceSizeClassCompact){
-    return @"LANDSCAPE";
+    return LANDSCAPE;
   } else if (verticalSizeClass == UIUserInterfaceSizeClassCompact && horizontalSizeClass == UIUserInterfaceSizeClassRegular) {
-    return @"LANDSCAPE"; // iPhone 7 plus
+    return LANDSCAPE; // iPhone 7 plus
   } else {
-    return @"UNKNOWN";
+    return UNKNOWN;
   }
 }
 
-- (EXOrientationLock) orientationLockNativeToJS:(UIInterfaceOrientationMask) orientationMask
+- (EXOrientation) orientationNativeToJS:(UIInterfaceOrientationMask) orientationMask
 {
-  if (orientationMask == UIInterfaceOrientationMaskAllButUpsideDown){
-    return DEFAULT;
-  } else if (orientationMask == UIInterfaceOrientationMaskAll) {
-    return ALL;
-  } else if (orientationMask == (UIInterfaceOrientationMaskPortrait | UIInterfaceOrientationMaskPortraitUpsideDown)) {
+  if (orientationMask == (UIInterfaceOrientationMaskPortrait | UIInterfaceOrientationMaskPortraitUpsideDown)) {
     return PORTRAIT;
   } else if (orientationMask == UIInterfaceOrientationMaskPortrait) {
     return PORTRAIT_UP;
@@ -307,33 +333,96 @@ RCT_REMAP_METHOD(getOrientationAsync,
   } else if (orientationMask == UIInterfaceOrientationMaskLandscapeRight) {
     return LANDSCAPE_RIGHT;
   } else {
-    return OTHER;
+    return UNKNOWN;
+  }
+}
+
+- (EXOrientationLock) orientationLockNativeToJS:(UIInterfaceOrientationMask) orientationMask
+{
+  if (orientationMask == UIInterfaceOrientationMaskAllButUpsideDown){
+    return DEFAULT_LOCK;
+  } else if (orientationMask == UIInterfaceOrientationMaskAll) {
+    return ALL_LOCK;
+  } else if (orientationMask == (UIInterfaceOrientationMaskPortrait | UIInterfaceOrientationMaskPortraitUpsideDown)) {
+    return PORTRAIT_LOCK;
+  } else if (orientationMask == UIInterfaceOrientationMaskPortrait) {
+    return PORTRAIT_UP_LOCK;
+  } else if (orientationMask == UIInterfaceOrientationMaskPortraitUpsideDown) {
+    return PORTRAIT_DOWN_LOCK;
+  } else if (orientationMask == UIInterfaceOrientationMaskLandscape) {
+    return LANDSCAPE_LOCK;
+  } else if (orientationMask == UIInterfaceOrientationMaskLandscapeLeft) {
+    return LANDSCAPE_LEFT_LOCK;
+  } else if (orientationMask == UIInterfaceOrientationMaskLandscapeRight) {
+    return LANDSCAPE_RIGHT_LOCK;
+  } else {
+    return OTHER_LOCK;
+  }
+}
+
+- (UIInterfaceOrientationMask) orientationJSToNative:(EXOrientation)orientation
+{
+  if (orientation == PORTRAIT) {
+    return UIInterfaceOrientationMaskPortrait | UIInterfaceOrientationMaskPortraitUpsideDown;
+  } else if (orientation == PORTRAIT_UP) {
+    return UIInterfaceOrientationMaskPortrait;
+  } else if (orientation == PORTRAIT_DOWN) {
+    return UIInterfaceOrientationMaskPortraitUpsideDown;
+  } else if (orientation == LANDSCAPE) {
+    return UIInterfaceOrientationMaskLandscape;
+  } else if (orientation == LANDSCAPE_LEFT) {
+    return UIInterfaceOrientationMaskLandscapeLeft;
+  } else if (orientation == LANDSCAPE_RIGHT) {
+    return UIInterfaceOrientationMaskLandscapeRight;
+  } else {
+    return INVALID_MASK;
   }
 }
 
 - (UIInterfaceOrientationMask) orientationLockJSToNative:(EXOrientationLock)orientationLock
 {
-  if (orientationLock == DEFAULT) {
-    return UIInterfaceOrientationMaskAllButUpsideDown; // Should be all but upside down?
-  } else if (orientationLock == ALL) {
+  if (orientationLock == DEFAULT_LOCK) {
+    return UIInterfaceOrientationMaskAllButUpsideDown;
+  } else if (orientationLock == ALL_LOCK) {
     return UIInterfaceOrientationMaskAll;
-  } else if (orientationLock == PORTRAIT) {
+  } else if (orientationLock == PORTRAIT_LOCK) {
     return UIInterfaceOrientationMaskPortrait | UIInterfaceOrientationMaskPortraitUpsideDown;
-  } else if (orientationLock == PORTRAIT_UP) {
+  } else if (orientationLock == PORTRAIT_UP_LOCK) {
     return UIInterfaceOrientationMaskPortrait;
-  } else if (orientationLock == PORTRAIT_DOWN) {
+  } else if (orientationLock == PORTRAIT_DOWN_LOCK) {
     return UIInterfaceOrientationMaskPortraitUpsideDown;
-  } else if (orientationLock == LANDSCAPE) {
+  } else if (orientationLock == LANDSCAPE_LOCK) {
     return UIInterfaceOrientationMaskLandscape;
-  } else if (orientationLock == LANDSCAPE_LEFT) {
+  } else if (orientationLock == LANDSCAPE_LEFT_LOCK) {
     return UIInterfaceOrientationMaskLandscapeLeft;
-  } else if (orientationLock == LANDSCAPE_RIGHT) {
+  } else if (orientationLock == LANDSCAPE_RIGHT_LOCK) {
     return UIInterfaceOrientationMaskLandscapeRight;
-  } else if (orientationLock == ALL_BUT_UPSIDE_DOWN) { // legacy
+  } else if (orientationLock == ALL_BUT_UPSIDE_DOWN_LOCK) { // legacy
     return UIInterfaceOrientationMaskAllButUpsideDown;
   }else {
     return INVALID_MASK;
   }
+}
+
+- (EXOrientation) stringToOrientation:(NSString *) orientationStr
+{
+  return [[[EXScreenOrientation getStrToOrientationDict] objectForKey:orientationStr] intValue];
+}
+
+- (NSString *) orientationToString:(EXOrientation) orientation
+{
+  return [[EXScreenOrientation getOrientationToStrDict] objectForKey:@(orientation)];
+}
+
+
+- (EXOrientationLock) stringToOrientationLock:(NSString *) orientationLockStr
+{
+  return [[[EXScreenOrientation getStrToOrientationLockDict] objectForKey:orientationLockStr] intValue];
+}
+
+- (NSString *) orientationLockToString:(EXOrientationLock) orientationLock
+{
+  return [[EXScreenOrientation getOrientationLockToStrDict] objectForKey:@(orientationLock)];
 }
 
 @end
