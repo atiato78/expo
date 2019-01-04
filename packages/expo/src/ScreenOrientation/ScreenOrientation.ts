@@ -177,7 +177,9 @@ export async function addOrientationChangeListenerAsync(listener: OrientationCha
       orientationInfo = update.orientationInfo;
     } else {
       // We rely on the RN Dimensions to emit the `didUpdateDimensions` event on Android
-      [orientationLock, orientationInfo] = await Promise.all([ExponentScreenOrientation.getOrientationLockAsync(), ExponentScreenOrientation.getOrientationAsync()])
+      let orientation;
+      [orientationLock, orientation] = await Promise.all([ExponentScreenOrientation.getOrientationLockAsync(), ExponentScreenOrientation.getOrientationAsync()])
+      orientationInfo = {orientation};
     }
     listener ({orientationInfo, orientationLock});
   });
