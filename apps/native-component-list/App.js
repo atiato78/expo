@@ -1,4 +1,4 @@
-import './LegacyReact';
+/* import './LegacyReact';
 
 import { AppLoading, Asset, Font } from 'expo';
 import React from 'react';
@@ -67,5 +67,37 @@ const styles = StyleSheet.create({
   statusBarUnderlay: {
     height: 24,
     backgroundColor: 'rgba(0,0,0,0.2)',
+  },
+}); */
+
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import { ScreenOrientation } from 'expo';
+
+export default class App extends React.Component {
+  componentWillMount() {
+    ScreenOrientation.addPhysicalOrientationChangeListener(async update => {
+      const msg = `Got Info from REGULAR updater: ${JSON.stringify(update)}`;
+      alert(msg);
+      console.log(msg);
+    });
+  }
+
+  render() {
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.ALL);
+    return (
+      <View style={styles.container}>
+        <Text>Open up App.js to start working on your app!</Text>
+      </View>
+    );
+  }
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
