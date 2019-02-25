@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import expolib_v1.okhttp3.Cookie;
-import expolib_v1.okhttp3.HttpUrl;
+import okhttp3.Cookie;
+import okhttp3.HttpUrl;
 import host.exp.exponent.analytics.EXL;
 import versioned.host.exp.exponent.modules.api.av.AVModule;
 

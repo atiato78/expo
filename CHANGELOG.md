@@ -12,6 +12,19 @@ This is the log of notable changes to the Expo client that are developer-facing.
 
 - fix app crash when attempting to `console.log(Object.create(null))` by [@juangl](https://github.com/juangl) ([#3143](https://github.com/expo/expo/pull/3143))
 
+## 32.2.0
+
+### 🛠 Breaking changes
+
+- removed use of `expolib_v1.okhttp` in favor of regular `okhttp` dependency by [@Szymon20000](https://github.com/Szymon20000) ([#3539](https://github.com/expo/expo/pull/3539)) (an update to `MainApplication.getOkHttpBuilder` may be required when upgrading)
+
+### 🎉 New features
+
+### 🐛 Bug fixes
+
+- fix app crash when attempting to `console.log(Object.create(null))` by [@juangl](https://github.com/juangl) ([#3143](https://github.com/expo/expo/pull/3143))
+- fixed several issues related to `expo-av` by [@Szymon20000](https://github.com/Szymon20000) ([#3539](https://github.com/expo/expo/pull/3539))
+
 ## 32.0.0
 
 ### 🛠 Breaking changes

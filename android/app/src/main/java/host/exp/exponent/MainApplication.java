@@ -30,7 +30,7 @@ import expo.modules.print.PrintPackage;
 import expo.modules.sensors.SensorsPackage;
 import expo.modules.sms.SMSPackage;
 import expo.modules.taskManager.TaskManagerPackage;
-import expolib_v1.okhttp3.OkHttpClient;
+import okhttp3.OkHttpClient;
 
 // Needed for `react-native link`
 // import com.facebook.react.ReactApplication;
@@ -95,4 +95,5 @@ public class MainApplication extends ExpoApplication implements AppLoaderPackage
     // Customize/override OkHttp client here
     return builder;
   }
+
 }
