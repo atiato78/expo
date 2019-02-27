@@ -92,6 +92,14 @@ export type Anchor = {
   blendShapes?: { [shape in BlendShape]?: number };
 };
 
+export type PlaneAnchor = Anchor & {
+  center: { x: number, y: number, z: number },
+  extent: {
+    width: number,
+    length: number,
+  },
+}
+
 export type HitTest = {
   type: number;
   distance: number;
