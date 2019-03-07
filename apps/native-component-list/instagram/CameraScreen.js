@@ -114,14 +114,14 @@ const ListScreenItem = ({ renderImage, title, subtitle, renderAction, onPress })
       {renderImage({
         style: {
           shadowOpacity: 0.4,
-          shadowRadius: 4,
+          shadowRadius: 6,
           width: listItemImageSize,
           height: listItemImageSize,
           borderRadius: 5,
           backgroundColor: 'gray',
         },
       })}
-      <View style={{ justifyContent: 'space-between', marginLeft: 8 }}>
+      <View style={{ justifyContent: 'space-between', marginLeft: 12 }}>
         <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>{title}</Text>
         {subtitle && (
           <Text style={{ marginTop: 4, color: 'white', opacity: 0.7, fontSize: 14 }}>
@@ -145,12 +145,8 @@ const SongListScreenItem = ({ title, artist, image }) => (
 const GenreListScreenItem = ({ genre, image }) => (
   <ListScreenItem
     renderImage={({ style }) => (
-      <View
-        style={StyleSheet.flatten([
-          style,
-          { padding: 8, justifyContent: 'center', alignItems: 'center' },
-        ])}>
-        <Image source={image} />
+      <View style={StyleSheet.flatten([style, { padding: 12 }])}>
+        <Image style={{ flex: 1, tintColor: 'white' }} resizeMode={'contain'} source={image} />
       </View>
     )}
     title={genre}
@@ -179,8 +175,67 @@ const ListScreen = props => (
 //   },
 //   MusicScreen: () => <ListScreen data={[]} />,
 // });
-const GenreScreen = () => <ListScreen data={[]} />;
 
+const reformatGenres = d =>
+  d.map(genre => ({
+    genre,
+    image: {
+      uri: 'https://png.pngtree.com/svg/20170526/mic_icon_525549.png',
+    },
+  }));
+
+const moods = reformatGenres([
+  'Fun',
+  'Upbeat',
+  'Dreamy',
+  'Romantic',
+  'Bold',
+  'Mellow',
+  'Inspirational',
+  'Suspenseful',
+]);
+
+const genres = reformatGenres([
+  'Christmas',
+  'Hip Hop',
+  'R&B and Soul',
+  'Rock',
+  'Pop',
+  'Country',
+  'Latin',
+  'Electronic',
+  'Jazz',
+  'Classical',
+  'Reggae',
+  'Ambient',
+  'Folk',
+  'Indian',
+  'Cinematic',
+]);
+
+const GenreScreen = () => <ListScreen data={genres} />;
+const MoodScreen = () => <ListScreen data={moods} />;
+const PopularScreen = () => (
+  <ListScreen
+    data={[
+      aSong,
+      aSong,
+      aSong,
+      aSong,
+      aSong,
+      aSong,
+      aSong,
+      aSong,
+      aSong,
+      aSong,
+      aSong,
+      aSong,
+      aSong,
+      aSong,
+      aSong,
+    ]}
+  />
+);
 const aSong = {
   title: 'Wow.',
   artist: 'Post Malone',
@@ -191,29 +246,9 @@ const aSong = {
 const MusicNav = createAppContainer(
   createMaterialTopTabNavigator(
     {
-      Popular: () => (
-        <ListScreen
-          data={[
-            aSong,
-            aSong,
-            aSong,
-            aSong,
-            aSong,
-            aSong,
-            aSong,
-            aSong,
-            aSong,
-            aSong,
-            aSong,
-            aSong,
-            aSong,
-            aSong,
-            aSong,
-          ]}
-        />
-      ),
-      Moods: () => <GenreScreen />,
-      Genres: () => <GenreScreen />,
+      Popular: PopularScreen,
+      Moods: MoodScreen,
+      Genres: GenreScreen,
     },
     {
       style: {
