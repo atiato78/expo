@@ -1,5 +1,6 @@
 import React from 'react';
 import { FlatList, Dimensions, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import ViewPager from './ViewPager';
 
 const pages = ['Type', 'Music', 'Live', 'Normal', 'Boomerang', 'Rewind', 'Hands-Free'].map(value =>
@@ -59,7 +60,9 @@ export default class Slider extends React.Component {
   };
   render() {
     return (
-      <View style={{ flex: 1, maxHeight: sliderHeight }}>
+      <LinearGradient
+        colors={['transparent', 'rgba(0,0,0,0.3)']}
+        style={{ flex: 1, maxHeight: sliderHeight }}>
         <ViewPager
           pagingEnabled
           centerContent
@@ -88,7 +91,7 @@ export default class Slider extends React.Component {
           size={width}
           horizontal
         />
-      </View>
+      </LinearGradient>
     );
   }
 }
