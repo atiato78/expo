@@ -1,14 +1,26 @@
 import React from 'react';
-import { View, Text, Image, Animated, TouchableOpacity, FlatList } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  Animated,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  SafeAreaViewComponent,
+} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Constants from 'expo-constants';
 import { Camera } from 'expo-camera';
+import { BlurView } from 'expo-blur';
+import { SafeAreaView, createMaterialTopTabNavigator, createAppContainer } from 'react-navigation';
+import { SearchBar } from 'react-native-elements';
 import Slider from './Slider';
 import ViewPager from './ViewPager';
 
 const pages = [
-  { name: 'Type', icon: null, screen: () => <TypeScreen /> },
-  { name: 'Music', icon: require('./inf.png') },
+  // { name: 'Type', icon: null, screen: () => <TypeScreen /> },
+  { name: 'Music', icon: require('./inf.png'), screen: () => <MusicScreen /> },
   { name: 'Live', icon: null },
   { name: 'Normal', icon: null },
   { name: 'Boomerang', icon: require('./inf.png') },
@@ -21,6 +33,25 @@ const pages = [
   };
 });
 
+const Header = ({ style, ...props }) => (
+  <View
+    style={StyleSheet.flatten([
+      {
+        position: 'absolute',
+        top: Constants.statusBarHeight || 16,
+        left: 0,
+        right: 0,
+        flexDirection: 'row',
+        paddingHorizontal: 16,
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+      },
+      style,
+    ])}
+    {...props}
+  />
+);
+
 const TypeScreen = () => {
   return (
     <LinearGradient
@@ -31,11 +62,76 @@ const TypeScreen = () => {
       <Text style={{ fontSize: 24, fontWeight: 'bold', opacity: 0.7, textAlign: 'center' }}>
         Tap to Type
       </Text>
+      <Header>
+        <IconButton />
+        <IconButton />
+        <View />
+      </Header>
     </LinearGradient>
   );
 };
 
-export default class CameraScreen extends React.Component {
+const CameraScreen = () => {
+  return (
+    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+      <Camera style={{ flex: 1 }} />
+      <Header>
+        <IconButton />
+        <IconButton />
+      </Header>
+    </View>
+  );
+};
+const MusicScreen = () => {
+  return (
+    <BlurView tint={'dark'} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+      <SafeAreaView>
+        <SearchBar
+          round
+          containerStyle={{ backgroundColor: 'transparent', borderBottomWidth: 0 }}
+          inputStyle={{ color: 'white' }}
+          placeholder="Search music"
+        />
+        <MusicNav />
+      </SafeAreaView>
+    </BlurView>
+  );
+};
+
+const MusicNav = createAppContainer(
+  createMaterialTopTabNavigator(
+    {
+      Popular: () => <View />,
+      Moods: () => <View />,
+      Genres: () => <View />,
+    },
+    {
+      tabBarOptions: {
+        swipeEnabled: true,
+        activeTintColor: 'white',
+        inactiveBackgroundColor: 'transparent',
+        safeAreaInset: 'never',
+        upperCaseLabel: false,
+        scrollEnabled: false,
+        indicatorStyle: {
+          backgroundColor: 'white',
+          height: 3,
+        },
+        style: {
+          backgroundColor: 'transparent',
+          borderWidth: 0,
+          shadowOpacity: 0,
+          overflow: 'hidden',
+        },
+        labelStyle: {
+          fontWeight: 'bold',
+        },
+      },
+    }
+  )
+);
+
+export default class CameraContainerScreen extends React.Component {
   state = {
     index: 0,
   };
@@ -44,24 +140,10 @@ export default class CameraScreen extends React.Component {
     const page = pages[this.state.index];
     return (
       <View style={{ flex: 1, backgroundColor: 'green', justifyContent: 'flex-end' }}>
-        <Camera style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
+        <CameraScreen />
+
         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
           {page.screen && page.screen()}
-        </View>
-
-        <View
-          style={{
-            position: 'absolute',
-            top: Constants.statusBarHeight || 16,
-            left: 0,
-            right: 0,
-            flexDirection: 'row',
-            paddingHorizontal: 16,
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-          }}>
-          <IconButton />
-          <IconButton />
         </View>
 
         <View
@@ -109,13 +191,14 @@ class CaptureButton extends React.Component {
     const innerWidth = width * 0.75;
     return (
       <TouchableOpacity style={{ height: width }}>
-        <View
+        <BlurView
+          tint={'light'}
           style={{
             width,
             height: width,
             maxWidth: width,
             borderRadius: width / 2,
-            backgroundColor: 'rgba(255,255,255,0.5)',
+            backgroundColor: 'transparent',
             justifyContent: 'center',
             alignItems: 'center',
           }}>
@@ -135,7 +218,7 @@ class CaptureButton extends React.Component {
               itemWidth={innerWidth}
             />
           </View>
-        </View>
+        </BlurView>
       </TouchableOpacity>
     );
   }
