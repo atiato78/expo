@@ -23,7 +23,7 @@ const { height } = Dimensions.get('window');
 const pages = [
   { name: 'Type', icon: null, screen: () => <TypeScreen /> },
   { name: 'Music', hideFooter: true, icon: require('./inf.png'), screen: () => <MusicScreen /> },
-  { name: 'Live', icon: null },
+  { name: 'Live', icon: null, id: 'live' },
   { name: 'Normal', icon: null },
   { name: 'Boomerang', icon: require('./inf.png') },
   { name: 'Rewind', icon: require('./rewind.png') },
@@ -327,33 +327,151 @@ export default class CameraContainerScreen extends React.Component {
   }
 }
 
+const userProfilePictureSize = 24;
+const userProfilePictureIndicatorSize = userProfilePictureSize * 0.3;
+const UserProfilePicture = ({ source }) => (
+  <View style={{ width: userProfilePictureSize, height: userProfilePictureSize, marginLeft: 4 }}>
+    <Image style={{ flex: 1, borderRadius: userProfilePictureSize / 2 }} source={source} />
+    <View
+      style={{
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: 'black',
+        width: userProfilePictureIndicatorSize,
+        height: userProfilePictureIndicatorSize,
+        borderRadius: userProfilePictureIndicatorSize / 2,
+        backgroundColor: 'lime',
+      }}
+    />
+  </View>
+);
+const WhosActive = ({ users }) => (
+  <View style={{ flexDirection: 'row', width: '90%', justifyContent: 'space-between' }}>
+    <Text style={{ fontSize: 10, color: 'white' }}>
+      {users
+        .slice(0, 2)
+        .map(({ name }) => name)
+        .join(', ') + `, and ${users.length - 2} others are active now`}
+    </Text>
+
+    <View style={{ flexDirection: 'row' }}>
+      {users.slice(0, 3).map((user, index) => (
+        <UserProfilePicture key={index + '-img'} source={user.image} />
+      ))}
+    </View>
+  </View>
+);
+
+const GoLiveButton = () => (
+  <TouchableOpacity style={{ width: '50%' }}>
+    <View
+      style={{
+        height: innerCaptureButtonHeight,
+        borderRadius: innerCaptureButtonHeight / 2,
+        backgroundColor: 'white',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}>
+      <Text style={{ fontSize: 16 }}>Go Live</Text>
+    </View>
+  </TouchableOpacity>
+);
+
 class MainFooter extends React.Component {
   render() {
     const { page, index } = this.props;
-    return (
-      <View
-        style={{
-          display: page.hideFooter ? 'none' : 'flex',
-          paddingHorizontal: 36,
-          justifyContent: 'space-between',
-          paddingVertical: 24,
-          flexDirection: 'row',
-          alignItems: 'center',
-        }}>
-        <GalleryButton
-          source={{
-            uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
-          }}
-        />
-        <IconButton />
-        <CaptureButton selectedIndex={index} icon={page.icon} />
-        <IconButton />
-        <IconButton />
-      </View>
-    );
+
+    const footerStyle = {
+      display: page.hideFooter ? 'none' : 'flex',
+      paddingHorizontal: 36,
+      paddingVertical: 24,
+      justifyContent: 'space-between',
+      flexDirection: 'row',
+      alignItems: 'center',
+    };
+
+    switch (page.id) {
+      case 'live':
+        const users = [
+          {
+            name: 'Brent Vatne',
+            image: {
+              uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
+            },
+          },
+          {
+            name: 'Charlie Cheever',
+            image: {
+              uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
+            },
+          },
+          {
+            name: 'theavocoder',
+            image: {
+              uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
+            },
+          },
+          {
+            name: 'james',
+            image: {
+              uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
+            },
+          },
+          {
+            name: 'evan',
+            image: {
+              uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
+            },
+          },
+        ];
+        return (
+          <View
+            style={{
+              ...footerStyle,
+
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}>
+            <WhosActive users={users} />
+
+            <View
+              style={{
+                marginTop: 14,
+                width: '100%',
+                justifyContent: 'space-between',
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <IconButton key="cards" />
+              <GoLiveButton />
+              <IconButton key="flip" />
+              <IconButton key="filters" />
+            </View>
+          </View>
+        );
+      default:
+        return (
+          <View style={footerStyle}>
+            <GalleryButton
+              source={{
+                uri:
+                  'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
+              }}
+            />
+            <IconButton />
+            <CaptureButton selectedIndex={index} icon={page.icon} />
+            <IconButton key="flip" />
+            <IconButton key="filters" />
+          </View>
+        );
+    }
   }
 }
 
+const captureButtonHidth = 72;
+const innerCaptureButtonHeight = captureButtonHidth * 0.75;
 class CaptureButton extends React.Component {
   componentDidUpdate(prevProps) {
     // if (this.props.icon !== prevProps.icon) {
