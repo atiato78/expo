@@ -161,6 +161,7 @@ const GenreListScreenItem = ({ genre, image }) => (
 const ListScreen = props => (
   <FlatList
     style={{ flex: 1 }}
+    contentContainerStyle={{ paddingBottom: 96 }}
     {...props}
     renderItem={({ item }) => {
       if (item.genre) {
@@ -215,6 +216,9 @@ const MusicNav = createAppContainer(
       Genres: () => <GenreScreen />,
     },
     {
+      style: {
+        maxHeight: height - (48 + 8), // Tab Bar Height + padding
+      },
       tabBarOptions: {
         swipeEnabled: true,
         activeTintColor: 'white',
