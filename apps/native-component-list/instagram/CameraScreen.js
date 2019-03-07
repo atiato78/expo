@@ -61,6 +61,14 @@ const types = [
     fontFamily: 'insta-strong',
   },
   {
+    name: 'Modern',
+    fontFamily: 'insta-modern',
+  },
+  {
+    name: 'Neon',
+    fontFamily: 'insta-neon',
+  },
+  {
     name: 'Typewriter',
     fontFamily: 'insta-typewriter',
   },
@@ -360,7 +368,9 @@ export default class CameraContainerScreen extends React.Component {
     try {
       await Font.loadAsync({
         'insta-strong': require('./insta-strong.otf'),
+        'insta-neon': require('./insta-neon.otf'),
         'insta-typewriter': require('./insta-typewriter.ttf'),
+        'insta-modern': require('./insta-modern.ttf'),
       });
     } catch (error) {
     } finally {
