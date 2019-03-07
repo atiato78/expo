@@ -21,7 +21,7 @@ import ViewPager from './ViewPager';
 const { height } = Dimensions.get('window');
 
 const pages = [
-  // { name: 'Type', icon: null, screen: () => <TypeScreen /> },
+  { name: 'Type', icon: null, screen: () => <TypeScreen /> },
   { name: 'Music', icon: require('./inf.png'), screen: () => <MusicScreen /> },
   { name: 'Live', icon: null },
   { name: 'Normal', icon: null },
@@ -315,8 +315,31 @@ export default class CameraContainerScreen extends React.Component {
 
         <Slider
           data={pages.map(value => value.name)}
-          onIndexChange={index => this.setState({ index })}
+          onIndexChange={index => {
+            console.log(index);
+            this.setState({ index });
+          }}
         />
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+            overflow: 'hidden',
+          }}>
+          <View
+            style={{
+              width: 15,
+              height: 15,
+              borderTopLeftRadius: 2,
+              backgroundColor: 'white',
+              transform: [{ rotate: '45deg' }, { translateX: '50%' }, { translateY: '50%' }],
+            }}
+          />
+        </View>
       </View>
     );
   }

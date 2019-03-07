@@ -9,7 +9,7 @@ const pages = ['Type', 'Music', 'Live', 'Normal', 'Boomerang', 'Rewind', 'Hands-
 const { width } = Dimensions.get('window');
 const HORIZONTAL_ITEM_WIDTH = 95;
 const HORIZONTAL_ITEM_END_SPACE = (width - HORIZONTAL_ITEM_WIDTH) / 2;
-
+const sliderHeight = 60;
 export default class Slider extends React.Component {
   state = { index: 0 };
 
@@ -35,37 +35,51 @@ export default class Slider extends React.Component {
     // const marginLeft = index === 0 ? HORIZONTAL_ITEM_END_SPACE : 0;
     // const marginRight = index === pages.length - 1 ? HORIZONTAL_ITEM_END_SPACE : 0;
     return (
-      <Text
+      <View
         style={{
           width,
-          fontWeight: 'bold',
-          //   marginLeft,
-          //   marginRight,
-          fontSize: 12,
-          color: 'white',
-          textAlign: 'center',
-          backgroundColor: 'blue',
-        }}
-        key={item}>
-        {item}
-      </Text>
+          height: sliderHeight,
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}>
+        <Text
+          style={{
+            fontWeight: 'bold',
+            fontSize: 14,
+            color: 'white',
+            textAlign: 'center',
+            backgroundColor: 'blue',
+          }}
+          key={item}>
+          {item}
+        </Text>
+      </View>
     );
   };
   render() {
     return (
-      <View style={{ flex: 1, maxHeight: 60 }}>
+      <View style={{ flex: 1, maxHeight: sliderHeight }}>
         <ViewPager
           pagingEnabled
+          centerContent
           onMomentumScrollEnd={() => {
+            // TODO: Bacon: PR this method into RNWeb
+            // const { index } = this.viewPager;
+            // console.log('eng', this.state.index, index);
+            // if (this.state.index !== index) {
+            //   this.props.onIndexChange(index, this.state.index);
+            //   this.setState({ index });
+            // }
+          }}
+          onScroll={({ value }) => {
+            // console.log('scroll', value);
             const { index } = this.viewPager;
-            console.log('eng', this.state.index, index);
             if (this.state.index !== index) {
+              console.log('eng', this.state.index, index);
               this.props.onIndexChange(index, this.state.index);
               this.setState({ index });
             }
-          }}
-          onScroll={({ value }) => {
-            console.log('scroll', value);
           }}
           ref={ref => (this.viewPager = ref)}
           data={this.props.data}
