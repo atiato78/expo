@@ -16,17 +16,21 @@ import { BlurView } from 'expo-blur';
 import { SafeAreaView, createMaterialTopTabNavigator, createAppContainer } from 'react-navigation';
 import { SearchBar } from 'react-native-elements';
 import * as Font from 'expo-font';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import EvilIcons from '@expo/vector-icons/EvilIcons';
 import Slider from './Slider';
 import ViewPager from './ViewPager';
 
 const { height } = Dimensions.get('window');
 
 const pages = [
-  { name: 'Type', icon: null, id: 'type', screen: props => <TypeScreen {...props} /> },
-  { name: 'Music', hideFooter: true, icon: require('./inf.png'), screen: () => <MusicScreen /> },
+  // { name: 'Type', icon: null, id: 'type', screen: props => <TypeScreen {...props} /> },
+  // { name: 'Music', hideFooter: true, icon: require('./inf.png'), screen: () => <MusicScreen /> },
   { name: 'Live', icon: null, id: 'live' },
   { name: 'Normal', icon: null },
   { name: 'Boomerang', icon: require('./inf.png') },
+  { name: 'Superzoom', icon: require('./rewind.png') },
+  { name: 'Focus', icon: require('./inf.png') },
   { name: 'Rewind', icon: require('./rewind.png') },
   { name: 'Hands-Free', icon: require('./ball.png') },
 ].map(value => {
@@ -155,8 +159,8 @@ const CameraScreen = () => {
     <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
       <Camera style={{ flex: 1 }} />
       <Header>
-        <IconButton />
-        <IconButton />
+        <IconButton name={'cog'} size={16} color={'white'} />
+        <IconButton name={'chevron-right'} size={16} color={'white'} />
       </Header>
     </View>
   );
@@ -541,7 +545,7 @@ class MainFooter extends React.Component {
           <View style={footerStyle}>
             <GradientButton gradient={gradient} onPress={onPressGradientButton} />
             <CaptureButton selectedIndex={index} icon={page.icon} />
-            <IconButton key="camera" />
+            <IconButton key="camera" name="camera" />
           </View>
         );
       case 'live':
@@ -775,17 +779,18 @@ const Icon = ({ name }) => <Text style={{ fontSize: 24 }}>{name}</Text>;
 
 const iconButtonSize = 30;
 
-const IconButton = ({ name }) => (
-  <TouchableOpacity>
-    <View
-      style={{
-        borderRadius: iconButtonSize / 2,
-        width: iconButtonSize,
-        height: iconButtonSize,
-        backgroundColor: 'transparent',
-        borderWidth: 3,
-        borderColor: 'white',
-      }}
-    />
+const IconButton = ({ onPress, name, size, color }) => (
+  <TouchableOpacity style={{ width: iconButtonSize, height: iconButtonSize }} onPress={onPress}>
+    <FontAwesome name={name} size={size} color={color} />
   </TouchableOpacity>
 );
+// <View
+//       style={{
+//         borderRadius: iconButtonSize / 2,
+//         width: iconButtonSize,
+//         height: iconButtonSize,
+//         backgroundColor: 'transparent',
+//         borderWidth: 3,
+//         borderColor: 'white',
+//       }}
+//     />
