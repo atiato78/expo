@@ -21,7 +21,7 @@ import ViewPager from './ViewPager';
 const { height } = Dimensions.get('window');
 
 const pages = [
-  { name: 'Type', icon: null, screen: () => <TypeScreen /> },
+  { name: 'Type', icon: null, id: 'type', screen: props => <TypeScreen {...props} /> },
   { name: 'Music', hideFooter: true, icon: require('./inf.png'), screen: () => <MusicScreen /> },
   { name: 'Live', icon: null, id: 'live' },
   { name: 'Normal', icon: null },
@@ -54,14 +54,47 @@ const Header = ({ style, ...props }) => (
   />
 );
 
-const TypeScreen = () => {
+const gradients = [
+  {
+    start: [1, 0],
+    end: [0, 0.9],
+    colors: ['#E4C9BF', '#E89D99', '#DF6D71'],
+    theme: 'light',
+  },
+  {
+    start: [1, 0],
+    end: [0, 1],
+    colors: ['#62BFEA', '#76CEF5', '#82BFD7'],
+    theme: 'light',
+  },
+  {
+    start: [0, 0],
+    end: [1, 1],
+    colors: ['#F3F4F2', '#BDBDBC'],
+    theme: 'dark',
+  },
+  {
+    start: [0, 0],
+    end: [1, 1],
+    colors: ['#222222', '#010102'],
+    theme: 'light',
+  },
+];
+
+const TypeScreen = ({ gradient, gradientTheme }) => {
   return (
     <LinearGradient
       style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-      start={[0, 0]}
-      end={[1, 1]}
-      colors={['#15f5fd', '#b3eb50']}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', opacity: 0.7, textAlign: 'center' }}>
+      {...gradient}>
+      <Text
+        style={{
+          fontFamily: 'insta-strong',
+          color: gradientTheme === 'light' ? 'white' : 'black',
+          fontSize: 28,
+          // fontWeight: 'bold',
+          opacity: 0.5,
+          textAlign: 'center',
+        }}>
         Tap to Type
       </Text>
       <Header>
@@ -279,22 +312,54 @@ const MusicNav = createAppContainer(
   )
 );
 
+import * as Font from 'expo-font';
+
 export default class CameraContainerScreen extends React.Component {
   state = {
+    ready: false,
     index: 0,
+    selectedGradient: 0,
   };
 
+  async componentDidMount() {
+    try {
+      await Font.loadAsync({
+        'insta-strong': require('./insta-strong.otf'),
+        'insta-typewriter': require('./insta-typewriter.ttf'),
+      });
+    } catch (error) {
+
+    } finally {
+      this.setState({ ready: true })
+    }
+
+  }
+
+
   render() {
+    if (!this.state.ready) {
+      return <View />
+    }
     const page = pages[this.state.index];
+    const { theme: gradientTheme, ...gradient } = gradients[this.state.selectedGradient];
     return (
       <View style={{ flex: 1, backgroundColor: 'green', justifyContent: 'flex-end' }}>
         <CameraScreen />
 
         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-          {page.screen && page.screen()}
+          {page.screen && page.screen({ gradient, gradientTheme })}
         </View>
 
-        <MainFooter page={page} index={this.state.index} />
+        <MainFooter
+          page={page}
+          index={this.state.index}
+          gradient={gradient}
+          onPressGradientButton={() => {
+            this.setState({
+              selectedGradient: (this.state.selectedGradient + 1) % gradients.length,
+            });
+          }}
+        />
         <Slider
           data={pages.map(value => value.name)}
           onIndexChange={index => {
@@ -379,9 +444,32 @@ const GoLiveButton = () => (
   </TouchableOpacity>
 );
 
+const gradientButtonSize = 24;
+const GradientButton = ({ gradient, onPress }) => (
+  <TouchableOpacity onPress={onPress}>
+    <View
+      style={{
+        borderWidth: 2,
+        borderRadius: gradientButtonSize + 4,
+        borderColor: 'white',
+        padding: 2,
+        backgroundColor: 'transparent',
+      }}>
+      <LinearGradient
+        {...gradient}
+        style={{
+          width: gradientButtonSize,
+          height: gradientButtonSize,
+          borderRadius: gradientButtonSize / 2,
+        }}
+      />
+    </View>
+  </TouchableOpacity>
+);
+
 class MainFooter extends React.Component {
   render() {
-    const { page, index } = this.props;
+    const { page, gradient, index, onPressGradientButton } = this.props;
 
     const footerStyle = {
       display: page.hideFooter ? 'none' : 'flex',
@@ -393,6 +481,14 @@ class MainFooter extends React.Component {
     };
 
     switch (page.id) {
+      case 'type':
+        return (
+          <View style={footerStyle}>
+            <GradientButton gradient={gradient} onPress={onPressGradientButton} />
+            <CaptureButton selectedIndex={index} icon={page.icon} />
+            <IconButton key="camera" />
+          </View>
+        );
       case 'live':
         const users = [
           {
