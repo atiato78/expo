@@ -1,15 +1,16 @@
 import React from 'react';
 import { View, Text, Image, Animated, TouchableOpacity, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import Constants from 'expo-constants';
+import { Camera } from 'expo-camera';
 import Slider from './Slider';
-
 import ViewPager from './ViewPager';
 
 const pages = [
-  // { name: 'Type', icon: null, screen: () => <TypeScreen /> },
-  // { name: 'Music', icon: require('./inf.png') },
-  // { name: 'Live', icon: null },
-  // { name: 'Normal', icon: null },
+  { name: 'Type', icon: null, screen: () => <TypeScreen /> },
+  { name: 'Music', icon: require('./inf.png') },
+  { name: 'Live', icon: null },
+  { name: 'Normal', icon: null },
   { name: 'Boomerang', icon: require('./inf.png') },
   { name: 'Rewind', icon: require('./rewind.png') },
   { name: 'Hands-Free', icon: require('./ball.png') },
@@ -42,11 +43,26 @@ export default class CameraScreen extends React.Component {
   render() {
     const page = pages[this.state.index];
     return (
-      <View style={{ flex: 1, backgroundColor: 'green' }}>
+      <View style={{ flex: 1, backgroundColor: 'green', justifyContent: 'flex-end' }}>
+        <Camera style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
           {page.screen && page.screen()}
         </View>
-        <View style={{ flex: 1 }} />
+
+        <View
+          style={{
+            position: 'absolute',
+            top: Constants.statusBarHeight || 16,
+            left: 0,
+            right: 0,
+            flexDirection: 'row',
+            paddingHorizontal: 16,
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+          }}>
+          <IconButton />
+          <IconButton />
+        </View>
 
         <View
           style={{
@@ -56,7 +72,11 @@ export default class CameraScreen extends React.Component {
             flexDirection: 'row',
             alignItems: 'center',
           }}>
-          <IconButton />
+          <GalleryButton
+            source={{
+              uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
+            }}
+          />
           <IconButton />
           <CaptureButton selectedIndex={this.state.index} icon={page.icon} />
           <IconButton />
@@ -120,6 +140,24 @@ class CaptureButton extends React.Component {
     );
   }
 }
+
+const GalleryButton = ({ source }) => {
+  const size = 36;
+  return (
+    <TouchableOpacity style={{ width: size, height: size }} onPress={() => {}}>
+      <Image
+        source={source}
+        style={{
+          flex: 1,
+          resizeMode: 'contain',
+          borderRadius: 4,
+          borderWidth: StyleSheet.hairlineWidth,
+          borderColor: 'white',
+        }}
+      />
+    </TouchableOpacity>
+  );
+};
 
 class RotatingIcon extends React.Component {
   state = { index: 0 };
