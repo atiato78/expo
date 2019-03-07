@@ -22,7 +22,7 @@ const { height } = Dimensions.get('window');
 
 const pages = [
   { name: 'Type', icon: null, screen: () => <TypeScreen /> },
-  { name: 'Music', icon: require('./inf.png'), screen: () => <MusicScreen /> },
+  { name: 'Music', hideFooter: true, icon: require('./inf.png'), screen: () => <MusicScreen /> },
   { name: 'Live', icon: null },
   { name: 'Normal', icon: null },
   { name: 'Boomerang', icon: require('./inf.png') },
@@ -157,7 +157,7 @@ const GenreListScreenItem = ({ genre, image }) => (
 const ListScreen = props => (
   <FlatList
     style={{ flex: 1 }}
-    contentContainerStyle={{ paddingBottom: 96 }}
+    contentContainerStyle={{ paddingBottom: 60 }}
     {...props}
     renderItem={({ item }) => {
       if (item.genre) {
@@ -294,25 +294,7 @@ export default class CameraContainerScreen extends React.Component {
           {page.screen && page.screen()}
         </View>
 
-        <View
-          style={{
-            paddingHorizontal: 36,
-            justifyContent: 'space-between',
-            paddingVertical: 24,
-            flexDirection: 'row',
-            alignItems: 'center',
-          }}>
-          <GalleryButton
-            source={{
-              uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
-            }}
-          />
-          <IconButton />
-          <CaptureButton selectedIndex={this.state.index} icon={page.icon} />
-          <IconButton />
-          <IconButton />
-        </View>
-
+        <MainFooter page={page} index={this.state.index} />
         <Slider
           data={pages.map(value => value.name)}
           onIndexChange={index => {
@@ -345,11 +327,34 @@ export default class CameraContainerScreen extends React.Component {
   }
 }
 
-class CaptureButton extends React.Component {
-  constructor(props) {
-    super(props);
+class MainFooter extends React.Component {
+  render() {
+    const { page, index } = this.props;
+    return (
+      <View
+        style={{
+          display: page.hideFooter ? 'none' : 'flex',
+          paddingHorizontal: 36,
+          justifyContent: 'space-between',
+          paddingVertical: 24,
+          flexDirection: 'row',
+          alignItems: 'center',
+        }}>
+        <GalleryButton
+          source={{
+            uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
+          }}
+        />
+        <IconButton />
+        <CaptureButton selectedIndex={index} icon={page.icon} />
+        <IconButton />
+        <IconButton />
+      </View>
+    );
   }
+}
 
+class CaptureButton extends React.Component {
   componentDidUpdate(prevProps) {
     // if (this.props.icon !== prevProps.icon) {
     //   this.state.animation.start();
