@@ -1,17 +1,20 @@
 import React from 'react';
 import {
   View,
+  Platform,
   Text,
   Image,
   Animated,
   Dimensions,
   TouchableOpacity,
   StyleSheet,
+  LayoutAnimation,
   FlatList,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Constants from 'expo-constants';
 import { Camera } from 'expo-camera';
+import * as Permissions from 'expo-permissions';
 import { BlurView } from 'expo-blur';
 import { SafeAreaView, createMaterialTopTabNavigator, createAppContainer } from 'react-navigation';
 import { SearchBar } from 'react-native-elements';
@@ -24,8 +27,8 @@ import ViewPager from './ViewPager';
 const { height } = Dimensions.get('window');
 
 const pages = [
-  // { name: 'Type', icon: null, id: 'type', screen: props => <TypeScreen {...props} /> },
-  // { name: 'Music', hideFooter: true, icon: require('./inf.png'), screen: () => <MusicScreen /> },
+  { name: 'Type', icon: null, id: 'type', screen: props => <TypeScreen {...props} /> },
+  { name: 'Music', hideFooter: true, icon: require('./inf.png'), screen: () => <MusicScreen /> },
   { name: 'Live', icon: null, id: 'live' },
   { name: 'Normal', icon: null },
   { name: 'Boomerang', icon: require('./inf.png') },
@@ -167,8 +170,11 @@ const CameraScreen = () => {
 };
 const MusicScreen = () => {
   return (
-    <BlurView tint={'dark'} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-      <SafeAreaView>
+    <BlurView
+      tint={'dark'}
+      intensity={100}
+      style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+      <SafeAreaView style={{ flex: 1 }}>
         <SearchBar
           round
           containerStyle={{ backgroundColor: 'transparent', borderBottomWidth: 0 }}
@@ -237,6 +243,7 @@ const GenreListScreenItem = ({ genre, image }) => (
 
 const ListScreen = props => (
   <FlatList
+    keyExtractor={(o, i) => i + '--'}
     style={{ flex: 1 }}
     contentContainerStyle={{ paddingBottom: 60 }}
     {...props}
@@ -370,6 +377,7 @@ export default class CameraContainerScreen extends React.Component {
 
   async componentDidMount() {
     try {
+      await Permissions.askAsync(Permissions.CAMERA);
       await Font.loadAsync({
         'insta-strong': require('./insta-strong.otf'),
         'insta-neon': require('./insta-neon.otf'),
@@ -392,6 +400,7 @@ export default class CameraContainerScreen extends React.Component {
     if (!this.state.ready) {
       return <View />;
     }
+    LayoutAnimation.easeInEaseOut();
     const page = pages[this.state.index];
     const typeface = types[this.state.selectedFont];
     const { theme: gradientTheme, ...gradient } = gradients[this.state.selectedGradient];
@@ -436,15 +445,17 @@ export default class CameraContainerScreen extends React.Component {
             alignItems: 'center',
             overflow: 'hidden',
           }}>
-          <View
-            style={{
-              width: 15,
-              height: 15,
-              borderTopLeftRadius: 2,
-              backgroundColor: 'white',
-              transform: [{ rotate: '45deg' }, { translateX: '50%' }, { translateY: '50%' }],
-            }}
-          />
+          {Platform.OS === 'web' && (
+            <View
+              style={{
+                width: 15,
+                height: 15,
+                borderTopLeftRadius: 2,
+                backgroundColor: 'white',
+                transform: [{ rotate: '45deg' }, { translateX: '50%' }, { translateY: '50%' }],
+              }}
+            />
+          )}
         </View>
       </View>
     );
@@ -781,16 +792,15 @@ const iconButtonSize = 30;
 
 const IconButton = ({ onPress, name, size, color }) => (
   <TouchableOpacity style={{ width: iconButtonSize, height: iconButtonSize }} onPress={onPress}>
-    <FontAwesome name={name} size={size} color={color} />
+    <View
+      style={{
+        borderRadius: iconButtonSize / 2,
+        width: iconButtonSize,
+        height: iconButtonSize,
+        backgroundColor: 'transparent',
+        borderWidth: 3,
+        borderColor: 'white',
+      }}
+    />
   </TouchableOpacity>
 );
-// <View
-//       style={{
-//         borderRadius: iconButtonSize / 2,
-//         width: iconButtonSize,
-//         height: iconButtonSize,
-//         backgroundColor: 'transparent',
-//         borderWidth: 3,
-//         borderColor: 'white',
-//       }}
-//     />

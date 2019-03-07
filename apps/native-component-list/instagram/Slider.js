@@ -9,7 +9,8 @@ const pages = ['Type', 'Music', 'Live', 'Normal', 'Boomerang', 'Rewind', 'Hands-
 
 const { width } = Dimensions.get('window');
 const HORIZONTAL_ITEM_WIDTH = 95;
-const HORIZONTAL_ITEM_END_SPACE = (width - HORIZONTAL_ITEM_WIDTH) / 2;
+// const width = HORIZONTAL_ITEM_WIDTH;
+// const HORIZONTAL_ITEM_END_SPACE = (width - HORIZONTAL_ITEM_WIDTH) / 2;
 const sliderHeight = 60;
 export default class Slider extends React.Component {
   state = { index: 0 };
@@ -50,7 +51,6 @@ export default class Slider extends React.Component {
             fontSize: 14,
             color: 'white',
             textAlign: 'center',
-            backgroundColor: 'blue',
           }}
           key={item}>
           {item}
@@ -79,9 +79,10 @@ export default class Slider extends React.Component {
             // console.log('scroll', value);
             const { index } = this.viewPager;
             if (this.state.index !== index) {
-              console.log('eng', this.state.index, index);
-              this.props.onIndexChange(index, this.state.index);
-              this.setState({ index });
+              // console.log('eng', this.state.index, index);
+              this.setState({ index }, () => {
+                this.props.onIndexChange(index, this.state.index);
+              });
             }
           }}
           ref={ref => (this.viewPager = ref)}
