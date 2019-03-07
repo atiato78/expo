@@ -4,10 +4,10 @@ import {
   Text,
   Image,
   Animated,
+  Dimensions,
   TouchableOpacity,
   StyleSheet,
   FlatList,
-  SafeAreaViewComponent,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Constants from 'expo-constants';
@@ -17,6 +17,8 @@ import { SafeAreaView, createMaterialTopTabNavigator, createAppContainer } from 
 import { SearchBar } from 'react-native-elements';
 import Slider from './Slider';
 import ViewPager from './ViewPager';
+
+const { height } = Dimensions.get('window');
 
 const pages = [
   // { name: 'Type', icon: null, screen: () => <TypeScreen /> },
@@ -98,12 +100,119 @@ const MusicScreen = () => {
   );
 };
 
+const listItemImageSize = 56;
+const ListScreenItem = ({ renderImage, title, subtitle, renderAction, onPress }) => (
+  <View
+    style={{
+      flexDirection: 'row',
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    }}>
+    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      {renderImage({
+        style: {
+          shadowOpacity: 0.4,
+          shadowRadius: 4,
+          width: listItemImageSize,
+          height: listItemImageSize,
+          borderRadius: 5,
+          backgroundColor: 'gray',
+        },
+      })}
+      <View style={{ justifyContent: 'space-between', marginLeft: 8 }}>
+        <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>{title}</Text>
+        {subtitle && (
+          <Text style={{ marginTop: 4, color: 'white', opacity: 0.7, fontSize: 14 }}>
+            {subtitle}
+          </Text>
+        )}
+      </View>
+    </View>
+    {renderAction()}
+  </View>
+);
+
+const SongListScreenItem = ({ title, artist, image }) => (
+  <ListScreenItem
+    renderImage={({ style }) => <Image style={style} resizeMode="cover" source={image} />}
+    title={title}
+    subtitle={artist}
+    renderAction={() => <IconButton />}
+  />
+);
+const GenreListScreenItem = ({ genre, image }) => (
+  <ListScreenItem
+    renderImage={({ style }) => (
+      <View
+        style={StyleSheet.flatten([
+          style,
+          { padding: 8, justifyContent: 'center', alignItems: 'center' },
+        ])}>
+        <Image source={image} />
+      </View>
+    )}
+    title={genre}
+    renderAction={() => <IconButton />}
+  />
+);
+
+const ListScreen = props => (
+  <FlatList
+    style={{ flex: 1 }}
+    {...props}
+    renderItem={({ item }) => {
+      if (item.genre) {
+        return <GenreListScreenItem {...item} />;
+      }
+      return <SongListScreenItem {...item} />;
+    }}
+  />
+);
+
+// const GenreScreen = createStackNavigator({
+//   GenreScreen: {
+//     screen: () => <ListScreen data={[]} />,
+//     navigationOptions: { header: null },
+//   },
+//   MusicScreen: () => <ListScreen data={[]} />,
+// });
+const GenreScreen = () => <ListScreen data={[]} />;
+
+const aSong = {
+  title: 'Wow.',
+  artist: 'Post Malone',
+  isExplict: true,
+  image: { uri: 'https://pbs.twimg.com/profile_images/991091895014187008/H0os_Ljz_400x400.jpg' },
+};
+
 const MusicNav = createAppContainer(
   createMaterialTopTabNavigator(
     {
-      Popular: () => <View />,
-      Moods: () => <View />,
-      Genres: () => <View />,
+      Popular: () => (
+        <ListScreen
+          data={[
+            aSong,
+            aSong,
+            aSong,
+            aSong,
+            aSong,
+            aSong,
+            aSong,
+            aSong,
+            aSong,
+            aSong,
+            aSong,
+            aSong,
+            aSong,
+            aSong,
+            aSong,
+          ]}
+        />
+      ),
+      Moods: () => <GenreScreen />,
+      Genres: () => <GenreScreen />,
     },
     {
       tabBarOptions: {
