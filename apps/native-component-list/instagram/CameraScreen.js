@@ -15,6 +15,7 @@ import { Camera } from 'expo-camera';
 import { BlurView } from 'expo-blur';
 import { SafeAreaView, createMaterialTopTabNavigator, createAppContainer } from 'react-navigation';
 import { SearchBar } from 'react-native-elements';
+import * as Font from 'expo-font';
 import Slider from './Slider';
 import ViewPager from './ViewPager';
 
@@ -54,6 +55,17 @@ const Header = ({ style, ...props }) => (
   />
 );
 
+const types = [
+  {
+    name: 'Strong',
+    fontFamily: 'insta-strong',
+  },
+  {
+    name: 'Typewriter',
+    fontFamily: 'insta-typewriter',
+  },
+];
+
 const gradients = [
   {
     start: [1, 0],
@@ -81,14 +93,38 @@ const gradients = [
   },
 ];
 
-const TypeScreen = ({ gradient, gradientTheme }) => {
+const typefaceButtonSize = 36;
+const TypefaceButton = ({ onPress, title }) => {
+  return (
+    <TouchableOpacity style={{ height: typefaceButtonSize }} onPress={onPress}>
+      <View
+        style={{
+          borderWidth: 2,
+          borderRadius: typefaceButtonSize + 4,
+          borderColor: 'white',
+          paddingVertical: 4,
+          paddingHorizontal: 16,
+          minWidth: 80,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'rgba(0,0,0,0.05)',
+        }}>
+        <Text style={{ color: 'white', fontSize: 12, textAlign: 'center' }}>
+          {title.toUpperCase()}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+const TypeScreen = ({ gradient, gradientTheme, onPressTypefaceButton, typeface }) => {
   return (
     <LinearGradient
       style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
       {...gradient}>
       <Text
         style={{
-          fontFamily: 'insta-strong',
+          fontFamily: typeface.fontFamily,
           color: gradientTheme === 'light' ? 'white' : 'black',
           fontSize: 28,
           // fontWeight: 'bold',
@@ -99,7 +135,7 @@ const TypeScreen = ({ gradient, gradientTheme }) => {
       </Text>
       <Header>
         <IconButton />
-        <IconButton />
+        <TypefaceButton title={typeface.name} onPress={onPressTypefaceButton} />
         <View />
       </Header>
     </LinearGradient>
@@ -312,13 +348,12 @@ const MusicNav = createAppContainer(
   )
 );
 
-import * as Font from 'expo-font';
-
 export default class CameraContainerScreen extends React.Component {
   state = {
     ready: false,
     index: 0,
     selectedGradient: 0,
+    selectedFont: 0,
   };
 
   async componentDidMount() {
@@ -328,26 +363,36 @@ export default class CameraContainerScreen extends React.Component {
         'insta-typewriter': require('./insta-typewriter.ttf'),
       });
     } catch (error) {
-
     } finally {
-      this.setState({ ready: true })
+      this.setState({ ready: true });
     }
-
   }
 
+  onPressTypefaceButton = () => {
+    this.setState({
+      selectedFont: (this.state.selectedFont + 1) % types.length,
+    });
+  };
 
   render() {
     if (!this.state.ready) {
-      return <View />
+      return <View />;
     }
     const page = pages[this.state.index];
+    const typeface = types[this.state.selectedFont];
     const { theme: gradientTheme, ...gradient } = gradients[this.state.selectedGradient];
     return (
       <View style={{ flex: 1, backgroundColor: 'green', justifyContent: 'flex-end' }}>
         <CameraScreen />
 
         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-          {page.screen && page.screen({ gradient, gradientTheme })}
+          {page.screen &&
+            page.screen({
+              typeface,
+              onPressTypefaceButton: this.onPressTypefaceButton,
+              gradient,
+              gradientTheme,
+            })}
         </View>
 
         <MainFooter
