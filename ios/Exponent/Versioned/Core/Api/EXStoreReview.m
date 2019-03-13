@@ -13,6 +13,7 @@
 
 RCT_EXPORT_MODULE(ExponentStoreReview);
 
+// TODO: Roll into larger StoreKit module
 + (BOOL)requiresMainQueueSetup
 {
   return YES;
@@ -26,7 +27,7 @@ RCT_EXPORT_MODULE(ExponentStoreReview);
 - (NSDictionary *)constantsToExport
 {
   return @{
-           @"isSupported": [SKStoreReviewController class] ? @(YES) : @(NO)
+           @"isSupported": SKStoreReviewController.class ? @YES : @NO
            };
 }
 
