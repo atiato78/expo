@@ -75,11 +75,14 @@ class MediaPlayerData extends PlayerData implements
       } else {
         Map<String, String> headers = new HashMap<>(1);
         StringBuilder cookieBuilder = new StringBuilder();
-        for (HttpCookie httpCookie : getHttpCookiesList()) {
-          cookieBuilder.append(httpCookie.getName());
-          cookieBuilder.append("=");
-          cookieBuilder.append(httpCookie.getValue());
-          cookieBuilder.append("; ");
+        List<HttpCookie> httpCookies = getHttpCookiesList();
+        if (httpCookies != null) {
+          for (HttpCookie httpCookie : getHttpCookiesList()) {
+            cookieBuilder.append(httpCookie.getName());
+            cookieBuilder.append("=");
+            cookieBuilder.append(httpCookie.getValue());
+            cookieBuilder.append("; ");
+          }
         }
         cookieBuilder.append("\r\n");
         headers.put("Cookie", cookieBuilder.toString());
