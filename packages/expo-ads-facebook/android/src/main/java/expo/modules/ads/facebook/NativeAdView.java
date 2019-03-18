@@ -19,7 +19,7 @@ import java.util.List;
 import expo.core.ModuleRegistry;
 import expo.core.interfaces.services.EventEmitter;
 
-public class NativeAdView extends ViewGroup {
+public class NativeAdView extends NativeAdLayout {
   /**
    * @{NativeAd} received from the ads manager
    **/
