@@ -1,11 +1,16 @@
 'use strict';
 
 import { Asset, FileSystem } from 'expo';
+import { Platform } from '@unimodules/core';
 
 export const name = 'Asset';
 
 export function test(t) {
   t.describe('Asset', () => {
+    /* Web is not currently supported */
+    if (Platform.OS === 'web') {
+      return;
+    }
     [
       {
         module: require('../assets/black-128x256.png'),

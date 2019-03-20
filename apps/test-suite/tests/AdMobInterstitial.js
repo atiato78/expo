@@ -5,6 +5,10 @@ export const name = 'AdMobInterstitial';
 
 export function test(t) {
   t.describe('AdMobInterstitial', () => {
+    /* Web is not currently supported */
+    if (Platform.OS === 'web') {
+      return;
+    }
     t.describe('setTestDeviceID', () => {
       t.it('successfully sets Test Device ID for interstitial ads', () => {
         t.expect(AdMobInterstitial.setTestDeviceID('EMULATOR')).not.toBeNull();
@@ -13,9 +17,9 @@ export function test(t) {
 
     t.describe('setAdUnitID', () => {
       t.it('successfully sets Ad Unit ID for interstitial ads', () => {
-        t
-          .expect(AdMobInterstitial.setAdUnitID('ca-app-pub-3940256099942544/1033173712'))
-          .not.toBeNull();
+        t.expect(
+          AdMobInterstitial.setAdUnitID('ca-app-pub-3940256099942544/1033173712')
+        ).not.toBeNull();
       });
     });
 

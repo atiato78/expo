@@ -19,35 +19,47 @@ const pl = {
 export const name = 'Localization';
 
 export function test(t) {
-  t.describe(`Localization methods`, () => {
-    t.it('expect async to return locale', async () => {
-      function validateString(result) {
-        t.expect(result).toBeDefined();
-        t.expect(typeof result).toBe('string');
-        t.expect(result.length > 0).toBe(true);
-      }
+  t.describe(`Localization.getLocalizationAsync()`, () => {
+    function validateString(result) {
+      t.expect(result).toBeDefined();
+      t.expect(typeof result).toBe('string');
+      t.expect(result.length > 0).toBe(true);
+    }
 
-      function validateStringArray(result) {
-        t.expect(result).toBeDefined();
-        t.expect(Array.isArray(result)).toBe(true);
-      }
+    function validateStringArray(result) {
+      t.expect(result).toBeDefined();
+      t.expect(Array.isArray(result)).toBe(true);
+      // t.expect(result.length > 0).toBe(true);
+    }
 
-      const {
-        locale,
-        locales,
-        timezone,
-        isoCurrencyCodes,
-        country,
-        isRTL,
-      } = await Localization.getLocalizationAsync();
-
+    t.it(`Localization.locale`, async () => {
+      const { locale } = await Localization.getLocalizationAsync();
       validateString(locale);
-      validateString(timezone);
-      validateString(country);
+    });
 
-      validateStringArray(isoCurrencyCodes);
+    t.it(`Localization.locales`, async () => {
+      const { locales } = await Localization.getLocalizationAsync();
       validateStringArray(locales);
       t.expect(locales[0]).toBe(Localization.locale);
+    });
+
+    t.it(`Localization.timezone`, async () => {
+      const { timezone } = await Localization.getLocalizationAsync();
+      validateString(timezone);
+    });
+
+    t.it(`Localization.isoCurrencyCodes`, async () => {
+      const { isoCurrencyCodes } = await Localization.getLocalizationAsync();
+      validateStringArray(isoCurrencyCodes);
+    });
+
+    t.it(`Localization.country`, async () => {
+      const { country } = await Localization.getLocalizationAsync();
+      validateString(country);
+    });
+
+    t.it(`Localization.isRTL`, async () => {
+      const { isRTL } = await Localization.getLocalizationAsync();
       t.expect(typeof isRTL).toBe('boolean');
     });
   });
@@ -92,7 +104,6 @@ export function test(t) {
       // Format: expect something like America/Los_Angeles or America/Chihuahua
       t.expect(result.split('/').length > 1).toBe(true);
     });
-
     t.it('Gets the current layout direction (ltr only)', async () => {
       const result = Localization.isRTL;
       t.expect(result).toBeDefined();

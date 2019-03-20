@@ -12,6 +12,11 @@ const invalidAdUnitID = 'ad';
 
 export function test(t) {
   t.describe('AdMobRewarded', () => {
+    /* Web is not currently supported */
+    if (Platform.OS === 'web') {
+      return;
+    }
+
     t.describe('setTestDeviceID', () => {
       t.it('successfully sets Test Device ID for rewarded ads', () => {
         t.expect(AdMobRewarded.setTestDeviceID('EMULATOR')).not.toBeNull();

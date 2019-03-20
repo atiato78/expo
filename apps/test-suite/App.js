@@ -36,8 +36,22 @@ async function getTestModulesAsync() {
   if (Platform.OS === 'web') {
     let modules = [
       require('./tests/Import1'),
+      require('./tests/Asset'),
+      require('./tests/Calendar'),
+      require('./tests/Constants'),
+      require('./tests/Contacts'),
       require('./tests/Crypto'),
+      require('./tests/GoogleSignIn'),
+      require('./tests/Haptics'),
+      require('./tests/Localization'),
+      require('./tests/Linking'),
       require('./tests/Random'),
+      require('./tests/AdMobInterstitial'),
+      require('./tests/AdMobBanner'),
+      require('./tests/AdMobPublisherBanner'),
+      require('./tests/MediaLibrary'),
+      require('./tests/FBNativeAd'),
+      require('./tests/FBBannerAd'),
     ];
 
     if (browserSupportsWebGL()) {

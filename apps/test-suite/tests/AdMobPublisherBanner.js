@@ -3,9 +3,9 @@
 import React from 'react';
 import { forEach } from 'lodash';
 import { PublisherBanner } from 'expo';
+import { Platform } from 'react-native';
 
 import { mountAndWaitFor as originalMountAndWaitFor } from './helpers';
-
 export const name = 'PublisherBanner';
 
 const validAdUnitID = 'ca-app-pub-3940256099942544/6300978111';
@@ -23,6 +23,10 @@ const sizes = [
 
 export function test(t, { setPortalChild, cleanupPortal }) {
   t.describe('PublisherBanner', () => {
+    /* Web is not currently supported */
+    if (Platform.OS === 'web') {
+      return;
+    }
     t.afterEach(async () => await cleanupPortal());
 
     const mountAndWaitFor = (child, propName = 'onAdViewDidReceiveAd') =>
