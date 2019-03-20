@@ -1,7 +1,7 @@
 'use strict';
 
+import { UnavailabilityError } from '@unimodules/core';
 import { NativeModules } from 'react-native';
-
 let { ExponentTest } = NativeModules;
 
 export async function acceptPermissionsAndRunCommandAsync(fn) {
@@ -28,4 +28,16 @@ export async function shouldSkipTestsRequiringPermissionsAsync() {
     return false;
   }
   return ExponentTest.shouldSkipTestsRequiringPermissionsAsync();
+}
+
+export async function throwsErrorAsync(method) {
+  try {
+    await method();
+  } catch (error) {
+    return error;
+  }
+}
+export async function executeUnavailabileMethod(expect, method) {
+  const error = await throwsErrorAsync(method);
+  expect(error instanceof UnavailabilityError).toBeTruthy();
 }

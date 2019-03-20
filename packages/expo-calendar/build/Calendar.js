@@ -270,8 +270,7 @@ export async function getSourceAsync(id) {
 } // iOS
 export function openEventInCalendar(id) {
     if (!ExpoCalendar.openEventInCalendar) {
-        console.warn(`openEventInCalendar is not available on platform: ${Platform.OS}`);
-        return;
+        throw new UnavailabilityError('Calendar', 'getSourceAsync');
     }
     if (!id) {
         throw new Error('openEventInCalendar must be called with an id (string) of the target event');
