@@ -16,7 +16,12 @@ import Constants from 'expo-constants';
 import { Camera } from 'expo-camera';
 import * as Permissions from 'expo-permissions';
 import { BlurView } from 'expo-blur';
-import { SafeAreaView, createMaterialTopTabNavigator, createAppContainer } from 'react-navigation';
+import {
+  SafeAreaView,
+  createStackNavigator,
+  createMaterialTopTabNavigator,
+  createAppContainer,
+} from 'react-navigation';
 import { SearchBar } from 'react-native-elements';
 import * as Font from 'expo-font';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
@@ -24,18 +29,31 @@ import EvilIcons from '@expo/vector-icons/EvilIcons';
 import Slider from './Slider';
 import ViewPager from './ViewPager';
 
+import Popular from './data/Popular-itunes.json';
+// import Popular from './data/Popular.json';
+import Moods from './data/Moods.json';
+import Genres from './data/Genres.json';
+import InstaIcon from './InstaIcon';
+import Assets from './Assets';
+
 const { height } = Dimensions.get('window');
 
 const pages = [
-  { name: 'Type', icon: null, id: 'type', screen: props => <TypeScreen {...props} /> },
-  { name: 'Music', hideFooter: true, icon: require('./inf.png'), screen: () => <MusicScreen /> },
+  {
+    name: 'Type',
+    icon: null,
+    id: 'type',
+    screen: props => <TypeScreen {...props} />,
+    headerLeftIconName: null,
+  },
+  { name: 'Music', hideFooter: true, icon: Assets['inf.png'], screen: () => <MusicScreen /> },
   { name: 'Live', icon: null, id: 'live' },
   { name: 'Normal', icon: null },
-  { name: 'Boomerang', icon: require('./inf.png') },
-  { name: 'Superzoom', icon: require('./rewind.png') },
-  { name: 'Focus', icon: require('./inf.png') },
-  { name: 'Rewind', icon: require('./rewind.png') },
-  { name: 'Hands-Free', icon: require('./ball.png') },
+  { name: 'Boomerang', icon: Assets['inf.png'] },
+  { name: 'Superzoom', icon: Assets['rewind.png'] },
+  { name: 'Focus', icon: Assets['inf.png'] },
+  { name: 'Rewind', icon: Assets['rewind.png'] },
+  { name: 'Hands-Free', icon: Assets['ball.png'] },
 ].map(value => {
   return {
     ...value,
@@ -149,7 +167,7 @@ const TypeScreen = ({ gradient, gradientTheme, onPressTypefaceButton, typeface }
         Tap to Type
       </Text>
       <Header>
-        <IconButton />
+        <IconButton name={'text-effect'} />
         <TypefaceButton title={typeface.name} onPress={onPressTypefaceButton} />
         <View />
       </Header>
@@ -157,17 +175,26 @@ const TypeScreen = ({ gradient, gradientTheme, onPressTypefaceButton, typeface }
   );
 };
 
-const CameraScreen = () => {
-  return (
-    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-      <Camera style={{ flex: 1 }} />
-      <Header>
-        <IconButton name={'cog'} size={16} color={'white'} />
-        <IconButton name={'chevron-right'} size={16} color={'white'} />
-      </Header>
-    </View>
-  );
-};
+class CameraScreen extends React.Component {
+  static defaultProps = {
+    headerLeftIconName: 'settings',
+    headerLeft: props => <IconButton {...props} />,
+  };
+
+  render() {
+    const { headerLeft, headerLeftIconName = 'settings' } = this.props;
+
+    return (
+      <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+        <Camera style={{ flex: 1 }} />
+        <Header>
+          {headerLeft({ name: headerLeftIconName })}
+          <IconButton name={'chevron-right'} />
+        </Header>
+      </View>
+    );
+  }
+}
 const MusicScreen = () => {
   return (
     <BlurView
@@ -178,7 +205,7 @@ const MusicScreen = () => {
         <SearchBar
           round
           containerStyle={{ backgroundColor: 'transparent', borderBottomWidth: 0 }}
-          inputStyle={{ color: 'white' }}
+          inputStyle={{ color: 'white', outlineWidth: 0, outlineStyle: 'none' }}
           placeholder="Search music"
         />
         <MusicNav />
@@ -189,7 +216,8 @@ const MusicScreen = () => {
 
 const listItemImageSize = 56;
 const ListScreenItem = ({ renderImage, title, subtitle, renderAction, onPress }) => (
-  <View
+  <TouchableOpacity
+    onPress={onPress}
     style={{
       flexDirection: 'row',
       paddingHorizontal: 16,
@@ -218,30 +246,34 @@ const ListScreenItem = ({ renderImage, title, subtitle, renderAction, onPress })
       </View>
     </View>
     {renderAction()}
-  </View>
+  </TouchableOpacity>
 );
 
-const SongListScreenItem = ({ title, artist, image }) => (
+const SongListScreenItem = ({ title, artist, image, onPress }) => (
   <ListScreenItem
+    onPress={onPress}
     renderImage={({ style }) => <Image style={style} resizeMode="cover" source={image} />}
     title={title}
     subtitle={artist}
-    renderAction={() => <IconButton />}
+    renderAction={() => <PlayButtonIcon />}
   />
 );
-const GenreListScreenItem = ({ genre, image }) => (
+const USE_REMOTE_IMAGES = false;
+
+const GenreListScreenItem = ({ genre, image, onPress }) => (
   <ListScreenItem
+    onPress={onPress}
     renderImage={({ style }) => (
       <View style={StyleSheet.flatten([style, { padding: 12 }])}>
         <Image style={{ flex: 1, tintColor: 'white' }} resizeMode={'contain'} source={image} />
       </View>
     )}
     title={genre}
-    renderAction={() => <IconButton />}
+    renderAction={() => <ChevronRight />}
   />
 );
 
-const ListScreen = props => (
+const ListScreen = ({ onPress, ...props }) => (
   <FlatList
     keyExtractor={(o, i) => i + '--'}
     style={{ flex: 1 }}
@@ -249,81 +281,61 @@ const ListScreen = props => (
     {...props}
     renderItem={({ item }) => {
       if (item.genre) {
-        return <GenreListScreenItem {...item} />;
+        return (
+          <GenreListScreenItem
+            onPress={() => {
+              props.navigation.push('MusicScreen', { item });
+            }}
+            {...item}
+          />
+        );
       }
-      return <SongListScreenItem {...item} />;
+      return <SongListScreenItem onPress={onPress} {...item} />;
     }}
   />
 );
 
-// const GenreScreen = createStackNavigator({
-//   GenreScreen: {
-//     screen: () => <ListScreen data={[]} />,
-//     navigationOptions: { header: null },
-//   },
-//   MusicScreen: () => <ListScreen data={[]} />,
-// });
+const createGenreScreen = data => props => <ListScreen {...props} data={data} />;
 
-const reformatGenres = d =>
-  d.map(genre => ({
-    genre,
-    image: {
-      uri: 'https://png.pngtree.com/svg/20170526/mic_icon_525549.png',
-    },
-  }));
+const transformCategorySet = categories => {
+  return Object.keys(categories).map(itemKey => {
+    return {
+      genre: itemKey,
+      image: {
+        uri: 'https://png.pngtree.com/svg/20170526/mic_icon_525549.png',
+      },
+      items: transformSongList(categories[itemKey].results),
+    };
+  });
+};
 
-const moods = reformatGenres([
-  'Fun',
-  'Upbeat',
-  'Dreamy',
-  'Romantic',
-  'Bold',
-  'Mellow',
-  'Inspirational',
-  'Suspenseful',
-]);
+const moods = transformCategorySet(Moods);
+const genres = transformCategorySet(Genres);
 
-const genres = reformatGenres([
-  'Christmas',
-  'Hip Hop',
-  'R&B and Soul',
-  'Rock',
-  'Pop',
-  'Country',
-  'Latin',
-  'Electronic',
-  'Jazz',
-  'Classical',
-  'Reggae',
-  'Ambient',
-  'Folk',
-  'Indian',
-  'Cinematic',
-]);
+function transformSongList(list) {
+  return list
+    .filter(({ trackName }) => trackName)
+    .map(song => {
+      return {
+        title: song.trackName,
+        artist: song.artistName,
+        isExplict: song.trackExplicitness === 'explicit',
+        duration: song.trackTimeMillis,
+        audio: song.previewUrl,
+        image: {
+          uri: USE_REMOTE_IMAGES
+            ? song.artworkUrl60
+            : 'https://image-cdn.hypb.st/https%3A%2F%2Fhypebeast.com%2Fimage%2F2018%2F09%2Flil-yachty-mtv-how-high-2-movie-0.jpg?q=75&w=800&cbr=1&fit=max',
+        },
+      };
+    });
+}
+const Songs = transformSongList(Popular);
 
-const GenreScreen = () => <ListScreen data={genres} />;
-const MoodScreen = () => <ListScreen data={moods} />;
-const PopularScreen = () => (
-  <ListScreen
-    data={[
-      aSong,
-      aSong,
-      aSong,
-      aSong,
-      aSong,
-      aSong,
-      aSong,
-      aSong,
-      aSong,
-      aSong,
-      aSong,
-      aSong,
-      aSong,
-      aSong,
-      aSong,
-    ]}
-  />
-);
+const GenreScreen = createGenreScreen(genres);
+const MoodScreen = createGenreScreen(moods);
+
+const PopularScreen = props => <ListScreen {...props} data={Songs.splice(0, 50)} />;
 const aSong = {
   title: 'Wow.',
   artist: 'Post Malone',
@@ -331,37 +343,88 @@ const aSong = {
   image: { uri: 'https://pbs.twimg.com/profile_images/991091895014187008/H0os_Ljz_400x400.jpg' },
 };
 
+const MusicTabNavigator = createMaterialTopTabNavigator(
+  {
+    Popular: PopularScreen,
+    Moods: MoodScreen,
+    Genres: GenreScreen,
+  },
+  {
+    style: {
+      maxHeight: height - (48 + 8), // Tab Bar Height + padding
+    },
+    tabBarOptions: {
+      swipeEnabled: true,
+      activeTintColor: 'white',
+      inactiveBackgroundColor: 'transparent',
+      safeAreaInset: 'never',
+      upperCaseLabel: false,
+      scrollEnabled: false,
+      indicatorStyle: {
+        backgroundColor: 'white',
+        height: 3,
+      },
+      style: {
+        backgroundColor: 'transparent',
+        borderWidth: 0,
+        shadowOpacity: 0,
+        overflow: 'hidden',
+      },
+      labelStyle: {
+        fontWeight: 'bold',
+      },
+    },
+  }
+);
+
+MusicTabNavigator.navigationOptions = { header: null };
+class SecondaryMusicScreen extends React.Component {
+  static navigationOptions = ({ navigation }) => {
+    const item = navigation.getParam('item') || {};
+    return {
+      title: item.genre || item.name || 'MUSIC',
+    };
+  };
+  render() {
+    const { props } = this;
+    const item = props.navigation.getParam('item') || {};
+
+    return <ListScreen {...props} data={item.items.splice(0, 5)} />;
+  }
+}
+
+const PlayButtonIcon = props => (
+  <EvilIcons name="play" color={'rgba(255,255,255,0.7)'} size={36} {...props} />
+);
+const ChevronRight = props => (
+  <EvilIcons name="chevron-right" color={'rgba(255,255,255,0.7)'} size={36} {...props} />
+);
+
+const musicBackgroundColor = 'rgba(0,0,0,0.0)';
 const MusicNav = createAppContainer(
-  createMaterialTopTabNavigator(
+  createStackNavigator(
     {
-      Popular: PopularScreen,
-      Moods: MoodScreen,
-      Genres: GenreScreen,
+      GenreScreen: MusicTabNavigator,
+      MusicScreen: SecondaryMusicScreen,
     },
     {
-      style: {
-        maxHeight: height - (48 + 8), // Tab Bar Height + padding
+      transparentCard: true,
+      mode: 'card',
+      headerMode: 'float',
+      headerLayoutPreset: 'center',
+
+      cardStyle: {
+        backgroundColor: musicBackgroundColor,
       },
-      tabBarOptions: {
-        swipeEnabled: true,
-        activeTintColor: 'white',
-        inactiveBackgroundColor: 'transparent',
-        safeAreaInset: 'never',
-        upperCaseLabel: false,
-        scrollEnabled: false,
-        indicatorStyle: {
-          backgroundColor: 'white',
-          height: 3,
+      headerTransitionPreset: 'uikit',
+      defaultNavigationOptions: {
+        headerStyle: {
+          backgroundColor: musicBackgroundColor,
+          borderBottomColor: 'white',
+          borderBottomWidth: 1,
         },
-        style: {
-          backgroundColor: 'transparent',
-          borderWidth: 0,
-          shadowOpacity: 0,
-          overflow: 'hidden',
-        },
-        labelStyle: {
-          fontWeight: 'bold',
-        },
+        headerTintColor: 'white',
+        headerBackImage: () => <EvilIcons name="chevron-left" color={'white'} size={56} />,
       },
     }
   )
@@ -379,10 +442,10 @@ export default class CameraContainerScreen extends React.Component {
     try {
       await Permissions.askAsync(Permissions.CAMERA);
       await Font.loadAsync({
-        'insta-strong': require('./insta-strong.otf'),
-        'insta-neon': require('./insta-neon.otf'),
-        'insta-typewriter': require('./insta-typewriter.ttf'),
-        'insta-modern': require('./insta-modern.ttf'),
+        'insta-strong': Assets.fonts['insta-strong.otf'],
+        'insta-neon': Assets.fonts['insta-neon.otf'],
+        'insta-typewriter': Assets.fonts['insta-typewriter.ttf'],
+        'insta-modern': Assets.fonts['insta-modern.ttf'],
       });
     } catch (error) {
     } finally {
@@ -406,7 +469,7 @@ export default class CameraContainerScreen extends React.Component {
     const { theme: gradientTheme, ...gradient } = gradients[this.state.selectedGradient];
     return (
       <View style={{ flex: 1, backgroundColor: 'green', justifyContent: 'flex-end' }}>
-        <CameraScreen />
+        <CameraScreen headerLeftIconName={page.headerLeftIconName} />
 
         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
           {page.screen &&
@@ -537,6 +600,33 @@ const GradientButton = ({ gradient, onPress }) => (
   </TouchableOpacity>
 );
 
+const users = [
+  {
+    name: 'Brent Vatne',
+    image: {
+      uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
+    },
+  },
+  {
+    name: 'Charlie Cheever',
+    image: {
+      uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
+    },
+  },
+  {
+    name: 'james',
+    image: {
+      uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
+    },
+  },
+  {
+    name: 'evan',
+    image: {
+      uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
+    },
+  },
+];
+
 class MainFooter extends React.Component {
   render() {
     const { page, gradient, index, onPressGradientButton } = this.props;
@@ -556,42 +646,10 @@ class MainFooter extends React.Component {
           <View style={footerStyle}>
             <GradientButton gradient={gradient} onPress={onPressGradientButton} />
             <CaptureButton selectedIndex={index} icon={page.icon} />
-            <IconButton key="camera" name="camera" />
+            <IconButton key="camera" name="camera-off" />
           </View>
         );
       case 'live':
-        const users = [
-          {
-            name: 'Brent Vatne',
-            image: {
-              uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
-            },
-          },
-          {
-            name: 'Charlie Cheever',
-            image: {
-              uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
-            },
-          },
-          {
-            name: 'theavocoder',
-            image: {
-              uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
-            },
-          },
-          {
-            name: 'james',
-            image: {
-              uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
-            },
-          },
-          {
-            name: 'evan',
-            image: {
-              uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
-            },
-          },
-        ];
         return (
           <View
             style={{
@@ -610,10 +668,10 @@ class MainFooter extends React.Component {
                 flexDirection: 'row',
                 alignItems: 'center',
               }}>
-              <IconButton key="cards" />
+              <IconButton name="questions" />
               <GoLiveButton />
-              <IconButton key="flip" />
-              <IconButton key="filters" />
+              <IconButton name="flip" />
+              <IconButton name="face-off" />
             </View>
           </View>
         );
@@ -628,8 +686,8 @@ class MainFooter extends React.Component {
             />
             <IconButton />
             <CaptureButton selectedIndex={index} icon={page.icon} />
-            <IconButton key="flip" />
-            <IconButton key="filters" />
+            <IconButton name="flip" />
+            <IconButton name="face-off" />
           </View>
         );
     }
@@ -786,21 +844,10 @@ class RotatingIcon extends React.Component {
   }
 }
 
-const Icon = ({ name }) => <Text style={{ fontSize: 24 }}>{name}</Text>;
-
 const iconButtonSize = 30;
 
 const IconButton = ({ onPress, name, size, color }) => (
   <TouchableOpacity style={{ width: iconButtonSize, height: iconButtonSize }} onPress={onPress}>
-    <View
-      style={{
-        borderRadius: iconButtonSize / 2,
-        width: iconButtonSize,
-        height: iconButtonSize,
-        backgroundColor: 'transparent',
-        borderWidth: 3,
-        borderColor: 'white',
-      }}
-    />
+    <InstaIcon name={name} />
   </TouchableOpacity>
 );

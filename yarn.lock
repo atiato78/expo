@@ -4211,6 +4211,11 @@ deepmerge@^2.0.1, deepmerge@^2.1.1:
   resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-2.2.1.tgz#5d3ff22a01c00f645405a2fbc17d0778a1801170"
   integrity sha512-R9hc1Xa/NOBi9WRVUWg19rl1UB7Tt4kuPd+thNJgFZoxXsTz7ncaPaeIm+40oSGuP33DfMb4sZt1QIGiJzC4EA==
 
+deepmerge@^3.1.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-3.2.0.tgz#58ef463a57c08d376547f8869fdc5bcee957f44e"
+  integrity sha512-6+LuZGU7QCNUnAJyX8cIrlzoEgggTM6B7mm+znKOX4t5ltluT9KLjN6g61ECMS0LTsLW7yDpNoxhix5FZcrIow==
+
 default-gateway@^4.0.1:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/default-gateway/-/default-gateway-4.2.0.tgz#167104c7500c2115f6dd69b0a536bb8ed720552b"
@@ -10760,19 +10765,23 @@ react-native-deprecated-custom-components@^0.1.0:
     react-timer-mixin "^0.13.2"
     rebound "^0.0.13"
 
-react-native-gesture-handler@^1.1.0:
+react-native-elements@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-elements/-/react-native-elements-1.1.0.tgz#f99bcda4459a886f3ab4591c684c099d37aedf2b"
+  integrity sha512-n1eOL0kUdlH01zX7bn1p7qhYXn7kquqxYQ0oWlxoAck9t5Db/KeK5ViOsAk8seYSvAG6Pe7OxgzRFnMfFhng0Q==
+  dependencies:
+    color "^3.1.0"
+    deepmerge "^3.1.0"
+    hoist-non-react-statics "^3.1.0"
+    opencollective-postinstall "^2.0.0"
+    prop-types "^15.5.8"
+    react-native-ratings "^6.3.0"
+    react-native-status-bar-height "^2.2.0"
+
+react-native-gesture-handler@1.1.0, react-native-gesture-handler@^1.1.0, react-native-gesture-handler@~1.0.14:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/react-native-gesture-handler/-/react-native-gesture-handler-1.1.0.tgz#2a7d545ad2e0ca23adce22b2af441ad360ecccee"
   integrity sha512-E9IKHpmL+sz/iCYkUriTUjBaQBORWV+oheYPQleADkxjo2sYsQfnlyTz4EQYFONkUwJ6WmfTNkYt2/yc5U4Ziw==
-  dependencies:
-    hoist-non-react-statics "^2.3.1"
-    invariant "^2.2.2"
-    prop-types "^15.5.10"
-
-react-native-gesture-handler@~1.0.14:
-  version "1.0.17"
-  resolved "https://registry.yarnpkg.com/react-native-gesture-handler/-/react-native-gesture-handler-1.0.17.tgz#a046f371f277092157fc2781323d35a02a93daaf"
-  integrity sha512-0czy7SZvF4q2aCQUGFaBu/yBjYYEbcqSU1/r2bZ/IoXj+DgYuIPBL60SSXhJdYJU8G3brfUHmtgSdcNte8Lh0w==
   dependencies:
     hoist-non-react-statics "^2.3.1"
     invariant "^2.2.2"

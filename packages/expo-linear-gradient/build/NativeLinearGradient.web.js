@@ -20,47 +20,6 @@ export default class NativeLinearGradient extends React.PureComponent {
                 this.props.onLayout(event);
             }
         };
-<<<<<<< HEAD
-    }
-    getAngle() {
-        const startPoint = this.props.startPoint ? this.props.startPoint : [0.5, 0.0];
-        const endPoint = this.props.endPoint ? this.props.endPoint : [0.5, 1.0];
-        const { width = 0, height = 0 } = this.state;
-        let angle = 0;
-        const gradientWidth = height * (endPoint[0] - startPoint[0]);
-        const gradientHeight = width * (endPoint[1] - startPoint[1]);
-        angle = Math.atan2(gradientHeight, gradientWidth) + Math.PI / 2;
-        return `${angle}rad`;
-    }
-    getColors() {
-        const { colors } = this.props;
-        return colors
-            .map((color, index) => {
-            const location = this.props.locations && this.props.locations[index];
-            if (location) {
-                return `${color} ${location * 100}%`;
-||||||| merged common ancestors
-    }
-    getAngle() {
-        const startPoint = this.props.startPoint ? this.props.startPoint : [0.5, 0.0];
-        const endPoint = this.props.endPoint ? this.props.endPoint : [0.5, 1.0];
-        const { width = 0, height = 0 } = this.state;
-        let angle = 0;
-        const gradientWidth = height * (endPoint[0] - startPoint[0]);
-        const gradientHeight = width * (endPoint[1] - startPoint[1]);
-        angle = Math.atan2(gradientHeight, gradientWidth) + Math.PI / 2;
-        return `${angle}rad`;
-    }
-    getColors() {
-        const { colors } = this.props;
-        return colors
-            .map((color, index) => {
-            const colorStr = `${color.toString(16)}`;
-            const hex = `#${colorStr.substring(2, colorStr.length)}`;
-            const location = this.props.locations && this.props.locations[index];
-            if (location) {
-                return `${hex} ${location * 100}%`;
-=======
         this.getControlPoints = () => {
             const { startPoint, endPoint } = this.props;
             let correctedStartPoint = [0.5, 0.0];
@@ -69,33 +28,7 @@ export default class NativeLinearGradient extends React.PureComponent {
                     startPoint[0] != null ? startPoint[0] : 0.5,
                     startPoint[1] != null ? startPoint[1] : 0.0,
                 ];
->>>>>>> master
             }
-<<<<<<< HEAD
-            return color;
-        })
-            .join(',');
-    }
-    getBackgroundImage() {
-        if (this.state.width && this.state.height) {
-            return `linear-gradient(${this.getAngle()},${this.getColors()})`;
-        }
-        else {
-            return 'transparent';
-        }
-||||||| merged common ancestors
-            return hex;
-        })
-            .join(',');
-    }
-    getBackgroundImage() {
-        if (this.state.width && this.state.height) {
-            return `linear-gradient(${this.getAngle()},${this.getColors()})`;
-        }
-        else {
-            return 'transparent';
-        }
-=======
             let correctedEndPoint = [0.5, 1.0];
             if (Array.isArray(endPoint)) {
                 correctedEndPoint = [
@@ -136,7 +69,6 @@ export default class NativeLinearGradient extends React.PureComponent {
             }
             return null;
         };
->>>>>>> master
     }
     render() {
         const { colors, locations, startPoint, endPoint, onLayout, style, ...props } = this.props;
@@ -144,7 +76,7 @@ export default class NativeLinearGradient extends React.PureComponent {
         // TODO: Bacon: In the future we could consider adding `backgroundRepeat: "no-repeat"`. For more browser support.
         return (<View style={[
             style,
-            backgroundImage != null && {
+            backgroundImage !== null && {
                 // @ts-ignore: [ts] Property 'backgroundImage' does not exist on type 'ViewStyle'.
                 backgroundImage,
             },
