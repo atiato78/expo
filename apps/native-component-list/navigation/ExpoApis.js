@@ -21,6 +21,7 @@ import KeepAwake from '../screens/KeepAwakeScreen';
 import Linking from '../screens/LinkingScreen';
 import LocalAuthentication from '../screens/LocalAuthenticationScreen';
 import MailComposer from '../screens/MailComposerScreen';
+import NetInfo from '../screens/NetInfoScreen';
 import Notification from '../screens/NotificationScreen';
 import Pedometer from '../screens/PedometerScreen';
 import Permissions from '../screens/PermissionsScreen';
@@ -28,6 +29,7 @@ import Print from '../screens/PrintScreen';
 import Recording from '../screens/AV/RecordingScreen';
 import Reminders from '../screens/RemindersScreen';
 import ScreenOrientation from '../screens/ScreenOrientationScreen';
+import Sharing from '../screens/SharingScreen';
 import SecureStore from '../screens/SecureStoreScreen';
 import SMS from '../screens/SMSScreen';
 import StoreReview from '../screens/StoreReview';
@@ -82,6 +84,7 @@ const optionalScreens = {
   Linking,
   MailComposer,
   ...MediaLibraryScreens,
+  NetInfo,
   Notification,
   LocalAuthentication,
   ...LocationScreens,
@@ -93,6 +96,7 @@ const optionalScreens = {
   ScreenOrientation,
   SecureStore,
   Sensor,
+  Sharing,
   SMS,
   StoreReview,
   TaskManager,
