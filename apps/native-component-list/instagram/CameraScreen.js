@@ -56,8 +56,8 @@ const pages = [
   //   icon: Assets['inf.png'],
   //   screen: () => <MusicScreen />,
   // },
-  { name: 'Live', id: 'live', isFilterable: true, icon: null },
-  // { name: 'Normal', id: 'normal', isFilterable: true, icon: null },
+  // { name: 'Live', id: 'live', isFilterable: true, icon: null },
+  { name: 'Normal', id: 'normal', isFilterable: true, icon: null },
   { name: 'Boomerang', id: 'boomerang', isFilterable: true, icon: Assets['inf.png'] },
   { name: 'Superzoom', id: 'superzoom', isFilterable: false, icon: Assets['rewind.png'] },
   // { name: 'Focus', id: 'focus', isFilterable: false, icon: Assets['inf.png'] },
@@ -849,7 +849,7 @@ class FlashButtonContainer extends React.Component {
               // opacity: fadeFace,
               // transform: [{ rotate: rotateFace }],
             }}>
-            {!isLive && <IconButton name="flash-off" />}
+            {!isLive && <FlashButton />}
             {isLive && <IconButton name="questions" />}
           </Animated.View>
         </View>
@@ -857,6 +857,54 @@ class FlashButtonContainer extends React.Component {
     );
   }
 }
+
+const FlashNextState = {
+  off: 'on',
+  on: 'auto',
+  auto: 'off',
+};
+
+class FlipCameraButton extends React.Component {
+  state = {
+    flashState: 'off',
+  };
+  animation = new Animated.Value(0);
+  currentValue = 0;
+  onPress = () => {
+    console.log('AAA');
+    this.currentValue -= 180;
+    Animated.timing(this.animation, {
+      toValue: this.currentValue,
+      duration: 200,
+    }).start();
+  };
+  render() {
+    const rotate = this.animation.interpolate({
+      inputRange: [0, 180],
+      outputRange: ['0deg', '180deg'],
+    });
+    return (
+      <Animated.View style={{ transform: [{ rotate }] }}>
+        <IconButton {...this.props} onPress={this.onPress} name={`flip`} />
+      </Animated.View>
+    );
+  }
+}
+
+class FlashButton extends React.Component {
+  state = {
+    flashState: 'off',
+  };
+  onPress = () => {
+    this.setState({ flashState: FlashNextState[this.state.flashState] });
+  };
+  render() {
+    return (
+      <IconButton {...this.props} onPress={this.onPress} name={`flash-${this.state.flashState}`} />
+    );
+  }
+}
+
 class FlipButtonContainer extends React.Component {
   constructor(props) {
     super(props);
@@ -913,7 +961,7 @@ class FlipButtonContainer extends React.Component {
             justifyContent: 'space-around',
           }}>
           <Animated.View style={{ position: 'absolute', left: moveFlip }}>
-            <IconButton name="flip" />
+            <FlipCameraButton />
           </Animated.View>
           <Animated.View
             style={{
