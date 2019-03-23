@@ -37,33 +37,34 @@ import Moods from './data/Moods.json';
 import Genres from './data/Genres.json';
 import InstaIcon from './InstaIcon';
 import Assets from './Assets';
+import dispatch from './rematch/dispatch';
 
 const { height } = Dimensions.get('window');
 
 const pages = [
-  // {
-  //   name: 'Type',
-  //   icon: null,
-  //   id: 'type',
-  //   isFlipable: true,
-  //   screen: props => <TypeScreen {...props} />,
-  //   headerLeftIconName: null,
-  // },
-  // {
-  //   name: 'Music',
-  //   id: 'music',
-  //   isFilterable: true,
-  //   hideFooter: true,
-  //   icon: Assets['inf.png'],
-  //   screen: () => <MusicScreen />,
-  // },
-  // { name: 'Live', id: 'live', isFilterable: true, icon: null },
+  {
+    name: 'Type',
+    icon: null,
+    id: 'type',
+    isFlipable: true,
+    screen: props => <TypeScreen {...props} />,
+    headerLeftIconName: null,
+  },
+  {
+    name: 'Music',
+    id: 'music',
+    isFilterable: true,
+    hideFooter: true,
+    icon: Assets['inf.png'],
+    screen: () => <MusicScreen />,
+  },
+  { name: 'Live', id: 'live', isFilterable: true, icon: null },
   { name: 'Normal', id: 'normal', isFilterable: true, icon: null },
   { name: 'Boomerang', id: 'boomerang', isFilterable: true, icon: Assets['inf.png'] },
   { name: 'Superzoom', id: 'superzoom', isFilterable: false, icon: Assets['rewind.png'] },
-  // { name: 'Focus', id: 'focus', isFilterable: false, icon: Assets['inf.png'] },
+  { name: 'Focus', id: 'focus', isFilterable: false, icon: Assets['inf.png'] },
   { name: 'Rewind', id: 'rewind', isFilterable: true, icon: Assets['rewind.png'] },
-  // { name: 'Hands-Free', id: 'handsfree', isFilterable: true, icon: Assets['ball.png'] },
+  { name: 'Hands-Free', id: 'handsfree', isFilterable: true, icon: Assets['ball.png'] },
 ].map(value => {
   return {
     ...value,
@@ -439,15 +440,42 @@ const MusicNav = createAppContainer(
     }
   )
 );
+import { connect } from 'react-redux';
+
 
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
-export default class MediaContainerScreen extends React.Component {
+export default class Main extends React.Component {
+  render() {
+    return <ConnectedEditorComboScreen />;
+  }
+}
+
+class EditorComboScreen extends React.Component {
+  render() {
+    // if (this.props.image) {
+    //   return <EditorScreen image={this.props.image}/>
+    // }
+    return <MediaContainerScreen />;
+  }
+}
+
+const ConnectedEditorComboScreen = connect(({ image }) => ({ image }))(EditorComboScreen);
+
+class EditorScreen extends React.Component {
+
+  render() {
+    return (<View style={{flex: 1}}><Image style={{flex: 1, resizeMode: 'cover'}} source={this.props.image}/></View>)
+  }
+}
+
+
+
+class MediaContainerScreen extends React.Component {
   animation = new Animated.Value(0);
 
   constructor(props) {
     super(props);
-
     this.onScroll = Animated.event(
       [
         {
@@ -465,6 +493,7 @@ export default class MediaContainerScreen extends React.Component {
     const drawerHeight = height * 0.9;
     return (
       <AnimatedScrollView
+        scrollEventThrottle={16}
         onScroll={this.onScroll}
         pagingEnabled
         style={{ flex: 1 }}
@@ -526,6 +555,7 @@ class BlurredOptionsContainer extends React.Component {
 class MediaScreen extends React.Component {
   render() {
     const { height } = Dimensions.get('window');
+
     return (
       <View style={this.props.style}>
         <FlatList
@@ -533,7 +563,11 @@ class MediaScreen extends React.Component {
           renderItem={({ item }) => <MediaItem {...item} />}
           contentContainerStyle={{ padding: 1 }}
           style={{ flex: 1 }}
-          data={new Array(30).fill({})}
+          data={new Array(30).fill({
+            image: {
+              uri: 'https://i.pinimg.com/originals/7d/f3/91/7df3915b9345e5a95540779bd6359886.jpg',
+            },
+          })}
           numColumns={3}
         />
       </View>
@@ -542,6 +576,10 @@ class MediaScreen extends React.Component {
 }
 
 class MediaItem extends React.Component {
+  onPress = () => {
+    console.log("set image", this.props.image)
+    dispatch().image.set(this.props.image);
+  };
   render() {
     const { height, width: screenWidth } = Dimensions.get('window');
     const width = screenWidth - 8;
@@ -549,7 +587,11 @@ class MediaItem extends React.Component {
     const itemWidth = width / 3;
     const itemHeight = itemWidth * aspectRatio;
     return (
-      <View style={{ margin: 1, width: itemWidth, height: itemHeight, backgroundColor: 'red' }} />
+      <TouchableOpacity
+        style={{ margin: 1, width: itemWidth, height: itemHeight, backgroundColor: 'red' }}
+        onPress={this.onPress}>
+        <Image style={{ flex: 1, resizeMode: 'cover' }} source={this.props.image} />
+      </TouchableOpacity>
     );
   }
 }

@@ -16,7 +16,8 @@
       "color": "#000000"
     },
     "splash": {
-      "image": "./assets/icons/loadingIcon.png"
+      "image": "./assets/icons/loadingIcon.png",
+      "backgroundColor": "#3D83FF"
     },
     "packagerOpts": {
       "config": "rn-cli.config.js"
@@ -58,7 +59,10 @@
       }
     },
     "web": {
-      "productionPath": "web-build"
+      "productionPath": "web-build",
+      "build": {
+        "brotli": true
+      }
     },
     "assetBundlePatterns": [
       "assets/**",

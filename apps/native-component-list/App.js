@@ -1,63 +1,59 @@
 import './LegacyReact';
 
-import { AppLoading, Asset, Font } from 'expo';
 import React from 'react';
-import { Entypo, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-navigation';
-import { Assets as StackAssets } from 'react-navigation-stack';
-import { useScreens } from 'react-native-screens';
 
-import Icons from './constants/Icons';
+// const RootNavigation = View;
+import RootNavigation from './instagram/App';
+
+// import Icons from './constants/Icons';
 // import RootNavigation from './navigation/RootNavigation';
-import RootNavigation from './instagram/CameraScreen';
-
 // workaround for large android status bar in react-nav beta.27
-if (Platform.OS === 'android') {
-  useScreens();
-  SafeAreaView.setStatusBarHeight(0);
-}
+// if (Platform.OS === 'android') {
+//   useScreens();
+//   SafeAreaView.setStatusBarHeight(0);
+// }
 
 export default class App extends React.Component {
-  state = {
-    appIsReady: false,
-  };
+  // state = {
+  //   appIsReady: false,
+  // };
 
   componentWillMount() {
-    this._loadAssetsAsync();
+    // this._loadAssetsAsync();
   }
 
-  async _loadAssetsAsync() {
-    try {
-      const iconRequires = Object.keys(Icons).map(key => Icons[key]);
-      await Promise.all([
-        Asset.loadAsync(iconRequires),
-        Asset.loadAsync(StackAssets),
-        Font.loadAsync(Ionicons.font),
-        Font.loadAsync(Entypo.font),
-        Font.loadAsync(MaterialIcons.font),
-        Font.loadAsync({ 'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf') }),
-      ]);
-    } catch (e) {
-      console.log({ e });
-    } finally {
-      this.setState({ appIsReady: true });
-    }
-  }
+  // async _loadAssetsAsync() {
+  //   try {
+  //     const iconRequires = Object.keys(Icons).map(key => Icons[key]);
+  //     await Promise.all([
+  //       Asset.loadAsync(iconRequires),
+  //       Asset.loadAsync(StackAssets),
+  //       Font.loadAsync(Ionicons.font),
+  //       Font.loadAsync(Entypo.font),
+  //       Font.loadAsync(MaterialIcons.font),
+  //       Font.loadAsync({ 'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf') }),
+  //     ]);
+  //   } catch (e) {
+  //     console.log({ e });
+  //   } finally {
+  //     this.setState({ appIsReady: true });
+  //   }
+  // }
 
   render() {
-    if (this.state.appIsReady) {
-      return (
-        <View style={styles.container} testID="native_component_list">
-          {Platform.OS === 'android' && <View style={styles.statusBarUnderlay} />}
-          <RootNavigation />
+    // if (this.state.appIsReady) {
+    return (
+      <View style={styles.container} testID="native_component_list">
+        {Platform.OS === 'android' && <View style={styles.statusBarUnderlay} />}
+        <RootNavigation />
 
-          {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-        </View>
-      );
-    } else {
-      return <AppLoading />;
-    }
+        {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
+      </View>
+    );
+    // } else {
+    //   return <AppLoading />;
+    // }
   }
 }
 
