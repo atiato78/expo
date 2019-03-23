@@ -8,6 +8,7 @@ import {
   Dimensions,
   TouchableOpacity,
   StyleSheet,
+  ScrollView,
   LayoutAnimation,
   FlatList,
 } from 'react-native';
@@ -439,7 +440,61 @@ const MusicNav = createAppContainer(
   )
 );
 
-export default class CameraContainerScreen extends React.Component {
+export default class MediaContainerScreen extends React.Component {
+  render() {
+    const { height } = Dimensions.get('window');
+    const drawerHeight = height * 0.9;
+    return (
+      <ScrollView
+        pagingEnabled
+        style={{ flex: 1 }}
+        contentContainerStyle={{ height: height + drawerHeight }}>
+        <CameraContainerScreen />
+        <MediaScreen
+          style={{
+            width: '100%',
+            backgroundColor: 'orange',
+            height: drawerHeight,
+          }}
+        />
+      </ScrollView>
+    );
+  }
+}
+
+class MediaScreen extends React.Component {
+  render() {
+    const { height } = Dimensions.get('window');
+    const drawerHeight = height * 0.9;
+    return (
+      <View style={this.props.style}>
+        <FlatList
+          keyExtractor={(item, index) => index + '--'}
+          renderItem={({ item }) => <MediaItem {...item} />}
+          contentContainerStyle={{ padding: 1 }}
+          style={{ flex: 1 }}
+          data={new Array(30).fill({})}
+          numColumns={3}
+        />
+      </View>
+    );
+  }
+}
+
+class MediaItem extends React.Component {
+  render() {
+    const { height, width: screenWidth } = Dimensions.get('window');
+    const width = screenWidth - 8;
+    const aspectRatio = height / width;
+    const itemWidth = width / 3;
+    const itemHeight = itemWidth * aspectRatio;
+    return (
+      <View style={{ margin: 1, width: itemWidth, height: itemHeight, backgroundColor: 'red' }} />
+    );
+  }
+}
+
+class CameraContainerScreen extends React.Component {
   state = {
     ready: false,
     index: 0,
@@ -477,7 +532,13 @@ export default class CameraContainerScreen extends React.Component {
     const typeface = types[this.state.selectedFont];
     const { theme: gradientTheme, ...gradient } = gradients[this.state.selectedGradient];
     return (
-      <View style={{ flex: 1, backgroundColor: 'green', justifyContent: 'flex-end' }}>
+      <View
+        style={{
+          flex: 1,
+          height: Dimensions.get('window').height,
+          backgroundColor: 'green',
+          justifyContent: 'flex-end',
+        }}>
         <CameraScreen headerLeftIconName={page.headerLeftIconName} />
 
         <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
@@ -731,6 +792,7 @@ class MainFooter extends React.Component {
               }}>
               <FlashButtonContainer {...page} />
               <CaptureButtonContainer
+                selectedIndex={index}
                 animation={this.liveAnimation}
                 icon={page.icon}
                 isActive={page.id === 'live'}
@@ -747,7 +809,7 @@ class MainFooter extends React.Component {
 
 class CaptureButtonContainer extends React.Component {
   render() {
-    const { isActive, animation, icon } = this.props;
+    const { isActive, selectedIndex, animation, icon } = this.props;
 
     const opacity = animation.interpolate({
       inputRange: [0.2, 1],
@@ -774,7 +836,7 @@ class CaptureButtonContainer extends React.Component {
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-          <CaptureButton icon={icon} />
+          <CaptureButton selectedIndex={selectedIndex} icon={icon} />
         </Animated.View>
         <GoLiveButton
           animation={animation}
@@ -905,6 +967,24 @@ class FlashButton extends React.Component {
   }
 }
 
+class FaceButton extends React.Component {
+  state = {
+    isActive: false,
+  };
+  onPress = () => {
+    this.setState({ isActive: !this.state.isActive });
+  };
+  render() {
+    return (
+      <IconButton
+        {...this.props}
+        onPress={this.onPress}
+        name={`face-${this.state.isActive ? 'on' : 'off'}`}
+      />
+    );
+  }
+}
+
 class FlipButtonContainer extends React.Component {
   constructor(props) {
     super(props);
@@ -970,7 +1050,7 @@ class FlipButtonContainer extends React.Component {
               opacity: fadeFace,
               transform: [{ rotate: rotateFace }],
             }}>
-            <IconButton name="face-off" />
+            <FaceButton />
           </Animated.View>
         </Animated.View>
       </View>
