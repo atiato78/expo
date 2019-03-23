@@ -56,7 +56,7 @@ const pages = [
   //   icon: Assets['inf.png'],
   //   screen: () => <MusicScreen />,
   // },
-  // { name: 'Live', id: 'live', isFilterable: true, icon: null, id: 'live' },
+  { name: 'Live', id: 'live', isFilterable: true, icon: null },
   // { name: 'Normal', id: 'normal', isFilterable: true, icon: null },
   { name: 'Boomerang', id: 'boomerang', isFilterable: true, icon: Assets['inf.png'] },
   { name: 'Superzoom', id: 'superzoom', isFilterable: false, icon: Assets['rewind.png'] },
@@ -658,52 +658,145 @@ class MainFooter extends React.Component {
             <IconButton key="camera" name="camera-off" />
           </View>
         );
-      case 'live':
+      // case 'live':
+      //   return (
+      //     <View
+      //       style={{
+      //         ...footerStyle,
+
+      //         flexDirection: 'column',
+      //         alignItems: 'center',
+      //       }}>
+      //       <WhosActive users={users} />
+
+      //       <View
+      //         style={{
+      //           marginTop: 14,
+      //           width: '100%',
+      //           justifyContent: 'space-between',
+      //           flexDirection: 'row',
+      //           alignItems: 'center',
+      //         }}>
+      //         <IconButton name="questions" />
+      //         <GoLiveButton />
+      //         <IconButton name="flip" />
+      //         <IconButton name="face-off" />
+      //       </View>
+      //     </View>
+      //   );
+      default:
         return (
           <View
             style={{
               ...footerStyle,
 
               flexDirection: 'column',
-              alignItems: 'center',
+              alignItems: 'stretch',
+              // alignItems: 'center',
             }}>
-            <WhosActive users={users} />
-
-            <View
+            <Animatable.View
+              animation={page.id === 'live' ? 'fadeInDown' : 'fadeOutUp'}
+              duration={300}
               style={{
-                marginTop: 14,
+                marginBottom: 14,
                 width: '100%',
                 justifyContent: 'space-between',
                 flexDirection: 'row',
                 alignItems: 'center',
               }}>
-              <IconButton name="questions" />
-              <GoLiveButton />
-              <IconButton name="flip" />
-              <IconButton name="face-off" />
+              <WhosActive users={users} />
+            </Animatable.View>
+            <View
+              style={{
+                justifyContent: 'space-between',
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}>
+              <FlashButtonContainer {...page} />
+              <CaptureButton selectedIndex={index} icon={page.icon} />
+              <FlipButtonContainer {...page} />
             </View>
-          </View>
-        );
-      default:
-        return (
-          <View style={footerStyle}>
-            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-around' }}>
-              <GalleryButton
-                source={{
-                  uri:
-                    'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
-                }}
-              />
-              <IconButton />
-            </View>
-            <CaptureButton selectedIndex={index} icon={page.icon} />
-            <FlipButtonContainer {...page} />
           </View>
         );
     }
   }
 }
 
+class FlashButtonContainer extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.animation = new Animated.Value(this.getAnimatedValue(props));
+  }
+
+  getAnimatedValue = ({ id }) => (id === 'live' ? 1 : 0);
+
+  componentWillReceiveProps(nextProps, prevState, snapshot) {
+    if (nextProps.id !== this.props.id) {
+      Animated.timing(this.animation, {
+        toValue: this.getAnimatedValue(nextProps),
+        duration: 300,
+      }).start();
+    }
+  }
+
+  render() {
+    const isLive = this.props.id === 'live';
+    const moveFlip = this.animation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0%', '75%'],
+    });
+
+    const rotateFace = this.animation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', '-30deg'],
+    });
+
+    const fadeFace = this.animation.interpolate({
+      inputRange: [0, 0.8],
+      outputRange: [1, 0],
+    });
+
+    return (
+      <View
+        style={{
+          flex: 1,
+          height: '100%',
+          alignItems: 'center',
+        }}>
+        <View
+          style={{
+            flex: 1,
+            width: '50%',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-around',
+          }}>
+          <Animated.View
+            style={{ position: 'absolute', left: 0, opacity: fadeFace }}
+            pointerEvents={isLive ? 'none' : 'auto'}>
+            <GalleryButton
+              source={{
+                uri:
+                  'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
+              }}
+            />
+          </Animated.View>
+          <Animated.View
+            style={{
+              position: 'absolute',
+              right: moveFlip,
+              // opacity: fadeFace,
+              // transform: [{ rotate: rotateFace }],
+            }}>
+            {!isLive && <IconButton name="flash-off" />}
+            {isLive && <IconButton name="questions" />}
+          </Animated.View>
+        </View>
+      </View>
+    );
+  }
+}
 class FlipButtonContainer extends React.Component {
   constructor(props) {
     super(props);
