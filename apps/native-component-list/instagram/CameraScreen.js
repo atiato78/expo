@@ -571,20 +571,40 @@ const WhosActive = ({ users }) => (
   </View>
 );
 
-const GoLiveButton = () => (
-  <TouchableOpacity style={{ width: '50%' }}>
-    <View
-      style={{
-        height: innerCaptureButtonHeight,
-        borderRadius: innerCaptureButtonHeight / 2,
-        backgroundColor: 'white',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}>
-      <Text style={{ fontSize: 16 }}>Go Live</Text>
-    </View>
-  </TouchableOpacity>
-);
+class GoLiveButton extends React.Component {
+  render() {
+    const { isActive, animation } = this.props;
+
+    const width = animation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['10%', '90%'],
+    });
+
+    const opacity = animation.interpolate({
+      inputRange: [0, 0.5],
+      outputRange: [0, 1],
+    });
+
+    return (
+      <Animated.View style={{ width, opacity }}>
+        <TouchableOpacity style={{ flex: 1 }}>
+          <View
+            style={{
+              height: innerCaptureButtonHeight,
+              borderRadius: innerCaptureButtonHeight / 2,
+              backgroundColor: 'white',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Text lineBreakMode="clip" numberOfLines={1} style={{ fontSize: 16 }}>
+              Go Live
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  }
+}
 
 const gradientButtonSize = 24;
 const GradientButton = ({ gradient, onPress }) => (
@@ -637,6 +657,23 @@ const users = [
 ];
 
 class MainFooter extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.liveAnimation = new Animated.Value(this.getAnimatedValue(props));
+  }
+
+  getAnimatedValue = ({ page }) => (page.id === 'live' ? 1 : 0);
+
+  componentWillReceiveProps(nextProps, prevState, snapshot) {
+    if (nextProps.page.id !== this.props.page.id) {
+      Animated.timing(this.liveAnimation, {
+        toValue: this.getAnimatedValue(nextProps),
+        duration: 300,
+      }).start();
+    }
+  }
+
   render() {
     const { page, gradient, index, onPressGradientButton } = this.props;
 
@@ -684,7 +721,17 @@ class MainFooter extends React.Component {
       //       </View>
       //     </View>
       //   );
-      default:
+      default: {
+        const liveOpacity = this.liveAnimation.interpolate({
+          inputRange: [0.2, 1],
+          outputRange: [0, 1],
+          extrapolate: 'clamp',
+        });
+        const liveTranslationY = this.liveAnimation.interpolate({
+          inputRange: [0, 1],
+          outputRange: ['-100%', '0%'],
+        });
+
         return (
           <View
             style={{
@@ -694,10 +741,10 @@ class MainFooter extends React.Component {
               alignItems: 'stretch',
               // alignItems: 'center',
             }}>
-            <Animatable.View
-              animation={page.id === 'live' ? 'fadeInDown' : 'fadeOutUp'}
-              duration={300}
+            <Animated.View
               style={{
+                opacity: liveOpacity,
+                transform: [{ translateY: liveTranslationY }],
                 marginBottom: 14,
                 width: '100%',
                 justifyContent: 'space-between',
@@ -705,7 +752,7 @@ class MainFooter extends React.Component {
                 alignItems: 'center',
               }}>
               <WhosActive users={users} />
-            </Animatable.View>
+            </Animated.View>
             <View
               style={{
                 justifyContent: 'space-between',
@@ -713,12 +760,55 @@ class MainFooter extends React.Component {
                 alignItems: 'center',
               }}>
               <FlashButtonContainer {...page} />
-              <CaptureButton selectedIndex={index} icon={page.icon} />
+              <CaptureButtonContainer
+                animation={this.liveAnimation}
+                icon={page.icon}
+                isActive={page.id === 'live'}
+              />
+
               <FlipButtonContainer {...page} />
             </View>
           </View>
         );
+      }
     }
+  }
+}
+
+class CaptureButtonContainer extends React.Component {
+  render() {
+    const { isActive, animation, icon } = this.props;
+
+    const opacity = animation.interpolate({
+      inputRange: [0.2, 1],
+      outputRange: [1, 0],
+    });
+
+    return (
+      <View
+        style={{
+          flex: 1,
+          height: '100%',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+        <Animated.View
+          pointerEvents={isActive ? 'none' : 'auto'}
+          style={{
+            ...StyleSheet.absoluteFillObject,
+            opacity,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+          <CaptureButton icon={icon} />
+        </Animated.View>
+        <GoLiveButton
+          animation={animation}
+          isActive={isActive}
+          pointerEvents={!isActive ? 'none' : 'auto'}
+        />
+      </View>
+    );
   }
 }
 
