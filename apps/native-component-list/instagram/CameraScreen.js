@@ -575,18 +575,13 @@ class GoLiveButton extends React.Component {
   render() {
     const { isActive, animation } = this.props;
 
-    const width = animation.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['10%', '90%'],
-    });
-
     const opacity = animation.interpolate({
       inputRange: [0, 0.5],
       outputRange: [0, 1],
     });
 
     return (
-      <Animated.View style={{ width, opacity }}>
+      <Animated.View style={{ width: '100%', opacity }}>
         <TouchableOpacity style={{ flex: 1 }}>
           <View
             style={{
@@ -679,7 +674,7 @@ class MainFooter extends React.Component {
 
     const footerStyle = {
       display: page.hideFooter ? 'none' : 'flex',
-      paddingHorizontal: 36,
+      paddingHorizontal: 0,
       paddingVertical: 24,
       justifyContent: 'space-between',
       flexDirection: 'row',
@@ -695,32 +690,6 @@ class MainFooter extends React.Component {
             <IconButton key="camera" name="camera-off" />
           </View>
         );
-      // case 'live':
-      //   return (
-      //     <View
-      //       style={{
-      //         ...footerStyle,
-
-      //         flexDirection: 'column',
-      //         alignItems: 'center',
-      //       }}>
-      //       <WhosActive users={users} />
-
-      //       <View
-      //         style={{
-      //           marginTop: 14,
-      //           width: '100%',
-      //           justifyContent: 'space-between',
-      //           flexDirection: 'row',
-      //           alignItems: 'center',
-      //         }}>
-      //         <IconButton name="questions" />
-      //         <GoLiveButton />
-      //         <IconButton name="flip" />
-      //         <IconButton name="face-off" />
-      //       </View>
-      //     </View>
-      //   );
       default: {
         const liveOpacity = this.liveAnimation.interpolate({
           inputRange: [0.2, 1],
@@ -738,15 +707,15 @@ class MainFooter extends React.Component {
               ...footerStyle,
 
               flexDirection: 'column',
-              alignItems: 'stretch',
-              // alignItems: 'center',
+              // alignItems: 'stretch',
+              alignItems: 'center',
             }}>
             <Animated.View
               style={{
                 opacity: liveOpacity,
                 transform: [{ translateY: liveTranslationY }],
                 marginBottom: 14,
-                width: '100%',
+                width: '80%',
                 justifyContent: 'space-between',
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -755,6 +724,7 @@ class MainFooter extends React.Component {
             </Animated.View>
             <View
               style={{
+                width: '100%',
                 justifyContent: 'space-between',
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -766,7 +736,7 @@ class MainFooter extends React.Component {
                 isActive={page.id === 'live'}
               />
 
-              <FlipButtonContainer {...page} />
+              <FlipButtonContainer liveAnimation={this.liveAnimation} {...page} />
             </View>
           </View>
         );
@@ -784,10 +754,14 @@ class CaptureButtonContainer extends React.Component {
       outputRange: [1, 0],
     });
 
+    const width = animation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['10%', '50%'],
+    });
     return (
-      <View
+      <Animated.View
         style={{
-          flex: 1,
+          width,
           height: '100%',
           alignItems: 'center',
           justifyContent: 'center',
@@ -807,7 +781,7 @@ class CaptureButtonContainer extends React.Component {
           isActive={isActive}
           pointerEvents={!isActive ? 'none' : 'auto'}
         />
-      </View>
+      </Animated.View>
     );
   }
 }
@@ -834,12 +808,7 @@ class FlashButtonContainer extends React.Component {
     const isLive = this.props.id === 'live';
     const moveFlip = this.animation.interpolate({
       inputRange: [0, 1],
-      outputRange: ['0%', '75%'],
-    });
-
-    const rotateFace = this.animation.interpolate({
-      inputRange: [0, 1],
-      outputRange: ['0deg', '-30deg'],
+      outputRange: ['75%', '0%'],
     });
 
     const fadeFace = this.animation.interpolate({
@@ -852,15 +821,15 @@ class FlashButtonContainer extends React.Component {
         style={{
           flex: 1,
           height: '100%',
-          alignItems: 'center',
+          // alignItems: 'center',
         }}>
         <View
           style={{
             flex: 1,
+            marginLeft: Dimensions.get('window').width * 0.1,
             width: '50%',
             flexDirection: 'row',
             alignItems: 'center',
-            justifyContent: 'space-around',
           }}>
           <Animated.View
             style={{ position: 'absolute', left: 0, opacity: fadeFace }}
@@ -875,7 +844,8 @@ class FlashButtonContainer extends React.Component {
           <Animated.View
             style={{
               position: 'absolute',
-              right: moveFlip,
+              // right: 0,
+              left: moveFlip,
               // opacity: fadeFace,
               // transform: [{ rotate: rotateFace }],
             }}>
@@ -918,6 +888,15 @@ class FlipButtonContainer extends React.Component {
       outputRange: [1, 0],
     });
 
+    const liveWidth = this.props.liveAnimation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['50%', '75%'],
+    });
+    // const liveOffset = this.props.liveAnimation.interpolate({
+    //   inputRange: [0, 1],
+    //   outputRange: ['0%', '30%'],
+    // });
+
     return (
       <View
         style={{
@@ -925,10 +904,10 @@ class FlipButtonContainer extends React.Component {
           height: '100%',
           alignItems: 'center',
         }}>
-        <View
+        <Animated.View
           style={{
             flex: 1,
-            width: '50%',
+            width: liveWidth,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-around',
@@ -945,7 +924,7 @@ class FlipButtonContainer extends React.Component {
             }}>
             <IconButton name="face-off" />
           </Animated.View>
-        </View>
+        </Animated.View>
       </View>
     );
   }
