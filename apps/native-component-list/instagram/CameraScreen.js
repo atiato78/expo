@@ -15,6 +15,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Constants from 'expo-constants';
 import { Camera } from 'expo-camera';
 import * as Permissions from 'expo-permissions';
+import * as Animatable from 'react-native-animatable';
 import { BlurView } from 'expo-blur';
 import {
   SafeAreaView,
@@ -39,21 +40,29 @@ import Assets from './Assets';
 const { height } = Dimensions.get('window');
 
 const pages = [
-  {
-    name: 'Type',
-    icon: null,
-    id: 'type',
-    screen: props => <TypeScreen {...props} />,
-    headerLeftIconName: null,
-  },
-  { name: 'Music', hideFooter: true, icon: Assets['inf.png'], screen: () => <MusicScreen /> },
-  { name: 'Live', icon: null, id: 'live' },
-  { name: 'Normal', icon: null },
-  { name: 'Boomerang', icon: Assets['inf.png'] },
-  { name: 'Superzoom', icon: Assets['rewind.png'] },
-  { name: 'Focus', icon: Assets['inf.png'] },
-  { name: 'Rewind', icon: Assets['rewind.png'] },
-  { name: 'Hands-Free', icon: Assets['ball.png'] },
+  // {
+  //   name: 'Type',
+  //   icon: null,
+  //   id: 'type',
+  //   isFlipable: true,
+  //   screen: props => <TypeScreen {...props} />,
+  //   headerLeftIconName: null,
+  // },
+  // {
+  //   name: 'Music',
+  //   id: 'music',
+  //   isFilterable: true,
+  //   hideFooter: true,
+  //   icon: Assets['inf.png'],
+  //   screen: () => <MusicScreen />,
+  // },
+  // { name: 'Live', id: 'live', isFilterable: true, icon: null, id: 'live' },
+  // { name: 'Normal', id: 'normal', isFilterable: true, icon: null },
+  { name: 'Boomerang', id: 'boomerang', isFilterable: true, icon: Assets['inf.png'] },
+  { name: 'Superzoom', id: 'superzoom', isFilterable: false, icon: Assets['rewind.png'] },
+  // { name: 'Focus', id: 'focus', isFilterable: false, icon: Assets['inf.png'] },
+  { name: 'Rewind', id: 'rewind', isFilterable: true, icon: Assets['rewind.png'] },
+  // { name: 'Hands-Free', id: 'handsfree', isFilterable: true, icon: Assets['ball.png'] },
 ].map(value => {
   return {
     ...value,
@@ -678,19 +687,84 @@ class MainFooter extends React.Component {
       default:
         return (
           <View style={footerStyle}>
-            <GalleryButton
-              source={{
-                uri:
-                  'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
-              }}
-            />
-            <IconButton />
+            <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-around' }}>
+              <GalleryButton
+                source={{
+                  uri:
+                    'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
+                }}
+              />
+              <IconButton />
+            </View>
             <CaptureButton selectedIndex={index} icon={page.icon} />
-            <IconButton name="flip" />
-            <IconButton name="face-off" />
+            <FlipButtonContainer {...page} />
           </View>
         );
     }
+  }
+}
+
+class FlipButtonContainer extends React.Component {
+  constructor(props) {
+    super(props);
+    this.animation = new Animated.Value(props.isFilterable ? 0 : 1);
+  }
+
+  componentWillReceiveProps(nextProps, prevState, snapshot) {
+    if (nextProps.isFilterable !== this.props.isFilterable) {
+      Animated.timing(this.animation, {
+        toValue: nextProps.isFilterable ? 0 : 1,
+        duration: 300,
+      }).start();
+    }
+  }
+
+  render() {
+    const moveFlip = this.animation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0%', '50%'],
+    });
+
+    const rotateFace = this.animation.interpolate({
+      inputRange: [0, 1],
+      outputRange: ['0deg', '-30deg'],
+    });
+
+    const fadeFace = this.animation.interpolate({
+      inputRange: [0, 0.8],
+      outputRange: [1, 0],
+    });
+
+    return (
+      <View
+        style={{
+          flex: 1,
+          height: '100%',
+          alignItems: 'center',
+        }}>
+        <View
+          style={{
+            flex: 1,
+            width: '50%',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-around',
+          }}>
+          <Animated.View style={{ position: 'absolute', left: moveFlip }}>
+            <IconButton name="flip" />
+          </Animated.View>
+          <Animated.View
+            style={{
+              position: 'absolute',
+              right: moveFlip,
+              opacity: fadeFace,
+              transform: [{ rotate: rotateFace }],
+            }}>
+            <IconButton name="face-off" />
+          </Animated.View>
+        </View>
+      </View>
+    );
   }
 }
 
