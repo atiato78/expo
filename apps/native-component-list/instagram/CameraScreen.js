@@ -440,24 +440,85 @@ const MusicNav = createAppContainer(
   )
 );
 
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
+
 export default class MediaContainerScreen extends React.Component {
+  animation = new Animated.Value(0);
+
+  constructor(props) {
+    super(props);
+
+    this.onScroll = Animated.event(
+      [
+        {
+          nativeEvent: { contentOffset: { y: this.animation } },
+        },
+      ],
+      {
+        useNativeDriver: true,
+      }
+    );
+  }
+
   render() {
     const { height } = Dimensions.get('window');
     const drawerHeight = height * 0.9;
     return (
-      <ScrollView
+      <AnimatedScrollView
+        onScroll={this.onScroll}
         pagingEnabled
         style={{ flex: 1 }}
         contentContainerStyle={{ height: height + drawerHeight }}>
-        <CameraContainerScreen />
+        <BlurredOptionsContainer animation={this.animation}>
+          <CameraContainerScreen />
+        </BlurredOptionsContainer>
         <MediaScreen
           style={{
             width: '100%',
-            backgroundColor: 'orange',
+            backgroundColor: 'black',
             height: drawerHeight,
           }}
         />
-      </ScrollView>
+      </AnimatedScrollView>
+    );
+  }
+}
+
+class BlurredOptionsContainer extends React.Component {
+  render() {
+    const opacity = this.props.animation.interpolate({
+      inputRange: [0, Dimensions.get('window').height],
+      outputRange: [0, 1],
+      extrapolate: 'clamp',
+    });
+    return (
+      <View style={{ flex: 1 }}>
+        {this.props.children}
+        <Animated.View
+          style={{ ...StyleSheet.absoluteFillObject, opacity }}
+          pointerEvents={this.props.isEnabled ? 'auto' : 'none'}>
+          <BlurView
+            style={{
+              flex: 1,
+              justifyContent: 'flex-end',
+              alignItems: 'stretch',
+            }}>
+            <View
+              style={{
+                alignItems: 'center',
+                padding: 8,
+                justifyContent: 'space-between',
+                flexDirection: 'row',
+              }}>
+              <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
+                LAST 24 HOURS
+              </Text>
+
+              <IconButton name={'camera-off'} />
+            </View>
+          </BlurView>
+        </Animated.View>
+      </View>
     );
   }
 }
@@ -465,7 +526,6 @@ export default class MediaContainerScreen extends React.Component {
 class MediaScreen extends React.Component {
   render() {
     const { height } = Dimensions.get('window');
-    const drawerHeight = height * 0.9;
     return (
       <View style={this.props.style}>
         <FlatList

@@ -1,6 +1,7 @@
-import React from 'react';
-import { FlatList, Dimensions, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import React from 'react';
+import { Dimensions, Text, View } from 'react-native';
+
 import ViewPager from './ViewPager';
 
 const pages = ['Type', 'Music', 'Live', 'Normal', 'Boomerang', 'Rewind', 'Hands-Free'].map(value =>
