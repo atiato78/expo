@@ -13,6 +13,7 @@ import {
 import { FlatList } from 'react-native-gesture-handler';
 
 import NavigationService from '../navigation/NavigationService';
+import InstaIcon from '../InstaIcon';
 
 const Stat = ({ title, children, onPress }) => (
   <TouchableOpacity onPress={onPress}>
@@ -50,6 +51,7 @@ class OutlineImage extends React.Component {
           style={[
             {
               aspectRatio: 1,
+              height: imageSize,
               width: imageSize,
               borderRadius: imageSize / 2,
               overflow: 'hidden',
@@ -66,13 +68,13 @@ class OutlineImage extends React.Component {
       <View
         style={{
           aspectRatio: 1,
+          height: imageWrapperSize,
           width: imageWrapperSize,
           padding: imagePadding,
           borderRadius: imageWrapperSize / 2,
           borderWidth: imageBorderWidth,
           borderColor: 'rgba(0,0,0,0.3)',
-        }}
-      >
+        }}>
         {imageComponent}
       </View>
     );
@@ -91,8 +93,7 @@ const EditButton = () => (
         padding: 3,
         marginHorizontal: 8,
         marginVertical: 8,
-      }}
-    >
+      }}>
       <Text style={{ fontSize: 16, fontWeight: '500' }}>Edit</Text>
     </View>
   </TouchableHighlight>
@@ -111,14 +112,12 @@ class ProfileHead extends React.Component {
       {
         title: 'following',
         value: '72k',
-        onPress: () =>
-          NavigationService.navigate('Profile_Following', { users: [] }),
+        onPress: () => NavigationService.navigate('Profile_Following', { users: [] }),
       },
       {
         title: 'followers',
         value: '1M',
-        onPress: () =>
-          NavigationService.navigate('Profile_Followers', { users: [] }),
+        onPress: () => NavigationService.navigate('Profile_Followers', { users: [] }),
       },
     ];
 
@@ -130,9 +129,7 @@ class ProfileHead extends React.Component {
           }}
           imageSize={96}
         />
-        <View
-          style={{ flex: 1, justifyContent: 'center', alignItems: 'stretch' }}
-        >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'stretch' }}>
           <StatsBar stats={stats} />
           <EditButton />
         </View>
@@ -145,15 +142,11 @@ const ProfileBody = () => (
   <View
     style={{
       paddingHorizontal: 12,
-    }}
-  >
-    <Text style={{ fontSize: 16, marginBottom: 4, fontWeight: '500' }}>
-      Danny Boiiii
-    </Text>
+    }}>
+    <Text style={{ fontSize: 16, marginBottom: 4, fontWeight: '500' }}>Danny Boiiii</Text>
     <Text style={{ fontSize: 16 }}>
-      Self-taught #JavaScript developer 🎨 #Lego Master Builder I do stuff with
-      💙 Expo, #ReactNative, firebase, arkit, and #3dmodeling 🏠 #Austin 🔥 Bay
-      Area
+      Self-taught #JavaScript developer 🎨 #Lego Master Builder I do stuff with 💙 Expo,
+      #ReactNative, firebase, arkit, and #3dmodeling 🏠 #Austin 🔥 Bay Area
     </Text>
     <Text
       style={{
@@ -162,8 +155,7 @@ const ProfileBody = () => (
         marginBottom: 4,
         fontWeight: '500',
       }}
-      onPress={() => Linking.openURL('https://www.github.com/evanbacon')}
-    >
+      onPress={() => Linking.openURL('https://www.github.com/evanbacon')}>
       github.com/evanbacon
     </Text>
   </View>
@@ -186,8 +178,7 @@ const Stories = ({ stories }) => (
             justifyContent: 'center',
             marginTop: 4,
             alignItems: 'center',
-          }}
-        >
+          }}>
           <Ionicons name="ios-add" size={48} />
         </View>
       )}
@@ -206,13 +197,8 @@ const FormatButton = ({ icon, onPress, selected }) => (
         marginTop: 8,
         justifyContent: 'center',
         alignItems: 'center',
-      }}
-    >
-      <Ionicons
-        size={32}
-        color={selected ? '#003569' : 'rgba(0,0,0,0.5)'}
-        name={icon}
-      />
+      }}>
+      <InstaIcon size={32} color={selected ? '#003569' : 'rgba(0,0,0,0.5)'} name={icon} />
     </View>
   </TouchableHighlight>
 );
@@ -226,41 +212,32 @@ const FormatRow = () => (
         borderTopColor: 'rgba(0,0,0,0.3)',
         height: 48,
       },
-    ]}
-  >
-    <FormatButton icon="md-grid" selected />
-    <FormatButton icon="md-apps" />
-    <FormatButton icon="md-barcode" />
+    ]}>
+    <FormatButton icon="grid" selected />
+    <FormatButton icon="list" />
+    <FormatButton icon="tag-user" />
   </View>
 );
 
 const PhotoGridIcon = ({ name }) => (
-  <Ionicons
-    style={{ marginHorizontal: 4 }}
-    name={name}
-    size={26}
-    color={'black'}
-  />
+  <InstaIcon style={{ marginHorizontal: 4 }} name={name} size={26} color={'gray'} />
 );
 
+import Square from '../components/Square'
 class PhotoGridItem extends React.PureComponent {
   render() {
     const { hasMulti } = this.props;
     return (
-      <View
+      <Square
         style={{
           aspectRatio: 1,
           flex: 0.333,
           marginRight: 1,
-        }}
-      >
+        }}>
         <TouchableOpacity
-          onPress={() =>
-            NavigationService.navigate('Profile_Details', { item: this.props })
-          }
+          onPress={() => NavigationService.navigate('Profile_Details', { item: this.props })}
           activeOpacity={0.6}
-          style={{ flex: 1 }}
-        >
+          style={{ flex: 1 }}>
           <Image
             style={{
               resizeMode: 'cover',
@@ -283,7 +260,7 @@ class PhotoGridItem extends React.PureComponent {
             color={'white'}
           />
         )}
-      </View>
+      </Square>
     );
   }
 }
@@ -352,8 +329,7 @@ export default class ProfileScreen extends React.Component {
         author: 'baconbrix',
         description: 'enjoying a hammysammy',
         source: {
-          uri:
-            'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
+          uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
         },
       },
       {
@@ -397,8 +373,7 @@ export default class ProfileScreen extends React.Component {
         author: 'baconbrix',
         description: 'enjoying a hammysammy',
         source: {
-          uri:
-            'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
+          uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
         },
       },
       {

@@ -23,6 +23,7 @@ export class ItemHeader extends React.Component {
           <Image
             style={{
               aspectRatio: 1,
+              height: profileImageSize,
               backgroundColor: '#d8d8d8',
               borderWidth: StyleSheet.hairlineWidth,
               width: profileImageSize,
