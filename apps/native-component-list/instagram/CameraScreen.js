@@ -42,23 +42,23 @@ import dispatch from './rematch/dispatch';
 const { height } = Dimensions.get('window');
 
 const pages = [
-  {
-    name: 'Type',
-    icon: null,
-    id: 'type',
-    isFlipable: true,
-    screen: props => <TypeScreen {...props} />,
-    headerLeftIconName: null,
-  },
-  {
-    name: 'Music',
-    id: 'music',
-    isFilterable: true,
-    hideFooter: true,
-    icon: Assets['inf.png'],
-    screen: () => <MusicScreen />,
-  },
-  { name: 'Live', id: 'live', isFilterable: true, icon: null },
+  // {
+  //   name: 'Type',
+  //   icon: null,
+  //   id: 'type',
+  //   isFlipable: true,
+  //   screen: props => <TypeScreen {...props} />,
+  //   headerLeftIconName: null,
+  // },
+  // {
+  //   name: 'Music',
+  //   id: 'music',
+  //   isFilterable: true,
+  //   hideFooter: true,
+  //   icon: Assets['inf.png'],
+  //   screen: () => <MusicScreen />,
+  // },
+  // { name: 'Live', id: 'live', isFilterable: true, icon: null },
   { name: 'Normal', id: 'normal', isFilterable: true, icon: null },
   { name: 'Boomerang', id: 'boomerang', isFilterable: true, icon: Assets['inf.png'] },
   { name: 'Superzoom', id: 'superzoom', isFilterable: false, icon: Assets['rewind.png'] },
@@ -200,7 +200,9 @@ class CameraScreen extends React.Component {
         <Camera style={{ flex: 1 }} />
         <Header>
           {headerLeft({ name: headerLeftIconName })}
-          <IconButton name={'chevron-right'} />
+          <IconButton name={'chevron-right'} onPress={() => {
+            NavigationService.navigate('SocialUI');
+          }} />
         </Header>
       </View>
     );
@@ -441,15 +443,10 @@ const MusicNav = createAppContainer(
   )
 );
 import { connect } from 'react-redux';
+import NavigationService from './navigation/NavigationService';
 
 
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
-
-export default class Main extends React.Component {
-  render() {
-    return <ConnectedEditorComboScreen />;
-  }
-}
 
 class EditorComboScreen extends React.Component {
   render() {
@@ -462,14 +459,14 @@ class EditorComboScreen extends React.Component {
 
 const ConnectedEditorComboScreen = connect(({ image }) => ({ image }))(EditorComboScreen);
 
+export default ConnectedEditorComboScreen;
+
 class EditorScreen extends React.Component {
 
   render() {
     return (<View style={{flex: 1}}><Image style={{flex: 1, resizeMode: 'cover'}} source={this.props.image}/></View>)
   }
 }
-
-
 
 class MediaContainerScreen extends React.Component {
   animation = new Animated.Value(0);
@@ -543,7 +540,7 @@ class BlurredOptionsContainer extends React.Component {
                 LAST 24 HOURS
               </Text>
 
-              <IconButton name={'camera-off'} />
+              <IconButton name={'camera'} />
             </View>
           </BlurView>
         </Animated.View>
@@ -638,12 +635,12 @@ class CameraContainerScreen extends React.Component {
         style={{
           flex: 1,
           height: Dimensions.get('window').height,
-          backgroundColor: 'green',
+          backgroundColor: '#4630EB',
           justifyContent: 'flex-end',
         }}>
         <CameraScreen headerLeftIconName={page.headerLeftIconName} />
 
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+       {false && (<View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
           {page.screen &&
             page.screen({
               typeface,
@@ -651,8 +648,7 @@ class CameraContainerScreen extends React.Component {
               gradient,
               gradientTheme,
             })}
-        </View>
-
+        </View>)}
         <MainFooter
           page={page}
           index={this.state.index}
@@ -850,7 +846,7 @@ class MainFooter extends React.Component {
           <View style={footerStyle}>
             <GradientButton gradient={gradient} onPress={onPressGradientButton} />
             <CaptureButton selectedIndex={index} icon={page.icon} />
-            <IconButton key="camera" name="camera-off" />
+            <IconButton key="camera" name={"camera"} />
           </View>
         );
       default: {
@@ -1081,7 +1077,8 @@ class FaceButton extends React.Component {
       <IconButton
         {...this.props}
         onPress={this.onPress}
-        name={`face-${this.state.isActive ? 'on' : 'off'}`}
+        active={this.state.isActive}
+        name={`face`}
       />
     );
   }
@@ -1312,8 +1309,8 @@ class RotatingIcon extends React.Component {
 
 const iconButtonSize = 30;
 
-const IconButton = ({ onPress, name, size, color }) => (
+const IconButton = ({ onPress, active, name, size, color }) => (
   <TouchableOpacity style={{ width: iconButtonSize, height: iconButtonSize }} onPress={onPress}>
-    <InstaIcon name={name} />
+    <InstaIcon active={active} name={name} />
   </TouchableOpacity>
 );

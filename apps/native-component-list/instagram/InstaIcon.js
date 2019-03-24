@@ -5,12 +5,29 @@ import Assets from './Assets';
 
 export default class InstaIcon extends React.PureComponent {
   render() {
-    const { name, color = 'white', style, ...props } = this.props;
+    const { name, active, size, color = 'white', style, ...props } = this.props;
     if (!name) {
       return null;
     }
-    const colorStyle = [{ tintColor: color, flex: 1 }, style];
-    const icon = Assets.icons[name + '.png'];
+    const colorStyle = [
+      {
+        width: size,
+        height: size,
+        resizeMode: 'contain',
+        tintColor: color,
+        flex: size === undefined ? 1 : undefined,
+      },
+      style,
+    ];
+
+    let icon;
+    if (active && Assets.icons[name + '-on' + '.png']) {
+      icon = Assets.icons[name + '-on' + '.png'];
+    } else if (Assets.icons[name + '-off' + '.png']) {
+      icon = Assets.icons[name + '-off' + '.png'];
+    } else {
+      icon = Assets.icons[name + '.png'];
+    }
     console.log(name, icon);
     return <Image source={icon} style={colorStyle} {...props} />;
   }

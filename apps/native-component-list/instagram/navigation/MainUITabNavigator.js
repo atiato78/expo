@@ -1,9 +1,7 @@
 import React from 'react';
-import {
-  createStackNavigator,
-  createBottomTabNavigator,
-} from 'react-navigation';
+import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
 
+import { Button, View } from 'react-native';
 import TabBarIcon from '../components/TabBarIcon';
 import ExploreScreen from '../screens/ExploreScreen';
 import FeedScreen from '../screens/FeedScreen';
@@ -13,12 +11,8 @@ import ProfileScreen from '../screens/ProfileScreen';
 import createAppNavigator from './createAppNavigator';
 import LikesTabNavigator from './LikesTabNavigator';
 
-import { Button, View } from 'react-native';
-
 MediaScreen.navigationOptions = {
-  tabBarIcon: ({ focused }) => (
-    <TabBarIcon focused={focused} name="add-circle" />
-  ),
+  tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="capture" />,
 };
 
 const mediaStack = createStackNavigator(
@@ -52,12 +46,12 @@ const mediaStack = createStackNavigator(
   },
   {
     initialRouteName: 'EditMedia',
-  },
+  }
 );
 
 const FeedNav = createAppNavigator(FeedScreen, 'Feed');
 FeedNav.navigationOptions = {
-  tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name={'home'} />,
+  tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="home" />,
 };
 
 const ExploreNav = createAppNavigator(ExploreScreen, 'Explore');
@@ -66,17 +60,12 @@ ExploreNav.navigationOptions = {
 };
 const ProfileNav = createAppNavigator(ProfileScreen, 'Profile');
 ProfileNav.navigationOptions = {
-  tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="person" />,
+  tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="profile" />,
 };
 
 const LikesNav = createAppNavigator(LikesTabNavigator, 'Likes');
 LikesNav.navigationOptions = {
-  tabBarIcon: ({ focused }) => (
-    <TabBarIcon
-      focused={focused}
-      name={focused ? 'favorite' : 'favorite-border'}
-    />
-  ),
+  tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="like" />,
 };
 
 export default createBottomTabNavigator(
@@ -88,9 +77,9 @@ export default createBottomTabNavigator(
     Profile: ProfileNav,
   },
   {
-    initialRouteName: 'Media',
+    initialRouteName: 'Feed',
     tabBarOptions: {
       showLabel: false,
     },
-  },
+  }
 );

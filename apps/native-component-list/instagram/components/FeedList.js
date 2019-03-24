@@ -3,6 +3,7 @@ import React, { PureComponent } from 'react';
 import { FlatList, Text, View } from 'react-native';
 
 import { Item } from './Item';
+import InstaIcon from '../InstaIcon';
 
 class Footer extends PureComponent {
   render() {
@@ -19,26 +20,19 @@ export const profileImageSize = 48;
 export class IconBar extends React.Component {
   render() {
     return (
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+      <View style={{ flexDirection: 'row', height: 36, justifyContent: 'space-between' }}>
         <View style={{ flexDirection: 'row' }}>
-          <Icon name="ios-heart-outline" />
-          <Icon name="ios-chatbubbles-outline" />
-          <Icon name="ios-send-outline" />
+          <Icon name="like" />
+          <Icon name="chat" />
+          <Icon name="send" />
         </View>
-        <Icon name="ios-bookmark-outline" />
+        <Icon name="bookmark" />
       </View>
     );
   }
 }
 
-export const Icon = ({ name }) => (
-  <Ionicons
-    style={{ marginHorizontal: 4 }}
-    name={name}
-    size={26}
-    color={'black'}
-  />
-);
+export const Icon = ({ name }) => <InstaIcon size={36} name={name} color={'black'} />;
 
 export default class FeedList extends React.Component {
   render() {
@@ -46,9 +40,7 @@ export default class FeedList extends React.Component {
     return (
       <FlatList
         renderItem={({ item }) => <Item {...item} />}
-        ListFooterComponent={props => (
-          <Footer {...props} onPress={onPressFooter} />
-        )}
+        ListFooterComponent={props => <Footer {...props} onPress={onPressFooter} />}
         keyExtractor={item => item.key}
         {...props}
       />
