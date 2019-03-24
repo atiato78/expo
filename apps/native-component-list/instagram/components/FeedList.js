@@ -1,15 +1,29 @@
-import { Ionicons } from '@expo/vector-icons';
 import React, { PureComponent } from 'react';
 import { FlatList, Text, View } from 'react-native';
 
-import { Item } from './Item';
 import InstaIcon from '../InstaIcon';
+import { Item } from './Item';
 
 class Footer extends PureComponent {
   render() {
+    const height = 36;
     return (
-      <View>
-        <Text onPress={this.props.onPress}>Load More...</Text>
+      <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <View
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'white',
+            height,
+            borderRadius: height / 2,
+            shadowRadius: 6,
+            shadowOpacity: 0.3,
+            paddingHorizontal: 12,
+          }}>
+          <Text style={{ textAlign: 'center' }} onPress={this.props.onPress}>
+            Load More...
+          </Text>
+        </View>
       </View>
     );
   }
