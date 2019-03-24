@@ -24,7 +24,7 @@ import {
   createMaterialTopTabNavigator,
   createAppContainer,
 } from 'react-navigation';
-import { SearchBar } from 'react-native-elements';
+import SearchBar from './components/SearchBar';
 import * as Font from 'expo-font';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
