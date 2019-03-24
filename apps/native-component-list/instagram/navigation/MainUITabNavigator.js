@@ -11,10 +11,6 @@ import ProfileScreen from '../screens/ProfileScreen';
 import createAppNavigator from './createAppNavigator';
 import LikesTabNavigator from './LikesTabNavigator';
 
-MediaScreen.navigationOptions = {
-  tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="capture" />,
-};
-
 const mediaStack = createStackNavigator(
   {
     MediaScreen: {
@@ -48,6 +44,9 @@ const mediaStack = createStackNavigator(
     initialRouteName: 'EditMedia',
   }
 );
+mediaStack.navigationOptions = {
+  tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="capture" />,
+};
 
 const FeedNav = createAppNavigator(FeedScreen, 'Feed');
 FeedNav.navigationOptions = {
@@ -72,7 +71,7 @@ export default createBottomTabNavigator(
   {
     Feed: FeedNav,
     Explore: ExploreNav,
-    Media: { screen: mediaStack },
+    Media: mediaStack,
     Likes: LikesNav,
     Profile: ProfileNav,
   },

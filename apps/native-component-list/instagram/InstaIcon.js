@@ -20,13 +20,11 @@ export default class InstaIcon extends React.PureComponent {
       style,
     ];
 
-    let icon;
+    let icon = Assets.icons[name + '.png'];
     if (active && Assets.icons[name + '-on' + '.png']) {
       icon = Assets.icons[name + '-on' + '.png'];
     } else if (Assets.icons[name + '-off' + '.png']) {
       icon = Assets.icons[name + '-off' + '.png'];
-    } else {
-      icon = Assets.icons[name + '.png'];
     }
     console.log(name, icon);
     return <Image source={icon} style={colorStyle} {...props} />;

@@ -2,6 +2,7 @@ import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { Icon, profileImageSize } from './FeedList';
+import InstaIcon from '../InstaIcon';
 
 export class ItemHeader extends React.Component {
   constructor(props) {
@@ -17,8 +18,7 @@ export class ItemHeader extends React.Component {
           paddingVertical: 6,
           justifyContent: 'space-between',
           alignItems: 'center',
-        }}
-      >
+        }}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
           <Image
             style={{
@@ -34,12 +34,10 @@ export class ItemHeader extends React.Component {
           />
           <View>
             <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{name}</Text>
-            <Text style={{ fontSize: 16, opacity: 0.8 }}>
-              {location || 'Legoland'}
-            </Text>
+            <Text style={{ fontSize: 16, opacity: 0.8 }}>{location || 'Legoland'}</Text>
           </View>
         </View>
-        <Icon name="ios-more" />
+        <InstaIcon name="more" size={36} color={'black'} />
       </View>
     );
   }
