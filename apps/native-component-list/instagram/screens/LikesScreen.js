@@ -6,8 +6,7 @@ import NavigationService from '../navigation/NavigationService';
 const someUser = {
   name: 'Avocoder',
   source: {
-    uri:
-      'https://www.telegraph.co.uk/content/dam/news/2016/04/19/avocado_trans_NvBQzQNjv4BqkZdGXfzOPVSbO-9sH583RDp4DftbO29ksMGwKfb1CIU.jpg?imwidth=450',
+    uri: 'https://i.cspa.io/user_1092/89c808b0-24f0-4be3-94d4-b2b7af2ca987/400x.png',
   },
   title: 'liked 8 posts',
 };

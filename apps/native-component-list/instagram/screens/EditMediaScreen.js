@@ -1,22 +1,13 @@
 import React from 'react';
 
-import {
-  View,
-  Button,
-  Image,
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Button, Image, FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native';
 // import { UserList } from '../components/UserList';
 import NavigationService from '../navigation/NavigationService';
 
 const someUser = {
   name: 'Avocoder',
   source: {
-    uri:
-      'https://www.telegraph.co.uk/content/dam/news/2016/04/19/avocado_trans_NvBQzQNjv4BqkZdGXfzOPVSbO-9sH583RDp4DftbO29ksMGwKfb1CIU.jpg?imwidth=450',
+    uri: 'https://i.cspa.io/user_1092/89c808b0-24f0-4be3-94d4-b2b7af2ca987/400x.png',
   },
   title: 'liked 8 posts',
 };
@@ -51,8 +42,8 @@ const FilterListItem = ({ title, uri, id }) => (
       style={{
         aspectRatio: 1,
         height: 100,
-      }}
-    >
+        width: 100,
+      }}>
       <View
         style={{
           flex: 1,
@@ -61,8 +52,7 @@ const FilterListItem = ({ title, uri, id }) => (
           shadowColor: 'rgba(0,0,0,0.8)',
           shadowOpacity: 0.3,
           shadowOffset: { width: 0, height: 3 },
-        }}
-      >
+        }}>
         <Image
           style={{
             flex: 1,
@@ -126,8 +116,7 @@ export default class EditMediaScreen extends React.Component {
             flex: 1,
             justifyContent: 'center',
             alignItems: 'stretch',
-          }}
-        >
+          }}>
           <FiltersFlatList uri={uri} />
         </View>
         <BottomTabBar
@@ -143,13 +132,8 @@ export default class EditMediaScreen extends React.Component {
 }
 
 const BottomTabBarButton = ({ children, ...props }) => (
-  <TouchableOpacity
-    style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-    {...props}
-  >
-    <Text style={{ fontWeight: 'bold', fontSize: 16, textAlign: 'center' }}>
-      {children}
-    </Text>
+  <TouchableOpacity style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }} {...props}>
+    <Text style={{ fontWeight: 'bold', fontSize: 16, textAlign: 'center' }}>{children}</Text>
   </TouchableOpacity>
 );
 const BottomTabBar = ({ items }) => (
@@ -163,8 +147,7 @@ const BottomTabBar = ({ items }) => (
       borderTopColor: 'rgba(0, 0, 0, .3)',
       flexDirection: 'row',
       height: 49,
-    }}
-  >
+    }}>
     {items.map(item => (
       <BottomTabBarButton key={item.id}>{item.text}</BottomTabBarButton>
     ))}

@@ -3,6 +3,7 @@ import { FlatList, Text, View } from 'react-native';
 
 import InstaIcon from '../InstaIcon';
 import { Item } from './Item';
+import LikeButton from './LikeButton';
 
 class Footer extends PureComponent {
   render() {
@@ -29,14 +30,14 @@ class Footer extends PureComponent {
   }
 }
 
-export const profileImageSize = 48;
+export const profileImageSize = 30;
 
 export class IconBar extends React.Component {
   render() {
     return (
       <View style={{ flexDirection: 'row', height: 36, justifyContent: 'space-between' }}>
         <View style={{ flexDirection: 'row' }}>
-          <Icon name="like" />
+          <LikeButton size={36} />
           <Icon name="chat" />
           <Icon name="send" />
         </View>

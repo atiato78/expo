@@ -76,7 +76,7 @@ export default createBottomTabNavigator(
     Profile: ProfileNav,
   },
   {
-    initialRouteName: 'Feed',
+    initialRouteName: 'Profile',
     tabBarOptions: {
       showLabel: false,
     },

@@ -15,6 +15,8 @@ import { FlatList } from 'react-native-gesture-handler';
 import NavigationService from '../navigation/NavigationService';
 import InstaIcon from '../InstaIcon';
 
+import Square from '../components/Square';
+
 const Stat = ({ title, children, onPress }) => (
   <TouchableOpacity onPress={onPress}>
     <View style={{ justifyContent: 'center', alignItems: 'center' }}>
@@ -222,8 +224,6 @@ const FormatRow = () => (
 const PhotoGridIcon = ({ name }) => (
   <InstaIcon style={{ marginHorizontal: 4 }} name={name} size={26} color={'gray'} />
 );
-
-import Square from '../components/Square'
 class PhotoGridItem extends React.PureComponent {
   render() {
     const { hasMulti } = this.props;
@@ -285,15 +285,174 @@ class PhotoGrid extends React.Component {
   }
 }
 
+const posts = [
+  {
+    key: 'a',
+    author: 'baconbrix',
+    description: 'enjoying a hammysammy',
+    source: {
+      uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
+    },
+  },
+  {
+    key: 'b',
+    author: 'baconbrix',
+    description: 'enjoying a hammysammy',
+    hasMulti: true,
+    source: {
+      uri: 'https://i.ytimg.com/vi/iSTUfJjtEOY/maxresdefault.jpg',
+    },
+  },
+  {
+    key: 'asdb',
+    author: 'baconbrix',
+    description: 'enjoying a hammysammy',
+    source: {
+      uri:
+        'https://m.media-amazon.com/images/M/MV5BNTE0Yzc3OTQtN2NhMS00NTdiLTlmMzAtOGRjNmQ3ZGYxN2M5XkEyXkFqcGdeQXVyMzQ3OTE4NTk@._V1_UY268_CR11,0,182,268_AL_.jpg',
+    },
+  },
+
+  {
+    key: 'advasd',
+    author: 'baconbrix',
+    description: 'enjoying a hammysammy',
+    source: {
+      uri: 'https://i.ebayimg.com/images/g/MuwAAOSwax5YoZOp/s-l300.jpg',
+    },
+  },
+  {
+    key: 'agre',
+    author: 'baconbrix',
+    description: 'enjoying a hammysammy',
+    source: {
+      uri:
+        'https://coubsecure-s.akamaihd.net/get/b115/p/coub/simple/cw_timeline_pic/3ad828e8989/ffa93af652a155a7911d2/big_1473465663_1382481140_image.jpg',
+    },
+  },
+  {
+    key: 'asdfsdfsd',
+    author: 'baconbrix',
+    description: 'enjoying a hammysammy',
+    source: {
+      uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
+    },
+  },
+  {
+    key: 'bsdfsge',
+    author: 'baconbrix',
+    description: 'enjoying a hammysammy',
+    hasMulti: true,
+    source: {
+      uri: 'https://i.ytimg.com/vi/iSTUfJjtEOY/maxresdefault.jpg',
+    },
+  },
+  {
+    key: 'asdsdfb',
+    author: 'baconbrix',
+    description: 'enjoying a hammysammy',
+    source: {
+      uri:
+        'https://m.media-amazon.com/images/M/MV5BNTE0Yzc3OTQtN2NhMS00NTdiLTlmMzAtOGRjNmQ3ZGYxN2M5XkEyXkFqcGdeQXVyMzQ3OTE4NTk@._V1_UY268_CR11,0,182,268_AL_.jpg',
+    },
+  },
+  {
+    key: 'acasd',
+    title: 'enjoying a hammysammy',
+    source: {
+      uri:
+        'https://coubsecure-s.akamaihd.net/get/b115/p/coub/simple/cw_timeline_pic/3ad828e8989/ffa93af652a155a7911d2/big_1473465663_1382481140_image.jpg',
+    },
+  },
+  {
+    key: 'a',
+    author: 'baconbrix',
+    description: 'enjoying a hammysammy',
+    source: {
+      uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
+    },
+  },
+  {
+    key: 'b',
+    author: 'baconbrix',
+    description: 'enjoying a hammysammy',
+    hasMulti: true,
+    source: {
+      uri: 'https://i.ytimg.com/vi/iSTUfJjtEOY/maxresdefault.jpg',
+    },
+  },
+  {
+    key: 'asdb',
+    author: 'baconbrix',
+    description: 'enjoying a hammysammy',
+    source: {
+      uri:
+        'https://m.media-amazon.com/images/M/MV5BNTE0Yzc3OTQtN2NhMS00NTdiLTlmMzAtOGRjNmQ3ZGYxN2M5XkEyXkFqcGdeQXVyMzQ3OTE4NTk@._V1_UY268_CR11,0,182,268_AL_.jpg',
+    },
+  },
+
+  {
+    key: 'advasd',
+    author: 'baconbrix',
+    description: 'enjoying a hammysammy',
+    source: {
+      uri: 'https://i.ebayimg.com/images/g/MuwAAOSwax5YoZOp/s-l300.jpg',
+    },
+  },
+  {
+    key: 'agre',
+    author: 'baconbrix',
+    description: 'enjoying a hammysammy',
+    source: {
+      uri:
+        'https://coubsecure-s.akamaihd.net/get/b115/p/coub/simple/cw_timeline_pic/3ad828e8989/ffa93af652a155a7911d2/big_1473465663_1382481140_image.jpg',
+    },
+  },
+  {
+    key: 'asdfsdfsd',
+    author: 'baconbrix',
+    description: 'enjoying a hammysammy',
+    source: {
+      uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
+    },
+  },
+  {
+    key: 'bsdfsge',
+    author: 'baconbrix',
+    description: 'enjoying a hammysammy',
+    hasMulti: true,
+    source: {
+      uri: 'https://i.ytimg.com/vi/iSTUfJjtEOY/maxresdefault.jpg',
+    },
+  },
+  {
+    key: 'asdsdfb',
+    author: 'baconbrix',
+    description: 'enjoying a hammysammy',
+    source: {
+      uri:
+        'https://m.media-amazon.com/images/M/MV5BNTE0Yzc3OTQtN2NhMS00NTdiLTlmMzAtOGRjNmQ3ZGYxN2M5XkEyXkFqcGdeQXVyMzQ3OTE4NTk@._V1_UY268_CR11,0,182,268_AL_.jpg',
+    },
+  },
+  {
+    key: 'acasd',
+    title: 'enjoying a hammysammy',
+    source: {
+      uri:
+        'https://coubsecure-s.akamaihd.net/get/b115/p/coub/simple/cw_timeline_pic/3ad828e8989/ffa93af652a155a7911d2/big_1473465663_1382481140_image.jpg',
+    },
+  },
+];
+
 export default class ProfileScreen extends React.Component {
   static navigationOptions = {
     title: 'Baconbrix',
   };
 
   componentDidMount() {
-    // setTimeout(() => {
-    //   NavigationService.navigate('Details', this.props);
-    // });
+    setTimeout(() => {
+      NavigationService.navigate('Profile_Details', { item: posts[0] });
+    });
   }
   render() {
     const stories = [
@@ -323,86 +482,6 @@ export default class ProfileScreen extends React.Component {
       },
     ];
 
-    const posts = [
-      {
-        key: 'a',
-        author: 'baconbrix',
-        description: 'enjoying a hammysammy',
-        source: {
-          uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
-        },
-      },
-      {
-        key: 'b',
-        author: 'baconbrix',
-        description: 'enjoying a hammysammy',
-        hasMulti: true,
-        source: {
-          uri: 'https://i.ytimg.com/vi/iSTUfJjtEOY/maxresdefault.jpg',
-        },
-      },
-      {
-        key: 'asdb',
-        author: 'baconbrix',
-        description: 'enjoying a hammysammy',
-        source: {
-          uri:
-            'https://m.media-amazon.com/images/M/MV5BNTE0Yzc3OTQtN2NhMS00NTdiLTlmMzAtOGRjNmQ3ZGYxN2M5XkEyXkFqcGdeQXVyMzQ3OTE4NTk@._V1_UY268_CR11,0,182,268_AL_.jpg',
-        },
-      },
-
-      {
-        key: 'advasd',
-        author: 'baconbrix',
-        description: 'enjoying a hammysammy',
-        source: {
-          uri: 'https://i.ebayimg.com/images/g/MuwAAOSwax5YoZOp/s-l300.jpg',
-        },
-      },
-      {
-        key: 'agre',
-        author: 'baconbrix',
-        description: 'enjoying a hammysammy',
-        source: {
-          uri:
-            'https://coubsecure-s.akamaihd.net/get/b115/p/coub/simple/cw_timeline_pic/3ad828e8989/ffa93af652a155a7911d2/big_1473465663_1382481140_image.jpg',
-        },
-      },
-      {
-        key: 'asdfsdfsd',
-        author: 'baconbrix',
-        description: 'enjoying a hammysammy',
-        source: {
-          uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
-        },
-      },
-      {
-        key: 'bsdfsge',
-        author: 'baconbrix',
-        description: 'enjoying a hammysammy',
-        hasMulti: true,
-        source: {
-          uri: 'https://i.ytimg.com/vi/iSTUfJjtEOY/maxresdefault.jpg',
-        },
-      },
-      {
-        key: 'asdsdfb',
-        author: 'baconbrix',
-        description: 'enjoying a hammysammy',
-        source: {
-          uri:
-            'https://m.media-amazon.com/images/M/MV5BNTE0Yzc3OTQtN2NhMS00NTdiLTlmMzAtOGRjNmQ3ZGYxN2M5XkEyXkFqcGdeQXVyMzQ3OTE4NTk@._V1_UY268_CR11,0,182,268_AL_.jpg',
-        },
-      },
-      {
-        key: 'acasd',
-        title: 'enjoying a hammysammy',
-        source: {
-          uri:
-            'https://coubsecure-s.akamaihd.net/get/b115/p/coub/simple/cw_timeline_pic/3ad828e8989/ffa93af652a155a7911d2/big_1473465663_1382481140_image.jpg',
-        },
-      },
-    ];
     return (
       <ScrollView style={styles.container}>
         <ProfileHead />
@@ -419,7 +498,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 15,
-    backgroundColor: '#fff',
+    backgroundColor: '#fafafa',
   },
   row: {
     flexDirection: 'row',

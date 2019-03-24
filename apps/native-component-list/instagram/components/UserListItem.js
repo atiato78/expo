@@ -1,21 +1,11 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import React from 'react';
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableHighlight,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-
+import { Image, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from 'react-native';
+import LikeButton from './LikeButton';
 import ReplyButton from './ReplyButton';
 
-export default class Comment extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+import InstaIcon from '../InstaIcon';
 
+export default class Comment extends React.Component {
   onPress = () => {
     this.props.onPress(this.props);
   };
@@ -46,14 +36,15 @@ export default class Comment extends React.Component {
           minHeight: 64,
           marginBottom: 4,
           alignItems: 'stretch',
-        }}
-      >
+        }}>
         <View>
           <Image
             source={source}
             style={{
               width: 36,
+              height: 36,
               marginRight: 8,
+              resizeMode: 'cover',
               aspectRatio: 1,
               borderRadius: 36 / 2,
             }}
@@ -65,14 +56,12 @@ export default class Comment extends React.Component {
             flexDirection: 'row',
             flex: 1,
             justifyContent: 'space-between',
-          }}
-        >
+          }}>
           <View
             style={{
               flex: 1,
               justifyContent: 'space-between',
-            }}
-          >
+            }}>
             <Text style={{ flexWrap: 'wrap' }}>
               <Text style={{ fontWeight: '500' }}>{name}</Text> {title}
             </Text>
@@ -98,13 +87,8 @@ export default class Comment extends React.Component {
                   flex: 1,
                   justifyContent: 'center',
                   alignItems: 'center',
-                }}
-              >
-                <Ionicons
-                  size={16}
-                  color={isLiked ? 'red' : 'gray'}
-                  name={isLiked ? 'ios-heart' : 'ios-heart-outline'}
-                />
+                }}>
+                <LikeButton size={16} active={isLiked} color="gray" />
               </TouchableOpacity>
             </View>
           )}
@@ -122,8 +106,7 @@ const FollowButton = ({ isFollowing, onPress }) => (
       borderWidth: isFollowing ? 1 : 0,
       overflow: 'hidden',
       backgroundColor: isFollowing ? 'white' : '#3C95EC',
-    }}
-  >
+    }}>
     <TouchableHighlight
       underlayColor={'#DBDBDB'}
       onPress={onPress}
@@ -131,8 +114,7 @@ const FollowButton = ({ isFollowing, onPress }) => (
         justifyContent: 'center',
         paddingVertical: 6,
         paddingHorizontal: 16,
-      }}
-    >
+      }}>
       <Text style={{ color: isFollowing ? '#272727' : 'white' }}>
         {isFollowing ? 'Following' : 'Follow'}
       </Text>

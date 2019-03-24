@@ -3,7 +3,7 @@ import { Platform, StyleSheet, View } from 'react-native';
 
 import { Item } from '../components/Item';
 
-export default class HomeScreen extends React.Component {
+export default class DetailsScreen extends React.Component {
   static defaultProps = {
     item: {
       key: 'item-a',
@@ -27,7 +27,7 @@ export default class HomeScreen extends React.Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#fafafa',
   },
   developmentModeText: {
     marginBottom: 20,
@@ -117,8 +117,7 @@ const COMMENTS = [
   {
     name: 'Avocoder',
     source: {
-      uri:
-        'https://www.telegraph.co.uk/content/dam/news/2016/04/19/avocado_trans_NvBQzQNjv4BqkZdGXfzOPVSbO-9sH583RDp4DftbO29ksMGwKfb1CIU.jpg?imwidth=450',
+      uri: 'https://i.cspa.io/user_1092/89c808b0-24f0-4be3-94d4-b2b7af2ca987/400x.png',
     },
     isLiked: true,
     date: '2w',
@@ -137,8 +136,7 @@ const COMMENTS = [
   {
     name: 'lemon grab',
     source: {
-      uri:
-        'http://theculturalgutter.com/wp-content/uploads/2013/10/lemongrab-candy-life.png',
+      uri: 'http://theculturalgutter.com/wp-content/uploads/2013/10/lemongrab-candy-life.png',
     },
     isLiked: true,
     date: '3w',
