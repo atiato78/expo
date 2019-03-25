@@ -94,7 +94,14 @@ ExploreNav.navigationOptions = {
 };
 
 const ProfileNav = createAppNavigator(ProfileScreen, 'Profile', navigationOptions => ({
-  headerLeft: <InstaHeaderButton name={'history'} />,
+  headerLeft: (
+    <InstaHeaderButton
+      name={'history'}
+      onPress={() => {
+        NavigationService.navigate('Profile_History');
+      }}
+    />
+  ),
   headerRight: (
     <InstaHeaderButton
       name={'menu'}

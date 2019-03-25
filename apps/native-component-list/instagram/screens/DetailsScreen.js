@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View, ScrollView } from 'react-native';
 
 import { Item } from '../components/Item';
 
@@ -17,9 +17,9 @@ export default class DetailsScreen extends React.Component {
     const { state = {} } = this.props.navigation;
     const { item } = state.params;
     return (
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         <Item comments={COMMENTS} {...item} />
-      </View>
+      </ScrollView>
     );
   }
 }

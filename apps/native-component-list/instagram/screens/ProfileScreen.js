@@ -17,6 +17,8 @@ import InstaIcon from '../InstaIcon';
 
 import Square from '../components/Square';
 
+import Stories from '../components/Stories';
+
 const Stat = ({ title, children, onPress }) => (
   <TouchableOpacity onPress={onPress}>
     <View style={{ justifyContent: 'center', alignItems: 'center' }}>
@@ -101,6 +103,7 @@ const EditButton = () => (
   </TouchableHighlight>
 );
 
+const ACCOUNT = 'baconbrix';
 class ProfileHead extends React.Component {
   render() {
     const stats = [
@@ -118,7 +121,7 @@ class ProfileHead extends React.Component {
       },
       {
         title: 'followers',
-        value: '1M',
+        value: '-1M',
         onPress: () => NavigationService.navigate('Profile_Followers', { users: [] }),
       },
     ];
@@ -127,7 +130,7 @@ class ProfileHead extends React.Component {
       <View style={styles.row}>
         <OutlineImage
           source={{
-            uri: 'http://i.imgur.com/hFcXLvG.jpg',
+            uri: `https://avatars.io/instagram/${ACCOUNT}/Medium`,
           }}
           imageSize={96}
         />
@@ -145,7 +148,7 @@ const ProfileBody = () => (
     style={{
       paddingHorizontal: 12,
     }}>
-    <Text style={{ fontSize: 16, marginBottom: 4, fontWeight: '500' }}>Danny Boiiii</Text>
+    <Text style={{ fontSize: 16, marginBottom: 4, fontWeight: '500' }}>Evan Bacon</Text>
     <Text style={{ fontSize: 16 }}>
       Self-taught #JavaScript developer 🎨 #Lego Master Builder I do stuff with 💙 Expo,
       #ReactNative, firebase, arkit, and #3dmodeling 🏠 #Austin 🔥 Bay Area
@@ -161,34 +164,6 @@ const ProfileBody = () => (
       github.com/evanbacon
     </Text>
   </View>
-);
-
-const Story = ({ title, source, renderImage }) => (
-  <View style={{ alignItems: 'center', marginRight: 12 }}>
-    <OutlineImage source={source} renderImage={renderImage} imageSize={72} />
-    <Text style={{ fontSize: 16, marginTop: 6 }}>{title}</Text>
-  </View>
-);
-const Stories = ({ stories }) => (
-  <ScrollView horizontal style={styles.row}>
-    <Story
-      title="new"
-      renderImage={() => (
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            marginTop: 4,
-            alignItems: 'center',
-          }}>
-          <Ionicons name="ios-add" size={48} />
-        </View>
-      )}
-    />
-    {stories.map(story => (
-      <Story {...story} />
-    ))}
-  </ScrollView>
 );
 
 const FormatButton = ({ icon, onPress, selected }) => (
@@ -287,162 +262,43 @@ class PhotoGrid extends React.Component {
 
 const posts = [
   {
-    key: 'a',
-    author: 'baconbrix',
-    description: 'enjoying a hammysammy',
-    source: {
-      uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
-    },
+    description: 'Being a 21-year-old @expo.io developer is lit 😍🔥💙',
+    image: `https://scontent-sjc3-1.cdninstagram.com/vp/0ea7ffb0370dddfadd528a8b1b516573/5D186640/t51.2885-15/e35/45460185_782185418780650_4154679091114957131_n.jpg?_nc_ht=scontent-sjc3-1.cdninstagram.com`,
   },
   {
-    key: 'b',
-    author: 'baconbrix',
+    description: 'Being a 21-year-old @expo.io developer is lit 😍🔥💙',
+    image: `https://scontent-sjc3-1.cdninstagram.com/vp/38bfcc8b1412fe6e9eacf269def89ba5/5D0F993A/t51.2885-15/sh0.08/e35/c0.78.1080.1080/s640x640/50824531_117448239345934_8589191116386787248_n.jpg?_nc_ht=scontent-sjc3-1.cdninstagram.com`,
+  },
+  {
+    description: 'Being a 21-year-old @expo.io developer is lit 😍🔥💙',
+    image: `https://scontent-sjc3-1.cdninstagram.com/vp/f939678f172bbb08daec6cfe8f6c0aa1/5D4F31EB/t51.2885-15/sh0.08/e35/s640x640/44588924_315715379251262_8214353241920829455_n.jpg?_nc_ht=scontent-sjc3-1.cdninstagram.com`,
+  },
+  {
     description: 'enjoying a hammysammy',
     hasMulti: true,
-    source: {
-      uri: 'https://i.ytimg.com/vi/iSTUfJjtEOY/maxresdefault.jpg',
-    },
+    image: 'https://i.ytimg.com/vi/iSTUfJjtEOY/maxresdefault.jpg',
   },
   {
-    key: 'asdb',
-    author: 'baconbrix',
     description: 'enjoying a hammysammy',
-    source: {
-      uri:
-        'https://m.media-amazon.com/images/M/MV5BNTE0Yzc3OTQtN2NhMS00NTdiLTlmMzAtOGRjNmQ3ZGYxN2M5XkEyXkFqcGdeQXVyMzQ3OTE4NTk@._V1_UY268_CR11,0,182,268_AL_.jpg',
-    },
-  },
 
+    image:
+      'https://m.media-amazon.com/images/M/MV5BNTE0Yzc3OTQtN2NhMS00NTdiLTlmMzAtOGRjNmQ3ZGYxN2M5XkEyXkFqcGdeQXVyMzQ3OTE4NTk@._V1_UY268_CR11,0,182,268_AL_.jpg',
+  },
   {
-    key: 'advasd',
-    author: 'baconbrix',
     description: 'enjoying a hammysammy',
-    source: {
-      uri: 'https://i.ebayimg.com/images/g/MuwAAOSwax5YoZOp/s-l300.jpg',
-    },
-  },
-  {
-    key: 'agre',
-    author: 'baconbrix',
-    description: 'enjoying a hammysammy',
-    source: {
-      uri:
-        'https://coubsecure-s.akamaihd.net/get/b115/p/coub/simple/cw_timeline_pic/3ad828e8989/ffa93af652a155a7911d2/big_1473465663_1382481140_image.jpg',
-    },
-  },
-  {
-    key: 'asdfsdfsd',
-    author: 'baconbrix',
-    description: 'enjoying a hammysammy',
-    source: {
-      uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
-    },
-  },
-  {
-    key: 'bsdfsge',
-    author: 'baconbrix',
-    description: 'enjoying a hammysammy',
-    hasMulti: true,
-    source: {
-      uri: 'https://i.ytimg.com/vi/iSTUfJjtEOY/maxresdefault.jpg',
-    },
-  },
-  {
-    key: 'asdsdfb',
-    author: 'baconbrix',
-    description: 'enjoying a hammysammy',
-    source: {
-      uri:
-        'https://m.media-amazon.com/images/M/MV5BNTE0Yzc3OTQtN2NhMS00NTdiLTlmMzAtOGRjNmQ3ZGYxN2M5XkEyXkFqcGdeQXVyMzQ3OTE4NTk@._V1_UY268_CR11,0,182,268_AL_.jpg',
-    },
-  },
-  {
-    key: 'acasd',
-    title: 'enjoying a hammysammy',
-    source: {
-      uri:
-        'https://coubsecure-s.akamaihd.net/get/b115/p/coub/simple/cw_timeline_pic/3ad828e8989/ffa93af652a155a7911d2/big_1473465663_1382481140_image.jpg',
-    },
-  },
-  {
-    key: 'a',
-    author: 'baconbrix',
-    description: 'enjoying a hammysammy',
-    source: {
-      uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
-    },
-  },
-  {
-    key: 'b',
-    author: 'baconbrix',
-    description: 'enjoying a hammysammy',
-    hasMulti: true,
-    source: {
-      uri: 'https://i.ytimg.com/vi/iSTUfJjtEOY/maxresdefault.jpg',
-    },
-  },
-  {
-    key: 'asdb',
-    author: 'baconbrix',
-    description: 'enjoying a hammysammy',
-    source: {
-      uri:
-        'https://m.media-amazon.com/images/M/MV5BNTE0Yzc3OTQtN2NhMS00NTdiLTlmMzAtOGRjNmQ3ZGYxN2M5XkEyXkFqcGdeQXVyMzQ3OTE4NTk@._V1_UY268_CR11,0,182,268_AL_.jpg',
-    },
-  },
 
+    image: 'https://i.ebayimg.com/images/g/MuwAAOSwax5YoZOp/s-l300.jpg',
+  },
   {
-    key: 'advasd',
-    author: 'baconbrix',
     description: 'enjoying a hammysammy',
-    source: {
-      uri: 'https://i.ebayimg.com/images/g/MuwAAOSwax5YoZOp/s-l300.jpg',
-    },
+    image:
+      'https://coubsecure-s.akamaihd.net/get/b115/p/coub/simple/cw_timeline_pic/3ad828e8989/ffa93af652a155a7911d2/big_1473465663_1382481140_image.jpg',
   },
   {
-    key: 'agre',
-    author: 'baconbrix',
     description: 'enjoying a hammysammy',
-    source: {
-      uri:
-        'https://coubsecure-s.akamaihd.net/get/b115/p/coub/simple/cw_timeline_pic/3ad828e8989/ffa93af652a155a7911d2/big_1473465663_1382481140_image.jpg',
-    },
+    image: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
   },
-  {
-    key: 'asdfsdfsd',
-    author: 'baconbrix',
-    description: 'enjoying a hammysammy',
-    source: {
-      uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
-    },
-  },
-  {
-    key: 'bsdfsge',
-    author: 'baconbrix',
-    description: 'enjoying a hammysammy',
-    hasMulti: true,
-    source: {
-      uri: 'https://i.ytimg.com/vi/iSTUfJjtEOY/maxresdefault.jpg',
-    },
-  },
-  {
-    key: 'asdsdfb',
-    author: 'baconbrix',
-    description: 'enjoying a hammysammy',
-    source: {
-      uri:
-        'https://m.media-amazon.com/images/M/MV5BNTE0Yzc3OTQtN2NhMS00NTdiLTlmMzAtOGRjNmQ3ZGYxN2M5XkEyXkFqcGdeQXVyMzQ3OTE4NTk@._V1_UY268_CR11,0,182,268_AL_.jpg',
-    },
-  },
-  {
-    key: 'acasd',
-    title: 'enjoying a hammysammy',
-    source: {
-      uri:
-        'https://coubsecure-s.akamaihd.net/get/b115/p/coub/simple/cw_timeline_pic/3ad828e8989/ffa93af652a155a7911d2/big_1473465663_1382481140_image.jpg',
-    },
-  },
-];
+].map(item => ({ author: ACCOUNT, source: { uri: item.image }, ...item }));
 
 export default class ProfileScreen extends React.Component {
   static navigationOptions = {
@@ -460,15 +316,15 @@ export default class ProfileScreen extends React.Component {
         key: 'a',
         source: {
           uri:
-            'https://statici.behindthevoiceactors.com/behindthevoiceactors/_img/chars/rigby-regular-show-the-movie-59.jpg',
+            'https://scontent-sjc3-1.cdninstagram.com/vp/456a1e244da1dd8f8e66aee1c01acb92/5C9A9B70/t51.12442-15/e15/c0.280.720.720/s150x150/25012214_1298884170256839_2925294958220935168_n.jpg?_nc_ht=scontent-sjc3-1.cdninstagram.com',
         },
-        title: 'Code',
+        title: 'Expo',
       },
       {
         key: 'b',
         source: {
           uri:
-            'https://vignette.wikia.nocookie.net/theregularshow/images/c/c6/D1.png/revision/latest?cb=20111210030233',
+            'https://scontent-sjc3-1.cdninstagram.com/vp/7fdcefa9cbea31ff358b1d388e9ea326/5C9B5E36/t51.12442-15/e15/c426.433.576.576/s150x150/29739037_757557021118316_2970672945560551424_n.jpg?_nc_ht=scontent-sjc3-1.cdninstagram.com',
         },
         title: 'Hair',
       },
@@ -476,9 +332,9 @@ export default class ProfileScreen extends React.Component {
         key: 'c',
         source: {
           uri:
-            'https://statici.behindthevoiceactors.com/behindthevoiceactors/_img/chars/mordecai-regular-show-9.39.jpg',
+            'https://scontent-sjc3-1.cdninstagram.com/vp/f7e0a9c7d16230c40e5030c8dff3881b/5C9A3B92/t51.12442-15/e35/c3.110.1001.1001/s150x150/38448292_1018033021710609_9216289335135961088_n.jpg?_nc_ht=scontent-sjc3-1.cdninstagram.com',
         },
-        title: 'Kixx',
+        title: 'Kixx 👟',
       },
     ];
 
@@ -486,7 +342,7 @@ export default class ProfileScreen extends React.Component {
       <ScrollView style={styles.container}>
         <ProfileHead />
         <ProfileBody />
-        <Stories stories={stories} />
+        <Stories stories={stories} hasNew />
         <FormatRow />
         <PhotoGrid data={posts} />
       </ScrollView>

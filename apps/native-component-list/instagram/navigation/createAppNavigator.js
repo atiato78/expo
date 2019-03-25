@@ -58,6 +58,7 @@ function createAppNavigator(screen, name, navigationOptions) {
       [`${name}_Users`]: UsersScreen,
       [`${name}_TV`]: UsersScreen,
       [`${name}_Chat`]: UsersScreen,
+      [`${name}_History`]: UsersScreen,
       [`${name}_Details`]: {
         screen: DetailsScreen,
         navigationOptions: {
