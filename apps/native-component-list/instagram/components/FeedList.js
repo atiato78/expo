@@ -75,11 +75,13 @@ export class IconBar extends React.Component {
 export const Icon = ({ name }) => <InstaIcon size={36} name={name} color={'black'} />;
 
 export default class FeedList extends React.Component {
+  static defaultProps = {
+    ListHeaderComponent: props => <Stories stories={stories} />,
+  };
   render() {
     const { onPressFooter, ...props } = this.props;
     return (
       <FlatList
-        ListHeaderComponent={props => <Stories stories={stories} />}
         renderItem={({ item }) => <Item {...item} />}
         ListFooterComponent={props => <Footer {...props} onPress={onPressFooter} />}
         keyExtractor={item => item.key}

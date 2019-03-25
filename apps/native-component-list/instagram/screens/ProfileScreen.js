@@ -11,13 +11,14 @@ import {
   View,
 } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
-
+import FeedList from '../components/FeedList';
 import NavigationService from '../navigation/NavigationService';
 import InstaIcon from '../InstaIcon';
 
 import Square from '../components/Square';
 
 import Stories from '../components/Stories';
+import Posts from '../constants/Posts';
 
 const Stat = ({ title, children, onPress }) => (
   <TouchableOpacity onPress={onPress}>
@@ -109,7 +110,7 @@ class ProfileHead extends React.Component {
     const stats = [
       {
         title: 'posts',
-        value: '4k',
+        value: Posts.length,
         onPress: () => {
           //TODO: Bacon: Scroll down
         },
@@ -167,7 +168,7 @@ const ProfileBody = () => (
 );
 
 const FormatButton = ({ icon, onPress, selected }) => (
-  <TouchableHighlight onPress={onPress} style={{ flex: 1 }}>
+  <TouchableHighlight underlayColor={'rgba(0,0,0,0.02)'} onPress={onPress} style={{ flex: 1 }}>
     <View
       style={{
         flex: 1,
@@ -175,12 +176,13 @@ const FormatButton = ({ icon, onPress, selected }) => (
         justifyContent: 'center',
         alignItems: 'center',
       }}>
-      <InstaIcon size={32} color={selected ? '#003569' : 'rgba(0,0,0,0.5)'} name={icon} />
+      <InstaIcon size={32} color={selected ? '#3897F0' : 'rgba(0,0,0,0.5)'} name={icon} />
     </View>
   </TouchableHighlight>
 );
 
-const FormatRow = () => (
+const DISPLAY_FORMATS = ['grid', 'list', 'tag-user'];
+const FormatRow = ({ onSelect, selected }) => (
   <View
     style={[
       styles.row,
@@ -190,9 +192,16 @@ const FormatRow = () => (
         height: 48,
       },
     ]}>
-    <FormatButton icon="grid" selected />
-    <FormatButton icon="list" />
-    <FormatButton icon="tag-user" />
+    {DISPLAY_FORMATS.map(tag => {
+      return (
+        <FormatButton
+          icon={tag}
+          selected={tag === selected}
+          key={tag}
+          onPress={() => onSelect(tag)}
+        />
+      );
+    })}
   </View>
 );
 
@@ -259,50 +268,13 @@ class PhotoGrid extends React.Component {
     );
   }
 }
-
-const posts = [
-  {
-    description: 'Being a 21-year-old @expo.io developer is lit 😍🔥💙',
-    image: `https://scontent-sjc3-1.cdninstagram.com/vp/0ea7ffb0370dddfadd528a8b1b516573/5D186640/t51.2885-15/e35/45460185_782185418780650_4154679091114957131_n.jpg?_nc_ht=scontent-sjc3-1.cdninstagram.com`,
-  },
-  {
-    description: 'Being a 21-year-old @expo.io developer is lit 😍🔥💙',
-    image: `https://scontent-sjc3-1.cdninstagram.com/vp/38bfcc8b1412fe6e9eacf269def89ba5/5D0F993A/t51.2885-15/sh0.08/e35/c0.78.1080.1080/s640x640/50824531_117448239345934_8589191116386787248_n.jpg?_nc_ht=scontent-sjc3-1.cdninstagram.com`,
-  },
-  {
-    description: 'Being a 21-year-old @expo.io developer is lit 😍🔥💙',
-    image: `https://scontent-sjc3-1.cdninstagram.com/vp/f939678f172bbb08daec6cfe8f6c0aa1/5D4F31EB/t51.2885-15/sh0.08/e35/s640x640/44588924_315715379251262_8214353241920829455_n.jpg?_nc_ht=scontent-sjc3-1.cdninstagram.com`,
-  },
-  {
-    description: 'enjoying a hammysammy',
-    hasMulti: true,
-    image: 'https://i.ytimg.com/vi/iSTUfJjtEOY/maxresdefault.jpg',
-  },
-  {
-    description: 'enjoying a hammysammy',
-
-    image:
-      'https://m.media-amazon.com/images/M/MV5BNTE0Yzc3OTQtN2NhMS00NTdiLTlmMzAtOGRjNmQ3ZGYxN2M5XkEyXkFqcGdeQXVyMzQ3OTE4NTk@._V1_UY268_CR11,0,182,268_AL_.jpg',
-  },
-  {
-    description: 'enjoying a hammysammy',
-
-    image: 'https://i.ebayimg.com/images/g/MuwAAOSwax5YoZOp/s-l300.jpg',
-  },
-  {
-    description: 'enjoying a hammysammy',
-    image:
-      'https://coubsecure-s.akamaihd.net/get/b115/p/coub/simple/cw_timeline_pic/3ad828e8989/ffa93af652a155a7911d2/big_1473465663_1382481140_image.jpg',
-  },
-  {
-    description: 'enjoying a hammysammy',
-    image: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
-  },
-].map(item => ({ author: ACCOUNT, source: { uri: item.image }, ...item }));
-
 export default class ProfileScreen extends React.Component {
   static navigationOptions = {
     title: 'Baconbrix',
+  };
+
+  state = {
+    tag: DISPLAY_FORMATS[0],
   };
 
   componentDidMount() {
@@ -310,6 +282,15 @@ export default class ProfileScreen extends React.Component {
     //   NavigationService.navigate('Profile_Details', { item: posts[0] });
     // });
   }
+
+  renderDisplay = () => {
+    if (this.state.tag === DISPLAY_FORMATS[1]) {
+      return <FeedList data={Posts} ListHeaderComponent={null} />;
+    } else if (this.state.tag === DISPLAY_FORMATS[2]) {
+      return <PhotoGrid data={[...Posts].reverse()} />;
+    }
+    return <PhotoGrid data={Posts} />;
+  };
   render() {
     const stories = [
       {
@@ -343,8 +324,9 @@ export default class ProfileScreen extends React.Component {
         <ProfileHead />
         <ProfileBody />
         <Stories stories={stories} hasNew />
-        <FormatRow />
-        <PhotoGrid data={posts} />
+        <FormatRow onSelect={tag => this.setState({ tag })} selected={this.state.tag} />
+
+        {this.renderDisplay()}
       </ScrollView>
     );
   }
