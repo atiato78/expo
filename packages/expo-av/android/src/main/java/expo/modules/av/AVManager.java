@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.Log;
 
 import org.unimodules.core.ModuleRegistry;
 import org.unimodules.core.Promise;
@@ -27,7 +28,6 @@ import org.unimodules.interfaces.permissions.Permissions;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -348,17 +348,14 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   public void loadForSound(final ReadableArguments source, final ReadableArguments status, final Promise promise) {
     final int key = mSoundMapKeyCount++;
     final PlayerData data = PlayerData.createUnloadedPlayerData(this, mContext, source, status.toBundle());
-    data.setErrorListener(new PlayerData.ErrorListener() {
-      @Override
-      public void onError(final String error) {
-        removeSoundForKey(key);
-      }
-    });
+    data.setErrorListener(error -> removeSoundForKey(key));
     mSoundMap.put(key, data);
     data.load(status.toBundle(), new PlayerData.LoadCompletionListener() {
       @Override
       public void onLoadSuccess(final Bundle status) {
-        promise.resolve(Arrays.asList(key, status));
+        Throwable e = new Exception();
+        Log.e("Wwww", "Wat?", e);
+//        promise.resolve(Arrays.asList(key, status));
       }
 
       @Override
@@ -368,14 +365,11 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
       }
     });
 
-    data.setStatusUpdateListener(new PlayerData.StatusUpdateListener() {
-      @Override
-      public void onStatusUpdate(final Bundle status) {
-        Bundle payload = new Bundle();
-        payload.putInt("key", key);
-        payload.putBundle("status", status);
-        sendEvent("didUpdatePlaybackStatus", payload);
-      }
+    data.setStatusUpdateListener(status1 -> {
+      Bundle payload = new Bundle();
+      payload.putInt("key", key);
+      payload.putBundle("status", status1);
+      sendEvent("didUpdatePlaybackStatus", payload);
     });
   }
 

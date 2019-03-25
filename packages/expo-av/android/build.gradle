@@ -5,11 +5,13 @@ buildscript {
   }
 
   dependencies {
-    classpath 'com.android.tools.build:gradle:3.1.3'
+    classpath 'com.android.tools.build:gradle:3.3.2'
   }
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 apply plugin: 'maven'
 
 group = 'host.exp.exponent'
@@ -52,6 +54,10 @@ android {
   lintOptions {
     abortOnError false
   }
+  compileOptions {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+  }
 }
 
 if (new File(rootProject.projectDir.parentFile, 'package.json').exists()) {
@@ -75,4 +81,8 @@ dependencies {
 
   api "com.squareup.okhttp3:okhttp:3.10.0"
   api "com.squareup.okhttp3:okhttp-urlconnection:3.10.0"
+  implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+}
+repositories {
+  mavenCentral()
 }

@@ -7,28 +7,22 @@ import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
-import android.util.Log;
 import android.util.Pair;
 import android.view.Surface;
 
-import org.unimodules.core.ModuleRegistry;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
-import java.net.CookieHandler;
 import java.net.HttpCookie;
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import expo.modules.av.AVManagerInterface;
-import expo.modules.av.AudioFocusNotAcquiredException;
 
-
-class MediaPlayerData extends PlayerData implements
+class MediaPlayerData implements
+    Player,
     MediaPlayer.OnBufferingUpdateListener,
     MediaPlayer.OnCompletionListener,
     MediaPlayer.OnErrorListener,
@@ -36,22 +30,32 @@ class MediaPlayerData extends PlayerData implements
     MediaPlayer.OnSeekCompleteListener,
     MediaPlayer.OnVideoSizeChangedListener {
 
+  private Context mContext;
+
   static final String IMPLEMENTATION_NAME = "MediaPlayer";
 
   private MediaPlayer mMediaPlayer = null;
-  private ModuleRegistry mModuleRegistry = null;
   private boolean mMediaPlayerHasStartedEver = false;
+  private Integer mPlayableDurationMillis;
 
-  private Integer mPlayableDurationMillis = null;
-  private boolean mIsBuffering = false;
+  private boolean mIsBuffering;
 
-  MediaPlayerData(final AVManagerInterface avModule, final Context context, final Uri uri, final Map<String, Object> requestHeaders) {
-    super(avModule, uri, requestHeaders);
-    mModuleRegistry = avModule.getModuleRegistry();
+  private final Map<String, Object> mRequestHeaders;
+
+  private PlayerStateListener mPlayerStateListener = dummyPlayerStateListener();
+
+  public MediaPlayerData(Context context, Map<String, Object> requestHeaders) {
+    this.mContext = context;
+    this.mRequestHeaders = requestHeaders;
   }
 
   @Override
-  String getImplementationName() {
+  public void setPlayerStateListener(PlayerStateListener playerStateListener) {
+    this.mPlayerStateListener = playerStateListener;
+  }
+
+  @Override
+  public String getImplementationName() {
     return IMPLEMENTATION_NAME;
   }
 
@@ -60,8 +64,8 @@ class MediaPlayerData extends PlayerData implements
   // Lifecycle
 
   @Override
-  public void load(final Bundle status,
-                   final LoadCompletionListener loadCompletionListener) {
+  public void load(@NonNull final Bundle status, @NonNull Uri uri, @Nullable List<HttpCookie> cookies,
+                   @Nullable final PlayerData.LoadCompletionListener loadCompletionListener) {
     if (mMediaPlayer != null) {
       loadCompletionListener.onLoadError("Load encountered an error: MediaPlayerData cannot be loaded twice.");
       return;
@@ -71,13 +75,12 @@ class MediaPlayerData extends PlayerData implements
 
     try {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        unpreparedPlayer.setDataSource(mAVModule.getContext(), mUri, null, getHttpCookiesList());
+        unpreparedPlayer.setDataSource(mContext, uri, null, cookies);
       } else {
         Map<String, String> headers = new HashMap<>(1);
         StringBuilder cookieBuilder = new StringBuilder();
-        List<HttpCookie> httpCookies = getHttpCookiesList();
-        if (httpCookies != null) {
-          for (HttpCookie httpCookie : getHttpCookiesList()) {
+        if (cookies != null) {
+          for (HttpCookie httpCookie : cookies) {
             cookieBuilder.append(httpCookie.getName());
             cookieBuilder.append("=");
             cookieBuilder.append(httpCookie.getValue());
@@ -93,42 +96,26 @@ class MediaPlayerData extends PlayerData implements
             }
           }
         }
-        unpreparedPlayer.setDataSource(mAVModule.getContext(), mUri, headers);
+        unpreparedPlayer.setDataSource(mContext, uri, headers);
       }
     } catch (final Throwable throwable) {
       loadCompletionListener.onLoadError("Load encountered an error: setDataSource() threw an exception was thrown with message: " + throwable.toString());
       return;
     }
 
-    unpreparedPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-      @Override
-      public boolean onError(final MediaPlayer mp, final int what, final int extra) {
-        loadCompletionListener.onLoadError("Load encountered an error: the OnErrorListener was called with 'what' code " + what + " and 'extra' code " + extra + ".");
-        return true;
-      }
+    unpreparedPlayer.setOnErrorListener((mp, what, extra) -> {
+      loadCompletionListener.onLoadError("Load encountered an error: the OnErrorListener was called with 'what' code " + what + " and 'extra' code " + extra + ".");
+      return true;
     });
 
-    unpreparedPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-      @Override
-      public void onPrepared(final MediaPlayer mp) {
-        mMediaPlayer = mp;
-        mMediaPlayer.setOnBufferingUpdateListener(MediaPlayerData.this);
-        mMediaPlayer.setOnCompletionListener(MediaPlayerData.this);
-        mMediaPlayer.setOnErrorListener(MediaPlayerData.this);
-        mMediaPlayer.setOnInfoListener(MediaPlayerData.this);
+    unpreparedPlayer.setOnPreparedListener(mp -> {
+      mMediaPlayer = mp;
+      mMediaPlayer.setOnBufferingUpdateListener(MediaPlayerData.this);
+      mMediaPlayer.setOnCompletionListener(MediaPlayerData.this);
+      mMediaPlayer.setOnErrorListener(MediaPlayerData.this);
+      mMediaPlayer.setOnInfoListener(MediaPlayerData.this);
 
-        setStatusWithListener(status, new SetStatusCompletionListener() {
-          @Override
-          public void onSetStatusComplete() {
-            loadCompletionListener.onLoadSuccess(getStatus());
-          }
-
-          @Override
-          public void onSetStatusError(final String error) {
-            loadCompletionListener.onLoadSuccess(getStatus());
-          }
-        });
-      }
+      loadCompletionListener.onLoadSuccess(status);
     });
 
     try {
@@ -140,7 +127,6 @@ class MediaPlayerData extends PlayerData implements
 
   @Override
   public synchronized void release() {
-    stopUpdatingProgressIfNecessary();
     if (mMediaPlayer != null) {
       mMediaPlayer.setOnBufferingUpdateListener(null);
       mMediaPlayer.setOnCompletionListener(null);
@@ -153,34 +139,14 @@ class MediaPlayerData extends PlayerData implements
   }
 
   @Override
-  boolean shouldContinueUpdatingProgress() {
+  public boolean shouldContinueUpdatingProgress() {
     return mMediaPlayer != null && !mIsBuffering;
   }
 
   // Set status
 
-  @RequiresApi(api = Build.VERSION_CODES.M)
-  private void playMediaPlayerWithRateMAndHigher(final float rate) {
-    final PlaybackParams params = mMediaPlayer.getPlaybackParams();
-    params.setPitch(mShouldCorrectPitch ? 1.0f : rate);
-    params.setSpeed(rate);
-    params.setAudioFallbackMode(PlaybackParams.AUDIO_FALLBACK_MODE_DEFAULT);
-    mMediaPlayer.setPlaybackParams(params);
-    mMediaPlayer.start();
-  }
-
   @Override
-  void playPlayerWithRateAndMuteIfNecessary() throws AudioFocusNotAcquiredException {
-    if (mMediaPlayer == null || !shouldPlayerPlay()) {
-      return;
-    }
-
-    if (!mIsMuted) {
-      mAVModule.acquireAudioFocus();
-    }
-
-    updateVolumeMuteAndDuck();
-
+  public void play(boolean mute, float rate, boolean shouldCorrectPith) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
       if (!mMediaPlayer.isPlaying()) {
         mMediaPlayer.start();
@@ -192,88 +158,120 @@ class MediaPlayerData extends PlayerData implements
         final PlaybackParams params = mMediaPlayer.getPlaybackParams();
         final float setRate = params.getSpeed();
         final boolean setShouldCorrectPitch = params.getPitch() == 1.0f;
-        rateAndPitchAreSetCorrectly = setRate == mRate && setShouldCorrectPitch == mShouldCorrectPitch;
+        rateAndPitchAreSetCorrectly = setRate == rate && setShouldCorrectPitch == shouldCorrectPith;
       } catch (final Throwable throwable) {
         rateAndPitchAreSetCorrectly = false;
       }
-      if (mRate != 0 && (!mMediaPlayer.isPlaying() || !rateAndPitchAreSetCorrectly)) {
+      if (rate != 0 && (!mMediaPlayer.isPlaying() || !rateAndPitchAreSetCorrectly)) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-          playMediaPlayerWithRateMAndHigher(mRate);
+          playMediaPlayerWithRateMAndHigher(rate, shouldCorrectPith);
         } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
           // Bizarrely, I wasn't able to change rate while a sound was playing unless I had
           // changed the rate to something other than 1f before the sound started.
           // This workaround seems to fix this issue (which is said to only be fixed in N):
           // https://code.google.com/p/android/issues/detail?id=192135
-          playMediaPlayerWithRateMAndHigher(2f);
+          playMediaPlayerWithRateMAndHigher(2f, shouldCorrectPith);
           mMediaPlayer.pause();
-          playMediaPlayerWithRateMAndHigher(mRate);
+          playMediaPlayerWithRateMAndHigher(rate, shouldCorrectPith);
         }
         mMediaPlayerHasStartedEver = true;
       }
     }
-    beginUpdatingProgressIfNecessary();
   }
 
-  @Override
-  void applyNewStatus(final Integer newPositionMillis, final Boolean newIsLooping)
-      throws AudioFocusNotAcquiredException, IllegalStateException {
-    if (mMediaPlayer == null) {
-      throw new IllegalStateException("mMediaPlayer is null!");
-    }
-
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M && mRate != 1.0f) {
-      Log.w("Expo MediaPlayerData", "Cannot set audio/video playback rate for Android SDK < 23.");
-      mRate = 1.0f;
-    }
-
-    // Set looping idempotently
-    if (newIsLooping != null) {
-      mMediaPlayer.setLooping(newIsLooping);
-    }
-
-    // Pause first if necessary.
-    if (!shouldPlayerPlay()) {
-      if (mMediaPlayerHasStartedEver) {
-        mMediaPlayer.pause();
-      }
-      stopUpdatingProgressIfNecessary();
-    }
-
-    // Mute / update volume if it doesn't require a request of the audio focus.
-    updateVolumeMuteAndDuck();
-
-    // Seek
-    if (newPositionMillis != null && newPositionMillis != mMediaPlayer.getCurrentPosition()) {
-      mMediaPlayer.seekTo(newPositionMillis);
-    }
-
-    // Play / unmute
-    playPlayerWithRateAndMuteIfNecessary();
+  @RequiresApi(api = Build.VERSION_CODES.M)
+  private void playMediaPlayerWithRateMAndHigher(final float rate, boolean shouldCorrectPitch) {
+    final PlaybackParams params = mMediaPlayer.getPlaybackParams();
+    params.setPitch(shouldCorrectPitch ? 1.0f : rate);
+    params.setSpeed(rate);
+    params.setAudioFallbackMode(PlaybackParams.AUDIO_FALLBACK_MODE_DEFAULT);
+    mMediaPlayer.setPlaybackParams(params);
+    mMediaPlayer.start();
   }
+
+//  @Override
+//  void applyNewStatus(final Integer newPositionMillis, final Boolean newIsLooping)
+//      throws AudioFocusNotAcquiredException, IllegalStateException {
+//    if (mMediaPlayer == null) {
+//      throw new IllegalStateException("mMediaPlayer is null!");
+//    }
+//
+//    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M && mRate != 1.0f) {
+//      Log.w("Expo MediaPlayerData", "Cannot set audio/video playback rate for Android SDK < 23.");
+//      mRate = 1.0f;
+//    }
+//
+//    // Set looping idempotently
+//    if (newIsLooping != null) {
+//      mMediaPlayer.setLooping(newIsLooping);
+//    }
+//
+//    // Pause first if necessary.
+//    if (!shouldPlayerPlay()) {
+//      if (mMediaPlayerHasStartedEver) {
+//        mMediaPlayer.pause();
+//      }
+//      stopUpdatingProgressIfNecessary();
+//    }
+//
+//    // Mute / update volume if it doesn't require a request of the audio focus.
+//    updateVolumeMuteAndDuck();
+//
+//    // Seek
+//    if (newPositionMillis != null && newPositionMillis != mMediaPlayer.getCurrentPosition()) {
+//      mMediaPlayer.seekTo(newPositionMillis);
+//    }
+//
+//    // Play / unmute
+//    playPlayerWithRateAndMuteIfNecessary();
+//  }
 
   // Get status
 
+
   @Override
-  boolean isLoaded() {
+  public boolean isPlaying() {
+    return mMediaPlayer != null && mMediaPlayer.isPlaying();
+  }
+
+  @Override
+  public boolean isLoaded() {
     return mMediaPlayer != null;
   }
 
   @Override
-  void getExtraStatusFields(final Bundle map) {
-    Integer duration = mMediaPlayer.getDuration();
-    duration = duration < 0 ? null : duration;
-    if (duration != null) {
-      map.putInt(STATUS_DURATION_MILLIS_KEY_PATH, duration);
-    }
-    map.putInt(STATUS_POSITION_MILLIS_KEY_PATH, getClippedIntegerForValue(mMediaPlayer.getCurrentPosition(), 0, duration));
-    if (mPlayableDurationMillis != null) {
-      map.putInt(STATUS_PLAYABLE_DURATION_MILLIS_KEY_PATH, getClippedIntegerForValue(mPlayableDurationMillis, 0, duration));
-    }
+  public boolean isBuffering() {
+    return mIsBuffering;
+  }
 
-    map.putBoolean(STATUS_IS_PLAYING_KEY_PATH, mMediaPlayer.isPlaying());
-    map.putBoolean(STATUS_IS_BUFFERING_KEY_PATH, mIsBuffering);
+  @Override
+  public boolean getLooping() {
+    return mMediaPlayer.isLooping();
+  }
 
-    map.putBoolean(STATUS_IS_LOOPING_KEY_PATH, mMediaPlayer.isLooping());
+  @Override
+  public void setLooping(boolean looping) {
+    mMediaPlayer.setLooping(looping);
+  }
+
+  @Override
+  public void seekTo(int newPositionMillis) {
+    mMediaPlayer.seekTo(newPositionMillis);
+  }
+
+  @Override
+  public int getDuration() {
+    return mMediaPlayer.getDuration();
+  }
+
+  @Override
+  public int getPlayableDuration() {
+    return mPlayableDurationMillis;
+  }
+
+  @Override
+  public int getCurrentPosition() {
+    return mMediaPlayer.getCurrentPosition();
   }
 
   // Video specific stuff
@@ -284,7 +282,7 @@ class MediaPlayerData extends PlayerData implements
   }
 
   @Override
-  public void tryUpdateVideoSurface(final Surface surface) {
+  public void setSurface(@NonNull final Surface surface, boolean mShouldPlay) {
     if (mMediaPlayer == null) {
       return;
     }
@@ -312,18 +310,11 @@ class MediaPlayerData extends PlayerData implements
     if (mMediaPlayer != null && mMediaPlayerHasStartedEver) {
       mMediaPlayer.pause();
     }
-    stopUpdatingProgressIfNecessary();
   }
 
   @Override
-  public boolean requiresAudioFocus() {
-    return mMediaPlayer != null && (mMediaPlayer.isPlaying() || shouldPlayerPlay()) && !mIsMuted;
-  }
-
-  @Override
-  public void updateVolumeMuteAndDuck() {
+  public void setVolume(float value) {
     if (mMediaPlayer != null) {
-      final float value = mAVModule.getVolumeForDuckAndFocus(mIsMuted, mVolume);
       mMediaPlayer.setVolume(value, value);
     }
   }
@@ -337,24 +328,18 @@ class MediaPlayerData extends PlayerData implements
     } else {
       mPlayableDurationMillis = null;
     }
-    callStatusUpdateListener();
+    mPlayerStateListener.onBuffering(mPlayableDurationMillis);
   }
 
   @Override
   public void onCompletion(final MediaPlayer mp) {
-    callStatusUpdateListenerWithDidJustFinish();
-
-    if (!mp.isLooping()) {
-      mAVModule.abandonAudioFocusIfUnused();
-    }
+    mPlayerStateListener.onCompleted();
   }
 
   @Override
   public boolean onError(final MediaPlayer mp, final int what, final int extra) {
     release();
-    if (mErrorListener != null) {
-      mErrorListener.onError("MediaPlayer failed with 'what' code " + what + " and 'extra' code " + extra + ".");
-    }
+    mPlayerStateListener.onError("MediaPlayer failed with 'what' code " + what + " and 'extra' code " + extra + ".");
     return true;
   }
 
@@ -364,72 +349,76 @@ class MediaPlayerData extends PlayerData implements
     // @jesseruder @nikki93 I think we should hold off on handling some of the more obscure values
     // until the ExoPlayer refactor.
     switch (what) {
-      case MediaPlayer.MEDIA_INFO_UNKNOWN:
-        break;
       case MediaPlayer.MEDIA_INFO_BUFFERING_START:
         mIsBuffering = true;
+        mPlayerStateListener.onBufferingStart();
         break;
       case MediaPlayer.MEDIA_INFO_BUFFERING_END:
         mIsBuffering = false;
-        beginUpdatingProgressIfNecessary();
-        break;
-      case MediaPlayer.MEDIA_INFO_BAD_INTERLEAVING:
-        break;
-      case MediaPlayer.MEDIA_INFO_NOT_SEEKABLE:
-        break;
-      case MediaPlayer.MEDIA_INFO_METADATA_UPDATE:
-        break;
-      case MediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE:
-        break;
-      case MediaPlayer.MEDIA_INFO_SUBTITLE_TIMED_OUT:
+        mPlayerStateListener.onBufferingStop();
         break;
       case MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
-        if (mVideoSizeUpdateListener != null) {
-          mVideoSizeUpdateListener.onVideoSizeUpdate(new Pair<>(mp.getVideoWidth(), mp.getVideoHeight()));
-        }
+        mPlayerStateListener.videoSizeChanged(mp.getVideoWidth(), mp.getVideoHeight());
         break;
+      case MediaPlayer.MEDIA_INFO_UNKNOWN:
+      case MediaPlayer.MEDIA_INFO_BAD_INTERLEAVING:
+      case MediaPlayer.MEDIA_INFO_NOT_SEEKABLE:
+      case MediaPlayer.MEDIA_INFO_METADATA_UPDATE:
+      case MediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE:
+      case MediaPlayer.MEDIA_INFO_SUBTITLE_TIMED_OUT:
       case MediaPlayer.MEDIA_INFO_VIDEO_TRACK_LAGGING:
+        mPlayerStateListener.statusUpdated();
         break;
+
     }
-    callStatusUpdateListener();
     return true;
   }
 
   @Override
   public void onSeekComplete(final MediaPlayer mp) {
-    callStatusUpdateListener();
+    mPlayerStateListener.onSeekCompleted();
   }
 
   @Override
   public void onVideoSizeChanged(final MediaPlayer mp, final int width, final int height) {
-    if (mVideoSizeUpdateListener != null) {
-      mVideoSizeUpdateListener.onVideoSizeUpdate(new Pair<>(width, height));
-    }
+    mPlayerStateListener.videoSizeChanged(width, height);
   }
 
-  // Utilities
+  @NotNull
+  private PlayerStateListener dummyPlayerStateListener() {
+    return new PlayerStateListener() {
 
-  private List<HttpCookie> getHttpCookiesList() {
-    if (mModuleRegistry != null) {
-      CookieHandler cookieHandler = mModuleRegistry.getModule(CookieHandler.class);
-      if (cookieHandler != null) {
-        try {
-          Map<String, List<String>> headersMap = cookieHandler.get(URI.create(mUri.toString()), null);
-          List<String> cookies = headersMap.get("Cookie");
-          if (cookies != null) {
-            List<HttpCookie> httpCookies = new ArrayList<>();
-            for (String cookieValue : cookies) {
-              httpCookies.addAll(HttpCookie.parse(cookieValue));
-            }
-            return httpCookies;
-          } else {
-            return null;
-          }
-        } catch (IOException e) {
-          // do nothing, we'll return an empty list
-        }
+      @Override
+      public void onCompleted() {
       }
-    }
-    return Collections.emptyList();
+
+      @Override
+      public void onError(@NotNull String message) {
+      }
+
+      @Override
+      public void onBufferingStart() {
+      }
+
+      @Override
+      public void onBuffering(int bufferedDuration) {
+      }
+
+      @Override
+      public void onBufferingStop() {
+      }
+
+      @Override
+      public void onSeekCompleted() {
+      }
+
+      @Override
+      public void videoSizeChanged(int width, int height) {
+      }
+
+      @Override
+      public void statusUpdated() {
+      }
+    };
   }
 }

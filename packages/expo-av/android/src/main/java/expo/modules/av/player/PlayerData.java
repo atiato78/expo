@@ -7,16 +7,29 @@ import android.os.Handler;
 import android.util.Pair;
 import android.view.Surface;
 
-import java.lang.ref.WeakReference;
-import java.util.Map;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.util.Util;
 
+import org.jetbrains.annotations.NotNull;
 import org.unimodules.core.Promise;
 import org.unimodules.core.arguments.ReadableArguments;
+
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.net.CookieHandler;
+import java.net.HttpCookie;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import expo.modules.av.AVManagerInterface;
 import expo.modules.av.AudioEventHandler;
 import expo.modules.av.AudioFocusNotAcquiredException;
+import expo.modules.av.player.datasource.DataSourceFactoryProvider;
 
-public abstract class PlayerData implements AudioEventHandler {
+public class PlayerData implements AudioEventHandler, Player.PlayerStateListener {
   static final String STATUS_ANDROID_IMPLEMENTATION_KEY_PATH = "androidImplementation";
   static final String STATUS_HEADERS_KEY_PATH = "headers";
   static final String STATUS_IS_LOADED_KEY_PATH = "isLoaded";
@@ -51,7 +64,7 @@ public abstract class PlayerData implements AudioEventHandler {
   }
 
   public interface LoadCompletionListener {
-    void onLoadSuccess(final Bundle status);
+    void onLoadSuccess(Bundle status);
 
     void onLoadError(final String error);
   }
@@ -72,12 +85,13 @@ public abstract class PlayerData implements AudioEventHandler {
     void setFullscreenMode(boolean isFullscreen);
   }
 
-  final AVManagerInterface mAVModule;
-  final Uri mUri;
-  final Map<String, Object> mRequestHeaders;
+  private final AVManagerInterface mAVModule;
+  private final Uri mUri;
 
   private Handler mHandler = new Handler();
   private Runnable mProgressUpdater = new ProgressUpdater(this);
+
+  private Player mPlayer;
 
   private class ProgressUpdater implements Runnable {
     private WeakReference<PlayerData> mPlayerDataWeakReference;
@@ -108,8 +122,9 @@ public abstract class PlayerData implements AudioEventHandler {
   float mVolume = 1.0f;
   boolean mIsMuted = false;
 
-  PlayerData(final AVManagerInterface avModule, final Uri uri, final Map<String, Object> requestHeaders) {
-    mRequestHeaders = requestHeaders;
+  PlayerData(final Player player, final AVManagerInterface avModule, final Uri uri) {
+    this.mPlayer = player;
+    player.setPlayerStateListener(this);
     mAVModule = avModule;
     mUri = uri;
   }
@@ -126,19 +141,52 @@ public abstract class PlayerData implements AudioEventHandler {
 
     if (status.containsKey(STATUS_ANDROID_IMPLEMENTATION_KEY_PATH)
         && status.getString(STATUS_ANDROID_IMPLEMENTATION_KEY_PATH).equals(MediaPlayerData.IMPLEMENTATION_NAME)) {
-      return new MediaPlayerData(avModule, context, uri, requestHeaders);
+      return new PlayerData(new MediaPlayerData(context, requestHeaders), avModule, uri);
     } else {
-      return new SimpleExoPlayerData(avModule, context, uri, uriOverridingExtension, requestHeaders);
+      DataSource.Factory sourceFactory = avModule.getModuleRegistry().getModule(DataSourceFactoryProvider.class).createFactory(context, avModule.getModuleRegistry(), Util.getUserAgent(avModule.getContext(), "yourApplicationName"), requestHeaders);
+      return new PlayerData(new SimpleExoPlayerData(context, uriOverridingExtension, sourceFactory), avModule, uri);
     }
   }
 
-  abstract String getImplementationName();
-
   // Lifecycle
 
-  public abstract void load(final Bundle status, final LoadCompletionListener loadCompletionListener);
+  // TODO: change status to class I've created
+  public void load(final Bundle status, final LoadCompletionListener loadCompletionListener) {
+    this.mPlayer.load(status, mUri, getHttpCookiesList(), new LoadCompletionListener() {
+      @Override
+      public void onLoadSuccess(Bundle status) {
+        setStatusWithListener(status, new SetStatusCompletionListener() {
+          @Override
+          public void onSetStatusComplete() {
+            loadCompletionListener.onLoadSuccess(getStatus());
+          }
 
-  public abstract void release();
+          @Override
+          public void onSetStatusError(String error) {
+            loadCompletionListener.onLoadSuccess(getStatus());
+          }
+        });
+      }
+
+      @Override
+      public void onLoadError(String error) {
+        loadCompletionListener.onLoadError(error);
+      }
+    });
+  }
+
+  public void setSurface(Surface surface) {
+    this.mPlayer.setSurface(surface, mShouldPlay);
+  }
+
+  public Pair<Integer, Integer> getVideoWidthHeight() {
+    return mPlayer.getVideoWidthHeight();
+  }
+
+  public void release() {
+    stopUpdatingProgressIfNecessary();
+    this.mPlayer.release();
+  }
 
   // Status update listener
 
@@ -158,14 +206,12 @@ public abstract class PlayerData implements AudioEventHandler {
     callStatusUpdateListenerWithStatus(getStatus());
   }
 
-  abstract boolean shouldContinueUpdatingProgress();
-
   final void stopUpdatingProgressIfNecessary() {
     mHandler.removeCallbacks(mProgressUpdater);
   }
 
   private void progressUpdateLoop() {
-    if (!shouldContinueUpdatingProgress()) {
+    if (!mPlayer.shouldContinueUpdatingProgress()) {
       stopUpdatingProgressIfNecessary();
     } else {
       mHandler.postDelayed(mProgressUpdater, mProgressUpdateIntervalMillis);
@@ -195,23 +241,10 @@ public abstract class PlayerData implements AudioEventHandler {
     return mShouldPlay && mRate > 0.0;
   }
 
-  abstract void playPlayerWithRateAndMuteIfNecessary() throws AudioFocusNotAcquiredException;
-
-  abstract void applyNewStatus(final Integer newPositionMillis, final Boolean newIsLooping)
-      throws AudioFocusNotAcquiredException, IllegalStateException;
-
-  final void setStatusWithListener(final Bundle status, final SetStatusCompletionListener setStatusCompletionListener) {
+  final void setStatusWithListener(Bundle status, final SetStatusCompletionListener setStatusCompletionListener) {
+    if (status == null) status = getStatus();
     if (status.containsKey(STATUS_PROGRESS_UPDATE_INTERVAL_MILLIS_KEY_PATH)) {
       mProgressUpdateIntervalMillis = (int) status.getDouble(STATUS_PROGRESS_UPDATE_INTERVAL_MILLIS_KEY_PATH);
-    }
-
-    final Integer newPositionMillis;
-    if (status.containsKey(STATUS_POSITION_MILLIS_KEY_PATH)) {
-      // Even though we set the position with an int, this is a double in the map because iOS can
-      // take a floating point value for positionMillis.
-      newPositionMillis = (int) status.getDouble(STATUS_POSITION_MILLIS_KEY_PATH);
-    } else {
-      newPositionMillis = null;
     }
 
     if (status.containsKey(STATUS_SHOULD_PLAY_KEY_PATH)) {
@@ -234,23 +267,32 @@ public abstract class PlayerData implements AudioEventHandler {
       mIsMuted = status.getBoolean(STATUS_IS_MUTED_KEY_PATH);
     }
 
-    final Boolean newIsLooping;
+    if (status.containsKey(STATUS_POSITION_MILLIS_KEY_PATH)) {
+      // Even though we set the position with an int, this is a double in the map because iOS can
+      // take a floating point value for positionMillis.
+      mPlayer.seekTo((int) status.getDouble(STATUS_POSITION_MILLIS_KEY_PATH));
+    }
     if (status.containsKey(STATUS_IS_LOOPING_KEY_PATH)) {
-      newIsLooping = status.getBoolean(STATUS_IS_LOOPING_KEY_PATH);
-    } else {
-      newIsLooping = null;
+      mPlayer.setLooping(status.getBoolean(STATUS_IS_LOOPING_KEY_PATH));
+    }
+
+    updateVolumeMuteAndDuck();
+
+    if (!shouldPlayerPlay()) {
+      mPlayer.pauseImmediately();
     }
 
     try {
-      applyNewStatus(newPositionMillis, newIsLooping);
-    } catch (final Throwable throwable) {
-      mAVModule.abandonAudioFocusIfUnused();
-      setStatusCompletionListener.onSetStatusError(throwable.toString());
-      return;
-    }
+      mAVModule.acquireAudioFocus();
 
-    mAVModule.abandonAudioFocusIfUnused();
-    setStatusCompletionListener.onSetStatusComplete();
+      mPlayer.play(mIsMuted, mRate, mShouldCorrectPitch);
+
+      mAVModule.abandonAudioFocusIfUnused();
+      setStatusCompletionListener.onSetStatusComplete();
+    } catch (AudioFocusNotAcquiredException ex) {
+      mAVModule.abandonAudioFocusIfUnused();
+      setStatusCompletionListener.onSetStatusError(ex.toString());
+    }
   }
 
   public final void setStatus(final Bundle status, final Promise promise) {
@@ -292,30 +334,26 @@ public abstract class PlayerData implements AudioEventHandler {
     return (min != null && value < min) ? min : (max != null && value > max) ? max : value;
   }
 
-  abstract boolean isLoaded();
-
-  abstract void getExtraStatusFields(final Bundle map);
-
   // Sometimes another thread would release the player
   // in the middle of `getStatus()` call, which would result
   // in a null reference method invocation in `getExtraStatusFields`,
   // so we need to ensure nothing will release or nullify the property
   // while we get the latest status.
   public synchronized final Bundle getStatus() {
-    if (!isLoaded()) {
+    if (!mPlayer.isLoaded()) {
       final Bundle map = getUnloadedStatus();
-      map.putString(STATUS_ANDROID_IMPLEMENTATION_KEY_PATH, getImplementationName());
+      map.putString(STATUS_ANDROID_IMPLEMENTATION_KEY_PATH, mPlayer.getImplementationName());
       return map;
     }
 
     final Bundle map = new Bundle();
 
     map.putBoolean(STATUS_IS_LOADED_KEY_PATH, true);
-    map.putString(STATUS_ANDROID_IMPLEMENTATION_KEY_PATH, getImplementationName());
+    map.putString(STATUS_ANDROID_IMPLEMENTATION_KEY_PATH, mPlayer.getImplementationName());
 
     map.putString(STATUS_URI_KEY_PATH, mUri.getPath());
 
-    map.putInt(STATUS_PROGRESS_UPDATE_INTERVAL_MILLIS_KEY_PATH, mProgressUpdateIntervalMillis);
+    map.putDouble(STATUS_PROGRESS_UPDATE_INTERVAL_MILLIS_KEY_PATH, mProgressUpdateIntervalMillis);
     // STATUS_DURATION_MILLIS_KEY_PATH, STATUS_POSITION_MILLIS_KEY_PATH,
     // and STATUS_PLAYABLE_DURATION_MILLIS_KEY_PATH are set in addExtraStatusFields().
 
@@ -331,7 +369,7 @@ public abstract class PlayerData implements AudioEventHandler {
 
     map.putBoolean(STATUS_DID_JUST_FINISH_KEY_PATH, false);
 
-    getExtraStatusFields(map);
+    // TODO: Create rest of status based on deleted getExtraStatusFields method from SimpleExoPlayerdata and MediaPlayerData
 
     return map;
   }
@@ -346,11 +384,9 @@ public abstract class PlayerData implements AudioEventHandler {
     mFullscreenPresenter = fullscreenPresenter;
   }
 
-  public abstract Pair<Integer, Integer> getVideoWidthHeight();
-
-  public abstract void tryUpdateVideoSurface(final Surface surface);
-
-  abstract int getAudioSessionId();
+  int getAudioSessionId() {
+    return mPlayer.getAudioSessionId();
+  }
 
   public boolean isPresentedFullscreen() {
     return mFullscreenPresenter.isBeingPresentedFullscreen();
@@ -366,13 +402,14 @@ public abstract class PlayerData implements AudioEventHandler {
   public final void handleAudioFocusInterruptionBegan() {
     if (!mIsMuted) {
       pauseImmediately();
+      stopUpdatingProgressIfNecessary();
     }
   }
 
   @Override
   public final void handleAudioFocusGained() {
     try {
-      playPlayerWithRateAndMuteIfNecessary();
+      acquireFocusAndPlay();
     } catch (final AudioFocusNotAcquiredException e) {
       // This is ok -- we might be paused or audio might have been disabled.
     }
@@ -384,13 +421,116 @@ public abstract class PlayerData implements AudioEventHandler {
   }
 
   @Override
+  public void pauseImmediately() {
+    mPlayer.pauseImmediately();
+  }
+
+  @Override
+  public boolean requiresAudioFocus() {
+    return mPlayer.isPlaying() && !mIsMuted;
+  }
+
+  @Override
+  public void updateVolumeMuteAndDuck() {
+    if (mPlayer.isLoaded()) {
+      mPlayer.setVolume(mAVModule.getVolumeForDuckAndFocus(mIsMuted, mVolume));
+    }
+  }
+
+  @Override
   public final void onResume() {
     try {
-      playPlayerWithRateAndMuteIfNecessary();
+      acquireFocusAndPlay();
     } catch (final AudioFocusNotAcquiredException e) {
       // Do nothing -- another app has audio focus for now, and handleAudioFocusGained() will be
       // called when it abandons it.
     }
+  }
+
+  @Override
+  public void onCompleted() {
+    callStatusUpdateListenerWithDidJustFinish();
+
+    if (!mPlayer.getLooping()) {
+      mAVModule.abandonAudioFocusIfUnused();
+    }
+  }
+
+  @Override
+  public void onSeekCompleted() {
+    callStatusUpdateListener();
+  }
+
+  @Override
+  public void onError(@NotNull String message) {
+    mErrorListener.onError(message);
+  }
+
+  @Override
+  public void onBufferingStart() {
+    callStatusUpdateListener();
+  }
+
+  @Override
+  public void onBuffering(int bufferedDuration) {
+    callStatusUpdateListener();
+  }
+
+  @Override
+  public void onBufferingStop() {
+    callStatusUpdateListener();
+  }
+
+  @Override
+  public void statusUpdated() {
+    callStatusUpdateListener();
+  }
+
+  @Override
+  public void videoSizeChanged(int width, int height) {
+    if (mVideoSizeUpdateListener != null) {
+      mVideoSizeUpdateListener.onVideoSizeUpdate(new Pair<>(width, height));
+    }
+  }
+
+  private void acquireFocusAndPlay() throws AudioFocusNotAcquiredException {
+    if (!mPlayer.isLoaded() || !shouldPlayerPlay()) {
+      return;
+    }
+
+    if (!mIsMuted) {
+      mAVModule.acquireAudioFocus();
+    }
+
+    updateVolumeMuteAndDuck();
+
+    mPlayer.play(mIsMuted, mRate, mShouldCorrectPitch);
+
+    beginUpdatingProgressIfNecessary();
+  }
+
+  private List<HttpCookie> getHttpCookiesList() {
+    if (mAVModule.getModuleRegistry() != null) {
+      CookieHandler cookieHandler = mAVModule.getModuleRegistry().getModule(CookieHandler.class);
+      if (cookieHandler != null) {
+        try {
+          Map<String, List<String>> headersMap = cookieHandler.get(URI.create(mUri.toString()), null);
+          List<String> cookies = headersMap.get("Cookie");
+          if (cookies != null) {
+            List<HttpCookie> httpCookies = new ArrayList<>();
+            for (String cookieValue : cookies) {
+              httpCookies.addAll(HttpCookie.parse(cookieValue));
+            }
+            return httpCookies;
+          } else {
+            return null;
+          }
+        } catch (IOException e) {
+          // do nothing, we'll return an empty list
+        }
+      }
+    }
+    return Collections.emptyList();
   }
 
 }

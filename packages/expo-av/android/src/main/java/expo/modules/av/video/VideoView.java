@@ -15,6 +15,7 @@ import org.unimodules.core.ModuleRegistry;
 import org.unimodules.core.Promise;
 import org.unimodules.core.arguments.ReadableArguments;
 import org.unimodules.core.interfaces.services.EventEmitter;
+
 import expo.modules.av.AVManagerInterface;
 import expo.modules.av.AudioEventHandler;
 import expo.modules.av.player.PlayerData;
@@ -354,7 +355,7 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
         mVideoTextureView.scaleVideoSize(mPlayerData.getVideoWidthHeight(), mResizeMode);
 
         if (mVideoTextureView.isAttachedToWindow()) {
-          mPlayerData.tryUpdateVideoSurface(mVideoTextureView.getSurface());
+          mPlayerData.setSurface(mVideoTextureView.getSurface());
         }
 
         if (promise != null) {
@@ -434,7 +435,7 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
 
   public void tryUpdateVideoSurface(Surface surface) {
     if (mPlayerData != null) {
-      mPlayerData.tryUpdateVideoSurface(surface);
+      mPlayerData.setSurface(surface);
     }
   }
 

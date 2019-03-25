@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Pair;
@@ -12,16 +13,13 @@ import android.view.Surface;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
-import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.Timeline;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.source.AdaptiveMediaSourceEventListener;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.source.TrackGroupArray;
 import com.google.android.exoplayer2.source.dash.DashMediaSource;
 import com.google.android.exoplayer2.source.dash.DefaultDashChunkSource;
 import com.google.android.exoplayer2.source.hls.HlsMediaSource;
@@ -30,44 +28,42 @@ import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelection;
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
-import com.google.android.exoplayer2.upstream.BandwidthMeter;
 import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DataSpec;
-import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.util.Util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
-import java.util.Map;
+import java.net.HttpCookie;
+import java.util.List;
 
-import expo.modules.av.AVManagerInterface;
-import expo.modules.av.AudioFocusNotAcquiredException;
-import expo.modules.av.player.datasource.DataSourceFactoryProvider;
-
-class SimpleExoPlayerData extends PlayerData
-    implements Player.EventListener, ExtractorMediaSource.EventListener, SimpleExoPlayer.VideoListener, AdaptiveMediaSourceEventListener {
+class SimpleExoPlayerData
+    implements expo.modules.av.player.Player, Player.EventListener, ExtractorMediaSource.EventListener, SimpleExoPlayer.VideoListener, AdaptiveMediaSourceEventListener {
 
   private static final String IMPLEMENTATION_NAME = "SimpleExoPlayer";
 
   private SimpleExoPlayer mSimpleExoPlayer = null;
   private String mOverridingExtension;
-  private LoadCompletionListener mLoadCompletionListener = null;
+  private PlayerData.LoadCompletionListener mLoadCompletionListener = null;
   private boolean mFirstFrameRendered = false;
   private Pair<Integer, Integer> mVideoWidthHeight = null;
   private Integer mLastPlaybackState = null;
   private boolean mIsLooping = false;
   private boolean mIsLoading = true;
-  private Context mReactContext;
+  private final Context mContext;
+  private final DataSource.Factory mDataSourceFactory;
 
-  SimpleExoPlayerData(final AVManagerInterface avModule, final Context context, final Uri uri, final String overridingExtension, final Map<String, Object> requestHeaders) {
-    super(avModule, uri, requestHeaders);
-    mReactContext = context;
+  private PlayerStateListener mPlayerStateListener = dummyPlayerStateListener();
+
+  public SimpleExoPlayerData(final Context context, final String overridingExtension, DataSource.Factory dataSourceFactory) {
+    mContext = context;
     mOverridingExtension = overridingExtension;
+    this.mDataSourceFactory = dataSourceFactory;
   }
 
   @Override
-  String getImplementationName() {
+  public String getImplementationName() {
     return IMPLEMENTATION_NAME;
   }
 
@@ -76,30 +72,29 @@ class SimpleExoPlayerData extends PlayerData
   // Lifecycle
 
   @Override
-  public void load(final Bundle status, final LoadCompletionListener loadCompletionListener) {
+  public void load(final Bundle status, Uri uri, List<HttpCookie> cookies,
+                   final PlayerData.LoadCompletionListener loadCompletionListener) {
     mLoadCompletionListener = loadCompletionListener;
 
     // Create a default TrackSelector
     final Handler mainHandler = new Handler();
     // Measures bandwidth during playback. Can be null if not required.
-    final BandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
-    final TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory(bandwidthMeter);
+    final TrackSelection.Factory trackSelectionFactory = new AdaptiveTrackSelection.Factory();
     final TrackSelector trackSelector = new DefaultTrackSelector(trackSelectionFactory);
 
     // Create the player
-    mSimpleExoPlayer = ExoPlayerFactory.newSimpleInstance(mAVModule.getContext(), trackSelector);
+    mSimpleExoPlayer = ExoPlayerFactory.newSimpleInstance(mContext, trackSelector);
     mSimpleExoPlayer.addListener(this);
     mSimpleExoPlayer.addVideoListener(this);
 
     // Produces DataSource instances through which media data is loaded.
-    final DataSource.Factory dataSourceFactory = mAVModule.getModuleRegistry().getModule(DataSourceFactoryProvider.class).createFactory(mReactContext, mAVModule.getModuleRegistry(), Util.getUserAgent(mAVModule.getContext(), "yourApplicationName"), mRequestHeaders);
     try {
       // This is the MediaSource representing the media to be played.
-      final MediaSource source = buildMediaSource(mUri, mOverridingExtension, mainHandler, dataSourceFactory);
+      final MediaSource source = buildMediaSource(uri, mOverridingExtension, mainHandler, mDataSourceFactory);
 
       // Prepare the player with the source.
       mSimpleExoPlayer.prepare(source);
-      setStatus(status, null);
+      loadCompletionListener.onLoadSuccess(status);
     } catch (IllegalStateException e) {
       onFatalError(e);
     }
@@ -114,90 +109,24 @@ class SimpleExoPlayerData extends PlayerData
   }
 
   @Override
-  boolean shouldContinueUpdatingProgress() {
+  public boolean shouldContinueUpdatingProgress() {
     return mSimpleExoPlayer != null && mSimpleExoPlayer.getPlayWhenReady();
   }
 
   // Set status
 
   @Override
-  void playPlayerWithRateAndMuteIfNecessary() throws AudioFocusNotAcquiredException {
-    if (mSimpleExoPlayer == null || !shouldPlayerPlay()) {
-      return;
-    }
+  public void play(boolean isMuted, float rate, boolean shouldCorrectPitch) {
+    mSimpleExoPlayer.setPlaybackParameters(new PlaybackParameters(rate, shouldCorrectPitch ? 1.0f : rate));
 
-    if (!mIsMuted) {
-      mAVModule.acquireAudioFocus();
-    }
-
-    updateVolumeMuteAndDuck();
-
-    mSimpleExoPlayer.setPlaybackParameters(new PlaybackParameters(mRate, mShouldCorrectPitch ? 1.0f : mRate));
-
-    mSimpleExoPlayer.setPlayWhenReady(mShouldPlay);
-
-    beginUpdatingProgressIfNecessary();
-  }
-
-  @Override
-  void applyNewStatus(final Integer newPositionMillis, final Boolean newIsLooping)
-      throws AudioFocusNotAcquiredException, IllegalStateException {
-    if (mSimpleExoPlayer == null) {
-      throw new IllegalStateException("mSimpleExoPlayer is null!");
-    }
-
-    // Set looping idempotently
-    if (newIsLooping != null) {
-      mIsLooping = newIsLooping;
-      if (mIsLooping) {
-        mSimpleExoPlayer.setRepeatMode(Player.REPEAT_MODE_ALL);
-      } else {
-        mSimpleExoPlayer.setRepeatMode(Player.REPEAT_MODE_OFF);
-      }
-    }
-
-    // Pause first if necessary.
-    if (!shouldPlayerPlay()) {
-      mSimpleExoPlayer.setPlayWhenReady(false);
-      stopUpdatingProgressIfNecessary();
-    }
-
-    // Mute / update volume if it doesn't require a request of the audio focus.
-    updateVolumeMuteAndDuck();
-
-    // Seek
-    if (newPositionMillis != null) {
-      // TODO handle different timeline cases for streaming
-      mSimpleExoPlayer.seekTo(newPositionMillis);
-    }
-
-    // Play / unmute
-    playPlayerWithRateAndMuteIfNecessary();
+    mSimpleExoPlayer.setPlayWhenReady(true);
   }
 
   // Get status
 
   @Override
-  boolean isLoaded() {
+  public boolean isLoaded() {
     return mSimpleExoPlayer != null;
-  }
-
-  @Override
-  void getExtraStatusFields(final Bundle map) {
-    // TODO handle different timeline cases for streaming
-    final int duration = (int) mSimpleExoPlayer.getDuration();
-    map.putInt(STATUS_DURATION_MILLIS_KEY_PATH, duration);
-    map.putInt(STATUS_POSITION_MILLIS_KEY_PATH,
-        getClippedIntegerForValue((int) mSimpleExoPlayer.getCurrentPosition(), 0, duration));
-    map.putInt(STATUS_PLAYABLE_DURATION_MILLIS_KEY_PATH,
-        getClippedIntegerForValue((int) mSimpleExoPlayer.getBufferedPosition(), 0, duration));
-
-    map.putBoolean(STATUS_IS_PLAYING_KEY_PATH,
-        mSimpleExoPlayer.getPlayWhenReady() && mSimpleExoPlayer.getPlaybackState() == Player.STATE_READY);
-    map.putBoolean(STATUS_IS_BUFFERING_KEY_PATH,
-        mIsLoading || mSimpleExoPlayer.getPlaybackState() == Player.STATE_BUFFERING);
-
-    map.putBoolean(STATUS_IS_LOOPING_KEY_PATH, mIsLooping);
   }
 
   // Video specific stuff
@@ -208,7 +137,7 @@ class SimpleExoPlayerData extends PlayerData
   }
 
   @Override
-  public void tryUpdateVideoSurface(final Surface surface) {
+  public void setSurface(@NonNull final Surface surface, boolean ignore) {
     if (mSimpleExoPlayer != null) {
       mSimpleExoPlayer.setVideoSurface(surface);
     }
@@ -217,6 +146,36 @@ class SimpleExoPlayerData extends PlayerData
   @Override
   public int getAudioSessionId() {
     return mSimpleExoPlayer != null ? mSimpleExoPlayer.getAudioSessionId() : 0;
+  }
+
+  @Override
+  public boolean getLooping() {
+    return mIsLooping;
+  }
+
+  @Override
+  public boolean isPlaying() {
+    return mSimpleExoPlayer.getPlayWhenReady();
+  }
+
+  @Override
+  public boolean isBuffering() {
+    return mIsLoading || mSimpleExoPlayer.getPlaybackState() == Player.STATE_BUFFERING;
+  }
+
+  @Override
+  public int getDuration() {
+    return (int) mSimpleExoPlayer.getDuration();
+  }
+
+  @Override
+  public int getPlayableDuration() {
+    return (int) mSimpleExoPlayer.getBufferedPosition();
+  }
+
+  @Override
+  public int getCurrentPosition() {
+    return (int) mSimpleExoPlayer.getCurrentPosition();
   }
 
   // --------- Interface implementation ---------
@@ -228,18 +187,12 @@ class SimpleExoPlayerData extends PlayerData
     if (mSimpleExoPlayer != null) {
       mSimpleExoPlayer.setPlayWhenReady(false);
     }
-    stopUpdatingProgressIfNecessary();
   }
 
   @Override
-  public boolean requiresAudioFocus() {
-    return mSimpleExoPlayer != null && (mSimpleExoPlayer.getPlayWhenReady() || shouldPlayerPlay()) && !mIsMuted;
-  }
-
-  @Override
-  public void updateVolumeMuteAndDuck() {
+  public void setVolume(float value) {
     if (mSimpleExoPlayer != null) {
-      mSimpleExoPlayer.setVolume(mAVModule.getVolumeForDuckAndFocus(mIsMuted, mVolume));
+      mSimpleExoPlayer.setVolume(value);
     }
   }
 
@@ -248,47 +201,27 @@ class SimpleExoPlayerData extends PlayerData
   @Override
   public void onLoadingChanged(final boolean isLoading) {
     mIsLoading = isLoading;
-    callStatusUpdateListener();
-  }
-
-  @Override
-  public void onPlaybackParametersChanged(PlaybackParameters parameters) {
-  }
-
-  @Override
-  public void onSeekProcessed() {
-
-  }
-
-  @Override
-  public void onRepeatModeChanged(int repeatMode) {
-  }
-
-  @Override
-  public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
-
-  }
-
-  @Override
-  public void onTracksChanged(TrackGroupArray trackGroups,
-                              TrackSelectionArray trackSelections) {
-
+    if (!isLoading) {
+      mPlayerStateListener.onBufferingStop();
+    } else {
+      mPlayerStateListener.onBufferingStart();
+    }
   }
 
   @Override
   public void onPlayerStateChanged(final boolean playWhenReady, final int playbackState) {
     if (playbackState == Player.STATE_READY && mLoadCompletionListener != null) {
-      final LoadCompletionListener listener = mLoadCompletionListener;
+      final PlayerData.LoadCompletionListener listener = mLoadCompletionListener;
       mLoadCompletionListener = null;
-      listener.onLoadSuccess(getStatus());
+      listener.onLoadSuccess(null);
     }
 
     if (mLastPlaybackState != null
         && playbackState != mLastPlaybackState
         && playbackState == Player.STATE_ENDED) {
-      callStatusUpdateListenerWithDidJustFinish();
+      mPlayerStateListener.onCompleted();
     } else {
-      callStatusUpdateListener();
+      mPlayerStateListener.statusUpdated();
     }
     mLastPlaybackState = playbackState;
   }
@@ -308,7 +241,7 @@ class SimpleExoPlayerData extends PlayerData
     // So I guess it's safe to say that when a period transition happens,
     // media file transition happens, so we just finished playing one.
     if (reason == Player.DISCONTINUITY_REASON_PERIOD_TRANSITION) {
-      callStatusUpdateListenerWithDidJustFinish();
+      mPlayerStateListener.onCompleted();
     }
   }
 
@@ -322,11 +255,11 @@ class SimpleExoPlayerData extends PlayerData
 
   private void onFatalError(final Throwable error) {
     if (mLoadCompletionListener != null) {
-      final LoadCompletionListener listener = mLoadCompletionListener;
+      final PlayerData.LoadCompletionListener listener = mLoadCompletionListener;
       mLoadCompletionListener = null;
       listener.onLoadError(error.toString());
     } else {
-      mErrorListener.onError("Player error: " + error.getMessage());
+      mPlayerStateListener.onError("Player error: " + error.getMessage());
     }
     release();
   }
@@ -337,15 +270,15 @@ class SimpleExoPlayerData extends PlayerData
   public void onVideoSizeChanged(final int width, final int height, final int unAppliedRotationDegrees, final float pixelWidthHeightRatio) {
     // TODO other params?
     mVideoWidthHeight = new Pair<>(width, height);
-    if (mFirstFrameRendered && mVideoSizeUpdateListener != null) {
-      mVideoSizeUpdateListener.onVideoSizeUpdate(mVideoWidthHeight);
+    if (mFirstFrameRendered) {
+      mPlayerStateListener.videoSizeChanged(width, height);
     }
   }
 
   @Override
   public void onRenderedFirstFrame() {
-    if (!mFirstFrameRendered && mVideoWidthHeight != null && mVideoSizeUpdateListener != null) {
-      mVideoSizeUpdateListener.onVideoSizeUpdate(mVideoWidthHeight);
+    if (!mFirstFrameRendered && mVideoWidthHeight != null) {
+      mPlayerStateListener.videoSizeChanged(mVideoWidthHeight.first, mVideoWidthHeight.second);
     }
     mFirstFrameRendered = true;
   }
@@ -415,4 +348,58 @@ class SimpleExoPlayerData extends PlayerData
   public void onDownstreamFormatChanged(int windowIndex, @Nullable MediaSource.MediaPeriodId mediaPeriodId, MediaLoadData mediaLoadData) {
 
   }
+
+  @Override
+  public void setLooping(boolean b) {
+    mSimpleExoPlayer.setRepeatMode(b ? Player.REPEAT_MODE_ALL : Player.REPEAT_MODE_OFF);
+  }
+
+  @Override
+  public void seekTo(int newPositionMillis) {
+    mSimpleExoPlayer.seekTo(newPositionMillis);
+  }
+
+  @Override
+  public void setPlayerStateListener(@NotNull PlayerStateListener listener) {
+    this.mPlayerStateListener = listener;
+  }
+
+  @NotNull
+  private PlayerStateListener dummyPlayerStateListener() {
+    return new PlayerStateListener() {
+
+      @Override
+      public void onCompleted() {
+      }
+
+      @Override
+      public void onError(@NotNull String message) {
+      }
+
+      @Override
+      public void onBufferingStart() {
+      }
+
+      @Override
+      public void onBuffering(int bufferedDuration) {
+      }
+
+      @Override
+      public void onBufferingStop() {
+      }
+
+      @Override
+      public void onSeekCompleted() {
+      }
+
+      @Override
+      public void videoSizeChanged(int width, int height) {
+      }
+
+      @Override
+      public void statusUpdated() {
+      }
+    };
+  }
+
 }
