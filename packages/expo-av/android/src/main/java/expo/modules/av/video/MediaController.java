@@ -25,7 +25,7 @@ import java.util.Formatter;
 import java.util.Locale;
 
 import expo.modules.av.R;
-import expo.modules.av.player.PlayerDataControl;
+import expo.modules.av.player.PlayerControl;
 
 // Based on https://www.brightec.co.uk/ideas/custom-android-media-controller
 // We implement our own MediaController,
@@ -37,7 +37,7 @@ import expo.modules.av.player.PlayerDataControl;
 // is in a FullscreenVideoPlayer (the controls float in a window below).
 
 public class MediaController extends FrameLayout {
-  private PlayerDataControl mPlayer;
+  private PlayerControl mPlayer;
   private Context mContext;
   private ViewGroup mAnchor;
   private View mRoot;
@@ -88,7 +88,7 @@ public class MediaController extends FrameLayout {
     super.onFinishInflate();
   }
 
-  public void setMediaPlayer(PlayerDataControl player) {
+  public void setMediaPlayer(PlayerControl player) {
     mPlayer = player;
     updateControls();
   }

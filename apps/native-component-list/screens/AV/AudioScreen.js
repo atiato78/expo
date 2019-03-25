@@ -32,10 +32,10 @@ export default class AuthSessionScreen extends React.Component {
           style={styles.player}
         />
         <HeadingText style={styles.headingText}>Local asset player</HeadingText>
-        <Player
+        {/* <Player
           source={Asset.fromModule(require('../../assets/sounds/polonez.mp3'))}
           style={styles.player}
-        />
+        /> */}
       </ScrollView>
     );
   }

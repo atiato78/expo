@@ -15,7 +15,6 @@ import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.source.AdaptiveMediaSourceEventListener;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
@@ -38,14 +37,14 @@ import java.io.IOException;
 import java.net.HttpCookie;
 import java.util.List;
 
-class SimpleExoPlayerData
-    implements expo.modules.av.player.Player, Player.EventListener, ExtractorMediaSource.EventListener, SimpleExoPlayer.VideoListener, AdaptiveMediaSourceEventListener {
+class ExoPlayerWrapper
+    implements expo.modules.av.player.ExpoPlayer, Player.EventListener, ExtractorMediaSource.EventListener, com.google.android.exoplayer2.SimpleExoPlayer.VideoListener, AdaptiveMediaSourceEventListener {
 
-  private static final String IMPLEMENTATION_NAME = "SimpleExoPlayer";
+  private static final String IMPLEMENTATION_NAME = "ExoPlayerWrapper";
 
-  private SimpleExoPlayer mSimpleExoPlayer = null;
+  private com.google.android.exoplayer2.SimpleExoPlayer mSimpleExoPlayer = null;
   private String mOverridingExtension;
-  private PlayerData.LoadCompletionListener mLoadCompletionListener = null;
+  private PlayerManager.LoadCompletionListener mLoadCompletionListener = null;
   private boolean mFirstFrameRendered = false;
   private Pair<Integer, Integer> mVideoWidthHeight = null;
   private Integer mLastPlaybackState = null;
@@ -56,7 +55,7 @@ class SimpleExoPlayerData
 
   private PlayerStateListener mPlayerStateListener = dummyPlayerStateListener();
 
-  public SimpleExoPlayerData(final Context context, final String overridingExtension, DataSource.Factory dataSourceFactory) {
+  public ExoPlayerWrapper(final Context context, final String overridingExtension, DataSource.Factory dataSourceFactory) {
     mContext = context;
     mOverridingExtension = overridingExtension;
     this.mDataSourceFactory = dataSourceFactory;
@@ -67,13 +66,13 @@ class SimpleExoPlayerData
     return IMPLEMENTATION_NAME;
   }
 
-  // --------- PlayerData implementation ---------
+  // --------- PlayerManager implementation ---------
 
   // Lifecycle
 
   @Override
   public void load(final Bundle status, Uri uri, List<HttpCookie> cookies,
-                   final PlayerData.LoadCompletionListener loadCompletionListener) {
+                   final PlayerManager.LoadCompletionListener loadCompletionListener) {
     mLoadCompletionListener = loadCompletionListener;
 
     // Create a default TrackSelector
@@ -211,7 +210,7 @@ class SimpleExoPlayerData
   @Override
   public void onPlayerStateChanged(final boolean playWhenReady, final int playbackState) {
     if (playbackState == Player.STATE_READY && mLoadCompletionListener != null) {
-      final PlayerData.LoadCompletionListener listener = mLoadCompletionListener;
+      final PlayerManager.LoadCompletionListener listener = mLoadCompletionListener;
       mLoadCompletionListener = null;
       listener.onLoadSuccess(null);
     }
@@ -255,16 +254,16 @@ class SimpleExoPlayerData
 
   private void onFatalError(final Throwable error) {
     if (mLoadCompletionListener != null) {
-      final PlayerData.LoadCompletionListener listener = mLoadCompletionListener;
+      final PlayerManager.LoadCompletionListener listener = mLoadCompletionListener;
       mLoadCompletionListener = null;
       listener.onLoadError(error.toString());
     } else {
-      mPlayerStateListener.onError("Player error: " + error.getMessage());
+      mPlayerStateListener.onError("ExpoPlayer error: " + error.getMessage());
     }
     release();
   }
 
-  // SimpleExoPlayer.VideoListener
+  // ExoPlayerWrapper.VideoListener
 
   @Override
   public void onVideoSizeChanged(final int width, final int height, final int unAppliedRotationDegrees, final float pixelWidthHeightRatio) {

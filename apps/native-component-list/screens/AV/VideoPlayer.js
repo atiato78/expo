@@ -17,6 +17,10 @@ export default class VideoPlayer extends React.Component {
     resizeMode: Video.RESIZE_MODE_CONTAIN,
   };
 
+  componentDidMount = () => {
+    this._video.loadAsync({}, { useNativeControls: true });
+  };
+
   _handleError = errorMessage => this.setState({ errorMessage });
 
   _handleVideoMount = ref => (this._video = ref);

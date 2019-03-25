@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import expo.modules.av.player.PlayerData;
+import expo.modules.av.player.PlayerManager;
 import expo.modules.av.video.VideoView;
 import expo.modules.av.video.VideoViewWrapper;
 
@@ -78,8 +78,8 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   private boolean mIsDuckingAudio = false;
 
   private int mSoundMapKeyCount = 0;
-  // There will never be many PlayerData objects in the map, so HashMap is most efficient.
-  private final Map<Integer, PlayerData> mSoundMap = new HashMap<>();
+  // There will never be many PlayerManager objects in the map, so HashMap is most efficient.
+  private final Map<Integer, PlayerManager> mSoundMap = new HashMap<>();
   private final Set<VideoView> mVideoViewSet = new HashSet<>();
 
   private MediaRecorder mAudioRecorder = null;
@@ -269,7 +269,7 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
     mAudioManager.abandonAudioFocus(this);
   }
 
-  public void abandonAudioFocusIfUnused() { // used by PlayerData
+  public void abandonAudioFocusIfUnused() { // used by PlayerManager
     for (final AudioEventHandler handler : getAllRegisteredAudioEventHandlers()) {
       if (handler.requiresAudioFocus()) {
         return;
@@ -327,17 +327,17 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
 
   // Unified playback API - Audio
 
-  // Rejects the promise and returns null if the PlayerData is not found.
-  private PlayerData tryGetSoundForKey(final Integer key, final Promise promise) {
-    final PlayerData data = this.mSoundMap.get(key);
+  // Rejects the promise and returns null if the PlayerManager is not found.
+  private PlayerManager tryGetSoundForKey(final Integer key, final Promise promise) {
+    final PlayerManager data = this.mSoundMap.get(key);
     if (data == null && promise != null) {
-      promise.reject("E_AUDIO_NOPLAYER", "Player does not exist.");
+      promise.reject("E_AUDIO_NOPLAYER", "ExpoPlayer does not exist.");
     }
     return data;
   }
 
   private void removeSoundForKey(final Integer key) {
-    final PlayerData data = mSoundMap.remove(key);
+    final PlayerManager data = mSoundMap.remove(key);
     if (data != null) {
       data.release();
       abandonAudioFocusIfUnused();
@@ -347,10 +347,10 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   @Override
   public void loadForSound(final ReadableArguments source, final ReadableArguments status, final Promise promise) {
     final int key = mSoundMapKeyCount++;
-    final PlayerData data = PlayerData.createUnloadedPlayerData(this, mContext, source, status.toBundle());
+    final PlayerManager data = PlayerManager.createUnloadedPlayerData(this, mContext, source, status.toBundle());
     data.setErrorListener(error -> removeSoundForKey(key));
     mSoundMap.put(key, data);
-    data.load(status.toBundle(), new PlayerData.LoadCompletionListener() {
+    data.load(status.toBundle(), new PlayerManager.LoadCompletionListener() {
       @Override
       public void onLoadSuccess(final Bundle status) {
         Throwable e = new Exception();
@@ -377,13 +377,13 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   public void unloadForSound(final Integer key, final Promise promise) {
     if (tryGetSoundForKey(key, promise) != null) {
       removeSoundForKey(key);
-      promise.resolve(PlayerData.getUnloadedStatus());
+      promise.resolve(PlayerManager.getUnloadedStatus());
     } // Otherwise, tryGetSoundForKey has already rejected the promise.
   }
 
   @Override
   public void setStatusForSound(final Integer key, final ReadableArguments status, final Promise promise) {
-    final PlayerData data = tryGetSoundForKey(key, promise);
+    final PlayerManager data = tryGetSoundForKey(key, promise);
     if (data != null) {
       data.setStatus(status.toBundle(), promise);
     } // Otherwise, tryGetSoundForKey has already rejected the promise.
@@ -391,7 +391,7 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
 
   @Override
   public void replaySound(final Integer key, final ReadableArguments status, final Promise promise) {
-    final PlayerData data = tryGetSoundForKey(key, promise);
+    final PlayerManager data = tryGetSoundForKey(key, promise);
     if (data != null) {
       data.setStatus(status.toBundle(), promise);
     } // Otherwise, tryGetSoundForKey has already rejected the promise.
@@ -399,7 +399,7 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
 
   @Override
   public void getStatusForSound(final Integer key, final Promise promise) {
-    final PlayerData data = tryGetSoundForKey(key, promise);
+    final PlayerManager data = tryGetSoundForKey(key, promise);
     if (data != null) {
       promise.resolve(data.getStatus());
     } // Otherwise, tryGetSoundForKey has already rejected the promise.

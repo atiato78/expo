@@ -6,13 +6,13 @@ import android.util.Pair
 import android.view.Surface
 import java.net.HttpCookie
 
-interface Player {
+interface ExpoPlayer {
 
     fun setSurface(surface: Surface, shouldPlay: Boolean)
 
     fun play(mute: Boolean, rate: Float, shouldCorrectPitch: Boolean)
     fun pauseImmediately()
-    fun load(status: Bundle, uri: Uri, cookies: List<HttpCookie>, loadCompletionListener: PlayerData.LoadCompletionListener)
+    fun load(status: Bundle, uri: Uri, cookies: List<HttpCookie>, loadCompletionListener: PlayerManager.LoadCompletionListener)
     fun release()
 
     fun getImplementationName(): String

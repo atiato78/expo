@@ -13,7 +13,7 @@ import org.unimodules.core.interfaces.services.KeepAwakeManager;
 
 import java.lang.ref.WeakReference;
 
-import expo.modules.av.player.PlayerData;
+import expo.modules.av.player.PlayerManager;
 
 public class FullscreenVideoPlayer extends Dialog {
   private static class KeepScreenOnUpdater implements Runnable {
@@ -31,8 +31,8 @@ public class FullscreenVideoPlayer extends Dialog {
         final Window window = fullscreenVideoPlayer.getWindow();
         if (window != null) {
           boolean isPlaying =
-              fullscreenVideoPlayer.mVideoView.getStatus().containsKey(PlayerData.STATUS_IS_PLAYING_KEY_PATH)
-                  && fullscreenVideoPlayer.mVideoView.getStatus().getBoolean(PlayerData.STATUS_IS_PLAYING_KEY_PATH);
+              fullscreenVideoPlayer.mVideoView.getStatus().containsKey(PlayerManager.STATUS_IS_PLAYING_KEY_PATH)
+                  && fullscreenVideoPlayer.mVideoView.getStatus().getBoolean(PlayerManager.STATUS_IS_PLAYING_KEY_PATH);
           ModuleRegistry moduleRegistry = fullscreenVideoPlayer.mModuleRegistry;
           if (moduleRegistry != null) {
             KeepAwakeManager keepAwakeManager = moduleRegistry.getModule(KeepAwakeManager.class);

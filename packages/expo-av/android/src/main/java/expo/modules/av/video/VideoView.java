@@ -18,11 +18,11 @@ import org.unimodules.core.interfaces.services.EventEmitter;
 
 import expo.modules.av.AVManagerInterface;
 import expo.modules.av.AudioEventHandler;
-import expo.modules.av.player.PlayerData;
-import expo.modules.av.player.PlayerDataControl;
+import expo.modules.av.player.PlayerControl;
+import expo.modules.av.player.PlayerManager;
 
 @SuppressLint("ViewConstructor")
-public class VideoView extends FrameLayout implements AudioEventHandler, FullscreenVideoPlayerPresentationChangeListener, PlayerData.FullscreenPresenter {
+public class VideoView extends FrameLayout implements AudioEventHandler, FullscreenVideoPlayerPresentationChangeListener, PlayerManager.FullscreenPresenter {
 
   private final Runnable mMediaControllerUpdater = new Runnable() {
     @Override
@@ -33,7 +33,7 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
     }
   };
 
-  private final PlayerData.StatusUpdateListener mStatusUpdateListener = new PlayerData.StatusUpdateListener() {
+  private final PlayerManager.StatusUpdateListener mStatusUpdateListener = new PlayerManager.StatusUpdateListener() {
     @Override
     public void onStatusUpdate(final Bundle status) {
       post(mMediaControllerUpdater);
@@ -45,7 +45,7 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
   private final AVManagerInterface mAVModule;
   private VideoViewWrapper mVideoViewWrapper;
 
-  private PlayerData mPlayerData = null;
+  private PlayerManager mPlayerManager = null;
 
   private ScalableType mResizeMode = ScalableType.LEFT_TOP;
   private boolean mUseNativeControls = false;
@@ -92,9 +92,9 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
       mMediaController.setAnchorView(null);
       mMediaController = null;
     }
-    if (mPlayerData != null) {
-      mPlayerData.release();
-      mPlayerData = null;
+    if (mPlayerManager != null) {
+      mPlayerManager.release();
+      mPlayerManager = null;
     }
     mIsLoaded = false;
   }
@@ -126,7 +126,7 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
 
       final Bundle map = new Bundle();
       map.putBundle("naturalSize", naturalSize);
-      map.putBundle("status", mPlayerData.getStatus());
+      map.putBundle("status", mPlayerManager.getStatus());
       mEventEmitter.emit(getReactId(), VideoViewManager.Events.EVENT_READY_FOR_DISPLAY.toString(), map);
     }
   }
@@ -136,7 +136,7 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
   }
 
   public void maybeUpdateMediaControllerForUseNativeControls(boolean showMediaControllerIfEnabled) {
-    if (mPlayerData != null && mMediaController != null) {
+    if (mPlayerManager != null && mMediaController != null) {
       mMediaController.updateControls();
       mMediaController.setEnabled(shouldUseNativeControls());
       if (shouldUseNativeControls() && showMediaControllerIfEnabled) {
@@ -269,18 +269,18 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
   public void setStatus(final ReadableArguments status, final Promise promise) {
     Bundle statusBundle = status.toBundle();
     mStatusToSet.putAll(statusBundle);
-    if (mPlayerData != null) {
+    if (mPlayerManager != null) {
       final Bundle statusToSet = new Bundle();
       statusToSet.putAll(mStatusToSet);
       mStatusToSet = new Bundle();
-      mPlayerData.setStatus(statusBundle, promise);
+      mPlayerManager.setStatus(statusBundle, promise);
     } else if (promise != null) {
-      promise.resolve(PlayerData.getUnloadedStatus());
+      promise.resolve(PlayerManager.getUnloadedStatus());
     }
   }
 
   public Bundle getStatus() {
-    return mPlayerData == null ? PlayerData.getUnloadedStatus() : mPlayerData.getStatus();
+    return mPlayerManager == null ? PlayerManager.getUnloadedStatus() : mPlayerManager.getStatus();
   }
 
   private boolean shouldUseNativeControls() {
@@ -302,10 +302,10 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
   }
 
   public void setSource(final ReadableArguments source, final ReadableArguments initialStatus, final Promise promise) {
-    if (mPlayerData != null) {
-      mStatusToSet.putAll(mPlayerData.getStatus());
-      mPlayerData.release();
-      mPlayerData = null;
+    if (mPlayerManager != null) {
+      mStatusToSet.putAll(mPlayerManager.getStatus());
+      mPlayerManager.release();
+      mPlayerManager = null;
       mIsLoaded = false;
     }
 
@@ -313,11 +313,11 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
       mStatusToSet.putAll(initialStatus.toBundle());
     }
 
-    final String uriString = source != null ? source.getString(PlayerData.STATUS_URI_KEY_PATH) : null;
+    final String uriString = source != null ? source.getString(PlayerManager.STATUS_URI_KEY_PATH) : null;
 
     if (uriString == null) {
       if (promise != null) {
-        promise.resolve(PlayerData.getUnloadedStatus());
+        promise.resolve(PlayerManager.getUnloadedStatus());
       }
       return;
     }
@@ -328,16 +328,16 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
     statusToInitiallySet.putAll(mStatusToSet);
     mStatusToSet = new Bundle();
 
-    mPlayerData = PlayerData.createUnloadedPlayerData(mAVModule, getContext(), source, statusToInitiallySet);
+    mPlayerManager = PlayerManager.createUnloadedPlayerData(mAVModule, getContext(), source, statusToInitiallySet);
 
-    mPlayerData.setErrorListener(new PlayerData.ErrorListener() {
+    mPlayerManager.setErrorListener(new PlayerManager.ErrorListener() {
       @Override
       public void onError(final String error) {
         unloadPlayerAndMediaController();
         callOnError(error);
       }
     });
-    mPlayerData.setVideoSizeUpdateListener(new PlayerData.VideoSizeUpdateListener() {
+    mPlayerManager.setVideoSizeUpdateListener(new PlayerManager.VideoSizeUpdateListener() {
       @Override
       public void onVideoSizeUpdate(final Pair<Integer, Integer> videoWidthHeight) {
         mVideoTextureView.scaleVideoSize(videoWidthHeight, mResizeMode);
@@ -346,16 +346,16 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
       }
     });
 
-    mPlayerData.setFullscreenPresenter(this);
+    mPlayerManager.setFullscreenPresenter(this);
 
-    mPlayerData.load(statusToInitiallySet, new PlayerData.LoadCompletionListener() {
+    mPlayerManager.load(statusToInitiallySet, new PlayerManager.LoadCompletionListener() {
       @Override
       public void onLoadSuccess(final Bundle status) {
         mIsLoaded = true;
-        mVideoTextureView.scaleVideoSize(mPlayerData.getVideoWidthHeight(), mResizeMode);
+        mVideoTextureView.scaleVideoSize(mPlayerManager.getVideoWidthHeight(), mResizeMode);
 
         if (mVideoTextureView.isAttachedToWindow()) {
-          mPlayerData.setSurface(mVideoTextureView.getSurface());
+          mPlayerManager.setSurface(mVideoTextureView.getSurface());
         }
 
         if (promise != null) {
@@ -364,8 +364,8 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
           promise.resolve(statusCopy);
         }
 
-        mPlayerData.setStatusUpdateListener(mStatusUpdateListener);
-        mMediaController.setMediaPlayer(new PlayerDataControl(mPlayerData));
+        mPlayerManager.setStatusUpdateListener(mStatusUpdateListener);
+        mMediaController.setMediaPlayer(new PlayerControl(mPlayerManager));
         mMediaController.setAnchorView(VideoView.this);
         maybeUpdateMediaControllerForUseNativeControls(false);
         mEventEmitter.emit(getReactId(), VideoViewManager.Events.EVENT_LOAD.toString(), status);
@@ -401,8 +401,8 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
 
   void setResizeMode(final ScalableType resizeMode) {
     mResizeMode = resizeMode;
-    if (mPlayerData != null) {
-      mVideoTextureView.scaleVideoSize(mPlayerData.getVideoWidthHeight(), mResizeMode);
+    if (mPlayerManager != null) {
+      mVideoTextureView.scaleVideoSize(mPlayerManager.getVideoWidthHeight(), mResizeMode);
     }
   }
 
@@ -426,16 +426,16 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
   protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
     super.onLayout(changed, left, top, right, bottom);
 
-    if (changed && mPlayerData != null) {
-      mVideoTextureView.scaleVideoSize(mPlayerData.getVideoWidthHeight(), mResizeMode);
+    if (changed && mPlayerManager != null) {
+      mVideoTextureView.scaleVideoSize(mPlayerManager.getVideoWidthHeight(), mResizeMode);
     }
   }
 
   // TextureView
 
   public void tryUpdateVideoSurface(Surface surface) {
-    if (mPlayerData != null) {
-      mPlayerData.setSurface(surface);
+    if (mPlayerManager != null) {
+      mPlayerManager.setSurface(surface);
     }
   }
 
@@ -443,49 +443,49 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
 
   @Override
   public void pauseImmediately() {
-    if (mPlayerData != null) {
-      mPlayerData.pauseImmediately();
+    if (mPlayerManager != null) {
+      mPlayerManager.pauseImmediately();
     }
   }
 
   @Override
   public boolean requiresAudioFocus() {
-    return mPlayerData != null && mPlayerData.requiresAudioFocus();
+    return mPlayerManager != null && mPlayerManager.requiresAudioFocus();
   }
 
   @Override
   public void updateVolumeMuteAndDuck() {
-    if (mPlayerData != null) {
-      mPlayerData.updateVolumeMuteAndDuck();
+    if (mPlayerManager != null) {
+      mPlayerManager.updateVolumeMuteAndDuck();
     }
   }
 
   @Override
   public void handleAudioFocusInterruptionBegan() {
-    if (mPlayerData != null) {
-      mPlayerData.handleAudioFocusInterruptionBegan();
+    if (mPlayerManager != null) {
+      mPlayerManager.handleAudioFocusInterruptionBegan();
     }
   }
 
   @Override
   public void handleAudioFocusGained() {
-    if (mPlayerData != null) {
-      mPlayerData.handleAudioFocusGained();
+    if (mPlayerManager != null) {
+      mPlayerManager.handleAudioFocusGained();
     }
   }
 
   @Override
   public void onPause() {
-    if (mPlayerData != null) {
+    if (mPlayerManager != null) {
       ensureFullscreenPlayerIsDismissed();
-      mPlayerData.onPause();
+      mPlayerManager.onPause();
     }
   }
 
   @Override
   public void onResume() {
-    if (mPlayerData != null) {
-      mPlayerData.onResume();
+    if (mPlayerManager != null) {
+      mPlayerManager.onResume();
     }
   }
 

@@ -2,7 +2,6 @@ package expo.modules.av.player;
 
 
 import android.content.Context;
-import android.media.MediaPlayer;
 import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.Build;
@@ -21,20 +20,20 @@ import java.util.List;
 import java.util.Map;
 
 
-class MediaPlayerData implements
-    Player,
-    MediaPlayer.OnBufferingUpdateListener,
-    MediaPlayer.OnCompletionListener,
-    MediaPlayer.OnErrorListener,
-    MediaPlayer.OnInfoListener,
-    MediaPlayer.OnSeekCompleteListener,
-    MediaPlayer.OnVideoSizeChangedListener {
+class MediaPlayerWrapper implements
+    ExpoPlayer,
+    android.media.MediaPlayer.OnBufferingUpdateListener,
+    android.media.MediaPlayer.OnCompletionListener,
+    android.media.MediaPlayer.OnErrorListener,
+    android.media.MediaPlayer.OnInfoListener,
+    android.media.MediaPlayer.OnSeekCompleteListener,
+    android.media.MediaPlayer.OnVideoSizeChangedListener {
 
   private Context mContext;
 
   static final String IMPLEMENTATION_NAME = "MediaPlayer";
 
-  private MediaPlayer mMediaPlayer = null;
+  private android.media.MediaPlayer mMediaPlayer = null;
   private boolean mMediaPlayerHasStartedEver = false;
   private Integer mPlayableDurationMillis;
 
@@ -44,7 +43,7 @@ class MediaPlayerData implements
 
   private PlayerStateListener mPlayerStateListener = dummyPlayerStateListener();
 
-  public MediaPlayerData(Context context, Map<String, Object> requestHeaders) {
+  public MediaPlayerWrapper(Context context, Map<String, Object> requestHeaders) {
     this.mContext = context;
     this.mRequestHeaders = requestHeaders;
   }
@@ -59,19 +58,19 @@ class MediaPlayerData implements
     return IMPLEMENTATION_NAME;
   }
 
-  // --------- PlayerData implementation ---------
+  // --------- PlayerManager implementation ---------
 
   // Lifecycle
 
   @Override
   public void load(@NonNull final Bundle status, @NonNull Uri uri, @Nullable List<HttpCookie> cookies,
-                   @Nullable final PlayerData.LoadCompletionListener loadCompletionListener) {
+                   @Nullable final PlayerManager.LoadCompletionListener loadCompletionListener) {
     if (mMediaPlayer != null) {
-      loadCompletionListener.onLoadError("Load encountered an error: MediaPlayerData cannot be loaded twice.");
+      loadCompletionListener.onLoadError("Load encountered an error: MediaPlayerWrapper cannot be loaded twice.");
       return;
     }
 
-    final MediaPlayer unpreparedPlayer = new MediaPlayer();
+    final android.media.MediaPlayer unpreparedPlayer = new android.media.MediaPlayer();
 
     try {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -110,10 +109,10 @@ class MediaPlayerData implements
 
     unpreparedPlayer.setOnPreparedListener(mp -> {
       mMediaPlayer = mp;
-      mMediaPlayer.setOnBufferingUpdateListener(MediaPlayerData.this);
-      mMediaPlayer.setOnCompletionListener(MediaPlayerData.this);
-      mMediaPlayer.setOnErrorListener(MediaPlayerData.this);
-      mMediaPlayer.setOnInfoListener(MediaPlayerData.this);
+      mMediaPlayer.setOnBufferingUpdateListener(MediaPlayerWrapper.this);
+      mMediaPlayer.setOnCompletionListener(MediaPlayerWrapper.this);
+      mMediaPlayer.setOnErrorListener(MediaPlayerWrapper.this);
+      mMediaPlayer.setOnInfoListener(MediaPlayerWrapper.this);
 
       loadCompletionListener.onLoadSuccess(status);
     });
@@ -197,7 +196,7 @@ class MediaPlayerData implements
 //    }
 //
 //    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M && mRate != 1.0f) {
-//      Log.w("Expo MediaPlayerData", "Cannot set audio/video playback rate for Android SDK < 23.");
+//      Log.w("Expo MediaPlayerWrapper", "Cannot set audio/video playback rate for Android SDK < 23.");
 //      mRate = 1.0f;
 //    }
 //
@@ -281,13 +280,14 @@ class MediaPlayerData implements
     return mMediaPlayer == null ? new Pair<>(0, 0) : new Pair<>(mMediaPlayer.getVideoWidth(), mMediaPlayer.getVideoHeight());
   }
 
+  // TODO: We should be able to determine shouldPlay within this class. Passing it to this method does not look good.
   @Override
-  public void setSurface(@NonNull final Surface surface, boolean mShouldPlay) {
+  public void setSurface(@NonNull final Surface surface, boolean shouldPlay) {
     if (mMediaPlayer == null) {
       return;
     }
     mMediaPlayer.setSurface(surface);
-    if (!mMediaPlayerHasStartedEver && !mShouldPlay) {
+    if (!mMediaPlayerHasStartedEver && !shouldPlay) {
       // For some reason, the media player does not render to the screen until start() has been
       // called in some cases.
       mMediaPlayer.start();
@@ -319,10 +319,10 @@ class MediaPlayerData implements
     }
   }
 
-  // MediaPlayer.*Listener
+  // MediaPlayerWrapper.*Listener
 
   @Override
-  public void onBufferingUpdate(final MediaPlayer mp, final int percent) {
+  public void onBufferingUpdate(final android.media.MediaPlayer mp, final int percent) {
     if (mp.getDuration() >= 0) {
       mPlayableDurationMillis = (int) (mp.getDuration() * (((double) percent) / 100.0));
     } else {
@@ -332,41 +332,41 @@ class MediaPlayerData implements
   }
 
   @Override
-  public void onCompletion(final MediaPlayer mp) {
+  public void onCompletion(final android.media.MediaPlayer mp) {
     mPlayerStateListener.onCompleted();
   }
 
   @Override
-  public boolean onError(final MediaPlayer mp, final int what, final int extra) {
+  public boolean onError(final android.media.MediaPlayer mp, final int what, final int extra) {
     release();
-    mPlayerStateListener.onError("MediaPlayer failed with 'what' code " + what + " and 'extra' code " + extra + ".");
+    mPlayerStateListener.onError("MediaPlayerWrapper failed with 'what' code " + what + " and 'extra' code " + extra + ".");
     return true;
   }
 
   @Override
-  public boolean onInfo(final MediaPlayer mp, final int what, final int extra) {
+  public boolean onInfo(final android.media.MediaPlayer mp, final int what, final int extra) {
     // Writing out all of the possible values here for clarity
     // @jesseruder @nikki93 I think we should hold off on handling some of the more obscure values
     // until the ExoPlayer refactor.
     switch (what) {
-      case MediaPlayer.MEDIA_INFO_BUFFERING_START:
+      case android.media.MediaPlayer.MEDIA_INFO_BUFFERING_START:
         mIsBuffering = true;
         mPlayerStateListener.onBufferingStart();
         break;
-      case MediaPlayer.MEDIA_INFO_BUFFERING_END:
+      case android.media.MediaPlayer.MEDIA_INFO_BUFFERING_END:
         mIsBuffering = false;
         mPlayerStateListener.onBufferingStop();
         break;
-      case MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
+      case android.media.MediaPlayer.MEDIA_INFO_VIDEO_RENDERING_START:
         mPlayerStateListener.videoSizeChanged(mp.getVideoWidth(), mp.getVideoHeight());
         break;
-      case MediaPlayer.MEDIA_INFO_UNKNOWN:
-      case MediaPlayer.MEDIA_INFO_BAD_INTERLEAVING:
-      case MediaPlayer.MEDIA_INFO_NOT_SEEKABLE:
-      case MediaPlayer.MEDIA_INFO_METADATA_UPDATE:
-      case MediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE:
-      case MediaPlayer.MEDIA_INFO_SUBTITLE_TIMED_OUT:
-      case MediaPlayer.MEDIA_INFO_VIDEO_TRACK_LAGGING:
+      case android.media.MediaPlayer.MEDIA_INFO_UNKNOWN:
+      case android.media.MediaPlayer.MEDIA_INFO_BAD_INTERLEAVING:
+      case android.media.MediaPlayer.MEDIA_INFO_NOT_SEEKABLE:
+      case android.media.MediaPlayer.MEDIA_INFO_METADATA_UPDATE:
+      case android.media.MediaPlayer.MEDIA_INFO_UNSUPPORTED_SUBTITLE:
+      case android.media.MediaPlayer.MEDIA_INFO_SUBTITLE_TIMED_OUT:
+      case android.media.MediaPlayer.MEDIA_INFO_VIDEO_TRACK_LAGGING:
         mPlayerStateListener.statusUpdated();
         break;
 
@@ -375,12 +375,12 @@ class MediaPlayerData implements
   }
 
   @Override
-  public void onSeekComplete(final MediaPlayer mp) {
+  public void onSeekComplete(final android.media.MediaPlayer mp) {
     mPlayerStateListener.onSeekCompleted();
   }
 
   @Override
-  public void onVideoSizeChanged(final MediaPlayer mp, final int width, final int height) {
+  public void onVideoSizeChanged(final android.media.MediaPlayer mp, final int width, final int height) {
     mPlayerStateListener.videoSizeChanged(width, height);
   }
 

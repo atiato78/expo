@@ -29,7 +29,7 @@ import expo.modules.av.AudioEventHandler;
 import expo.modules.av.AudioFocusNotAcquiredException;
 import expo.modules.av.player.datasource.DataSourceFactoryProvider;
 
-public class PlayerData implements AudioEventHandler, Player.PlayerStateListener {
+public class PlayerManager implements AudioEventHandler, ExpoPlayer.PlayerStateListener {
   static final String STATUS_ANDROID_IMPLEMENTATION_KEY_PATH = "androidImplementation";
   static final String STATUS_HEADERS_KEY_PATH = "headers";
   static final String STATUS_IS_LOADED_KEY_PATH = "isLoaded";
@@ -91,21 +91,21 @@ public class PlayerData implements AudioEventHandler, Player.PlayerStateListener
   private Handler mHandler = new Handler();
   private Runnable mProgressUpdater = new ProgressUpdater(this);
 
-  private Player mPlayer;
+  private ExpoPlayer mPlayer;
 
   private class ProgressUpdater implements Runnable {
-    private WeakReference<PlayerData> mPlayerDataWeakReference;
+    private WeakReference<PlayerManager> mPlayerDataWeakReference;
 
-    private ProgressUpdater(PlayerData playerData) {
-      mPlayerDataWeakReference = new WeakReference<>(playerData);
+    private ProgressUpdater(PlayerManager playerManager) {
+      mPlayerDataWeakReference = new WeakReference<>(playerManager);
     }
 
     @Override
     public void run() {
-      final PlayerData playerData = mPlayerDataWeakReference.get();
-      if (playerData != null) {
-        playerData.callStatusUpdateListener();
-        playerData.progressUpdateLoop();
+      final PlayerManager playerManager = mPlayerDataWeakReference.get();
+      if (playerManager != null) {
+        playerManager.callStatusUpdateListener();
+        playerManager.progressUpdateLoop();
       }
     }
   }
@@ -122,14 +122,14 @@ public class PlayerData implements AudioEventHandler, Player.PlayerStateListener
   float mVolume = 1.0f;
   boolean mIsMuted = false;
 
-  PlayerData(final Player player, final AVManagerInterface avModule, final Uri uri) {
+  PlayerManager(final ExpoPlayer player, final AVManagerInterface avModule, final Uri uri) {
     this.mPlayer = player;
     player.setPlayerStateListener(this);
     mAVModule = avModule;
     mUri = uri;
   }
 
-  public static PlayerData createUnloadedPlayerData(final AVManagerInterface avModule, final Context context, final ReadableArguments source, final Bundle status) {
+  public static PlayerManager createUnloadedPlayerData(final AVManagerInterface avModule, final Context context, final ReadableArguments source, final Bundle status) {
     final String uriString = source.getString(STATUS_URI_KEY_PATH);
     Map requestHeaders = null;
     if (source.containsKey(STATUS_HEADERS_KEY_PATH)) {
@@ -140,11 +140,11 @@ public class PlayerData implements AudioEventHandler, Player.PlayerStateListener
     final Uri uri = Uri.parse(uriString);
 
     if (status.containsKey(STATUS_ANDROID_IMPLEMENTATION_KEY_PATH)
-        && status.getString(STATUS_ANDROID_IMPLEMENTATION_KEY_PATH).equals(MediaPlayerData.IMPLEMENTATION_NAME)) {
-      return new PlayerData(new MediaPlayerData(context, requestHeaders), avModule, uri);
+        && status.getString(STATUS_ANDROID_IMPLEMENTATION_KEY_PATH).equals(MediaPlayerWrapper.IMPLEMENTATION_NAME)) {
+      return new PlayerManager(new MediaPlayerWrapper(context, requestHeaders), avModule, uri);
     } else {
       DataSource.Factory sourceFactory = avModule.getModuleRegistry().getModule(DataSourceFactoryProvider.class).createFactory(context, avModule.getModuleRegistry(), Util.getUserAgent(avModule.getContext(), "yourApplicationName"), requestHeaders);
-      return new PlayerData(new SimpleExoPlayerData(context, uriOverridingExtension, sourceFactory), avModule, uri);
+      return new PlayerManager(new ExoPlayerWrapper(context, uriOverridingExtension, sourceFactory), avModule, uri);
     }
   }
 
@@ -369,7 +369,7 @@ public class PlayerData implements AudioEventHandler, Player.PlayerStateListener
 
     map.putBoolean(STATUS_DID_JUST_FINISH_KEY_PATH, false);
 
-    // TODO: Create rest of status based on deleted getExtraStatusFields method from SimpleExoPlayerdata and MediaPlayerData
+    // TODO: Create rest of status based on deleted getExtraStatusFields method from SimpleExoPlayerdata and MediaPlayerWrapper
 
     return map;
   }
