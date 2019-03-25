@@ -4,10 +4,10 @@ import InstaIcon from './InstaIcon';
 
 export default class InstaHeaderButton extends React.PureComponent {
   render() {
-    const { onPress, ...props } = this.props;
+    const { onPress, touchableStyle, ...props } = this.props;
     return (
-      <TouchableOpacity style={{ marginHorizontal: 18 }} onPress={onPress}>
-        <InstaIcon size={24} color={'black'} {...props} />
+      <TouchableOpacity style={[{ marginHorizontal: 12 }, touchableStyle]} onPress={onPress}>
+        <InstaIcon size={32} color={'black'} {...props} />
       </TouchableOpacity>
     );
   }

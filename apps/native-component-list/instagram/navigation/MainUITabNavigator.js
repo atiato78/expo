@@ -1,7 +1,13 @@
 import React from 'react';
-import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
+import {
+  createStackNavigator,
+  createDrawerNavigator,
+  DrawerItems,
+  SafeAreaView,
+  createBottomTabNavigator,
+} from 'react-navigation';
 
-import { Button, View } from 'react-native';
+import { Button, StyleSheet, ScrollView, View, Text } from 'react-native';
 import TabBarIcon from '../components/TabBarIcon';
 import ExploreScreen from '../screens/ExploreScreen';
 import FeedScreen from '../screens/FeedScreen';
@@ -10,6 +16,9 @@ import EditMediaScreen from '../screens/EditMediaScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import createAppNavigator from './createAppNavigator';
 import LikesTabNavigator from './LikesTabNavigator';
+import InstaHeaderButton from '../InstaHeaderButton';
+import NavigationService from './NavigationService';
+import InstaIcon from '../InstaIcon';
 
 const mediaStack = createStackNavigator(
   {
@@ -48,7 +57,33 @@ mediaStack.navigationOptions = {
   tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="capture" />,
 };
 
-const FeedNav = createAppNavigator(FeedScreen, 'Feed');
+const FeedNav = createAppNavigator(FeedScreen, 'Feed', {
+  headerLeft: (
+    <InstaHeaderButton
+      name={'camera'}
+      onPress={() => {
+        NavigationService.navigate('MediaCreation');
+      }}
+    />
+  ),
+  headerRight: (
+    <View style={{ flexDirection: 'row' }}>
+      <InstaHeaderButton
+        name={'tv'}
+        touchableStyle={{ marginHorizontal: 0 }}
+        onPress={() => {
+          NavigationService.navigate('Feed_TV');
+        }}
+      />
+      <InstaHeaderButton
+        name={'send'}
+        onPress={() => {
+          NavigationService.navigate('Feed_Chat');
+        }}
+      />
+    </View>
+  ),
+});
 FeedNav.navigationOptions = {
   tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="home" />,
 };
@@ -57,17 +92,31 @@ const ExploreNav = createAppNavigator(ExploreScreen, 'Explore');
 ExploreNav.navigationOptions = {
   tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="search" />,
 };
-const ProfileNav = createAppNavigator(ProfileScreen, 'Profile');
+
+const ProfileNav = createAppNavigator(ProfileScreen, 'Profile', navigationOptions => ({
+  headerLeft: <InstaHeaderButton name={'history'} />,
+  headerRight: (
+    <InstaHeaderButton
+      name={'menu'}
+      onPress={() => {
+        navigationOptions.navigation.openDrawer();
+      }}
+    />
+  ),
+}));
 ProfileNav.navigationOptions = {
   tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="profile" />,
 };
 
-const LikesNav = createAppNavigator(LikesTabNavigator, 'Likes');
+const LikesNav = createAppNavigator(LikesTabNavigator, 'Likes', {
+  header: null,
+});
 LikesNav.navigationOptions = {
   tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="like" />,
+  header: null,
 };
 
-export default createBottomTabNavigator(
+const MainTabNavigator = createBottomTabNavigator(
   {
     Feed: FeedNav,
     Explore: ExploreNav,
@@ -80,5 +129,78 @@ export default createBottomTabNavigator(
     tabBarOptions: {
       showLabel: false,
     },
+  }
+);
+const CustomDrawerContentComponent = ({ items, ...props }) => {
+  console.log(props);
+  return (
+    <SafeAreaView style={{ flex: 1 }} forceInset={{ top: 'always', horizontal: 'never' }}>
+      <DrawerHeader>Baconbrix</DrawerHeader>
+      <ScrollView>
+        <DrawerItems
+          labelStyle={{ marginHorizontal: 0, fontWeight: 'normal' }}
+          iconContainerStyle={{ marginHorizontal: 8 }}
+          {...props}
+          items={items.slice(1)}
+        />
+      </ScrollView>
+      <DrawerFooter />
+    </SafeAreaView>
+  );
+};
+
+const DrawerHeader = ({ children }) => {
+  return (
+    <View
+      style={{
+        paddingHorizontal: 8,
+        borderBottomColor: 'rgba(0,0,0,0.095)',
+        flexDirection: 'row',
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        alignItems: 'center',
+      }}>
+      <Text style={{ fontSize: 16, marginVertical: 18, marginLeft: 8 }}>{children}</Text>
+    </View>
+  );
+};
+const DrawerFooter = () => {
+  return (
+    <View
+      style={{
+        paddingHorizontal: 8,
+        borderTopColor: 'rgba(0,0,0,0.095)',
+        flexDirection: 'row',
+        borderTopWidth: StyleSheet.hairlineWidth,
+        alignItems: 'center',
+      }}>
+      {createDrawerIcon('settings')}
+      <Text style={{ fontSize: 16, marginVertical: 16, marginLeft: 8 }}>Settings</Text>
+    </View>
+  );
+};
+
+const createDrawerIcon = name => <InstaIcon name={name} color={'black'} size={24} />;
+const createDrawerOptions = (name, icon) => ({
+  drawerIcon: createDrawerIcon(icon),
+  drawerLabel: name,
+});
+const createDrawerScreen = (screen, name, icon) => ({
+  screen,
+  navigationOptions: createDrawerOptions(name, icon),
+});
+export default createDrawerNavigator(
+  {
+    MainTabUI: MainTabNavigator,
+    Activity: createDrawerScreen(View, 'Activity', 'history'),
+    Nametag: createDrawerScreen(View, 'Nametag', 'scan'),
+    Saved: createDrawerScreen(View, 'Saved', 'bookmark'),
+    CloseFriends: createDrawerScreen(View, 'Close Friends', 'likes'),
+    DiscoverPeople: createDrawerScreen(View, 'Discover People', 'add-user'),
+    OpenFacebook: createDrawerScreen(View, 'Open Facebook', 'facebook'),
+  },
+  {
+    contentComponent: CustomDrawerContentComponent,
+    drawerPosition: 'right',
+    drawerType: 'slide',
   }
 );

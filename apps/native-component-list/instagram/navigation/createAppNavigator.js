@@ -39,13 +39,13 @@ class Header extends React.Component {
   }
 }
 
-function createAppNavigator(screen, name) {
+function createAppNavigator(screen, name, navigationOptions) {
   return createStackNavigator(
     {
       // MediaLibrary,
       // MediaAlbums,
       // MediaDetails,
-      [name]: screen,
+      [name]: { screen, navigationOptions },
       // Media: { screen: MediaScreen, navigationOptions: { header: null } },
       [`${name}_Followers`]: {
         screen: UsersScreen,
@@ -56,15 +56,21 @@ function createAppNavigator(screen, name) {
         navigationOptions: { title: 'Following' },
       },
       [`${name}_Users`]: UsersScreen,
+      [`${name}_TV`]: UsersScreen,
+      [`${name}_Chat`]: UsersScreen,
       [`${name}_Details`]: {
         screen: DetailsScreen,
         navigationOptions: {
           title: 'Photo',
+          headerRight: <InstaHeaderButton name={'flip'} />,
         },
       },
       [`${name}_Comments`]: {
         screen: CommentsScreen,
-        navigationOptions: { title: 'Comments' },
+        navigationOptions: {
+          title: 'Comments',
+          headerRight: <InstaHeaderButton name={'send'} />,
+        },
       },
     },
     {

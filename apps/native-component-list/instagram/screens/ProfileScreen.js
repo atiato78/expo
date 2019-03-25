@@ -450,9 +450,9 @@ export default class ProfileScreen extends React.Component {
   };
 
   componentDidMount() {
-    setTimeout(() => {
-      NavigationService.navigate('Profile_Details', { item: posts[0] });
-    });
+    // setTimeout(() => {
+    //   NavigationService.navigate('Profile_Details', { item: posts[0] });
+    // });
   }
   render() {
     const stories = [
