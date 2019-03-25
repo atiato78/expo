@@ -4,13 +4,13 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.util.Pair;
 import android.view.Surface;
 
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.util.Util;
 
-import org.jetbrains.annotations.NotNull;
 import org.unimodules.core.Promise;
 import org.unimodules.core.arguments.ReadableArguments;
 
@@ -28,6 +28,8 @@ import expo.modules.av.AVManagerInterface;
 import expo.modules.av.AudioEventHandler;
 import expo.modules.av.AudioFocusNotAcquiredException;
 import expo.modules.av.player.datasource.DataSourceFactoryProvider;
+import expo.modules.av.player.exoplayer.ExoPlayerWrapper;
+import expo.modules.av.player.mediaPlayer.MediaPlayerWrapper;
 
 public class PlayerManager implements AudioEventHandler, ExpoPlayer.PlayerStateListener {
   static final String STATUS_ANDROID_IMPLEMENTATION_KEY_PATH = "androidImplementation";
@@ -211,7 +213,7 @@ public class PlayerManager implements AudioEventHandler, ExpoPlayer.PlayerStateL
   }
 
   private void progressUpdateLoop() {
-    if (!mPlayer.shouldContinueUpdatingProgress()) {
+    if (!mPlayer.getContinueUpdatingProgress()) {
       stopUpdatingProgressIfNecessary();
     } else {
       mHandler.postDelayed(mProgressUpdater, mProgressUpdateIntervalMillis);
@@ -340,7 +342,7 @@ public class PlayerManager implements AudioEventHandler, ExpoPlayer.PlayerStateL
   // so we need to ensure nothing will release or nullify the property
   // while we get the latest status.
   public synchronized final Bundle getStatus() {
-    if (!mPlayer.isLoaded()) {
+    if (!mPlayer.getLoaded()) {
       final Bundle map = getUnloadedStatus();
       map.putString(STATUS_ANDROID_IMPLEMENTATION_KEY_PATH, mPlayer.getImplementationName());
       return map;
@@ -427,12 +429,12 @@ public class PlayerManager implements AudioEventHandler, ExpoPlayer.PlayerStateL
 
   @Override
   public boolean requiresAudioFocus() {
-    return mPlayer.isPlaying() && !mIsMuted;
+    return mPlayer.getPlaying() && !mIsMuted;
   }
 
   @Override
   public void updateVolumeMuteAndDuck() {
-    if (mPlayer.isLoaded()) {
+    if (mPlayer.getLoaded()) {
       mPlayer.setVolume(mAVModule.getVolumeForDuckAndFocus(mIsMuted, mVolume));
     }
   }
@@ -462,7 +464,7 @@ public class PlayerManager implements AudioEventHandler, ExpoPlayer.PlayerStateL
   }
 
   @Override
-  public void onError(@NotNull String message) {
+  public void onError(@NonNull String message) {
     mErrorListener.onError(message);
   }
 
@@ -494,7 +496,7 @@ public class PlayerManager implements AudioEventHandler, ExpoPlayer.PlayerStateL
   }
 
   private void acquireFocusAndPlay() throws AudioFocusNotAcquiredException {
-    if (!mPlayer.isLoaded() || !shouldPlayerPlay()) {
+    if (!mPlayer.getLoaded() || !shouldPlayerPlay()) {
       return;
     }
 
@@ -509,6 +511,7 @@ public class PlayerManager implements AudioEventHandler, ExpoPlayer.PlayerStateL
     beginUpdatingProgressIfNecessary();
   }
 
+  @NonNull
   private List<HttpCookie> getHttpCookiesList() {
     if (mAVModule.getModuleRegistry() != null) {
       CookieHandler cookieHandler = mAVModule.getModuleRegistry().getModule(CookieHandler.class);
@@ -523,7 +526,7 @@ public class PlayerManager implements AudioEventHandler, ExpoPlayer.PlayerStateL
             }
             return httpCookies;
           } else {
-            return null;
+            return Collections.emptyList();
           }
         } catch (IOException e) {
           // do nothing, we'll return an empty list

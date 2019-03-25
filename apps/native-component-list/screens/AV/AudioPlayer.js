@@ -31,7 +31,7 @@ export default class AudioPlayer extends React.Component {
       await soundObject.loadAsync(source, {
         progressUpdateIntervalMillis: 100,
         shouldPlay: true,
-        androidImplementation: 'MediaPlayer',
+        // androidImplementation: 'MediaPlayer',
       });
       soundObject.setOnPlaybackStatusUpdate(this._updateStateToStatus);
       const status = await soundObject.getStatusAsync();

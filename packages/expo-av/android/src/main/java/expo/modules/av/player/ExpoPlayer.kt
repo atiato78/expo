@@ -8,46 +8,43 @@ import java.net.HttpCookie
 
 interface ExpoPlayer {
 
-    fun setSurface(surface: Surface, shouldPlay: Boolean)
+  fun setSurface(surface: Surface, shouldPlay: Boolean)
 
-    fun play(mute: Boolean, rate: Float, shouldCorrectPitch: Boolean)
-    fun pauseImmediately()
-    fun load(status: Bundle, uri: Uri, cookies: List<HttpCookie>, loadCompletionListener: PlayerManager.LoadCompletionListener)
-    fun release()
+  fun play(mute: Boolean, rate: Float, shouldCorrectPitch: Boolean)
+  fun pauseImmediately()
+  fun load(status: Bundle, uri: Uri, cookies: List<HttpCookie>,
+           loadCompletionListener: PlayerManager.LoadCompletionListener)
 
-    fun getImplementationName(): String
-    fun getAudioSessionId(): Int
+  fun release()
 
-    var looping: Boolean
+  var looping: Boolean
 
-    fun isPlaying(): Boolean
-    fun isLoaded(): Boolean
-    fun isBuffering(): Boolean
-    fun getDuration(): Int
-    fun getPlayableDuration(): Int
-    fun getCurrentPosition(): Int
-    fun shouldContinueUpdatingProgress(): Boolean
-    fun getVideoWidthHeight(): Pair<Int, Int>
+  var volume: Float
+  val playing: Boolean
 
-    fun setVolume(value: Float)
-    fun seekTo(newPositionMillis: Int)
+  val loaded: Boolean
+  val buffering: Boolean
+  val duration: Int
+  val playableDuration: Int? // TODO: Consider changing to non-nullable
+  val currentPosition: Int
+  val continueUpdatingProgress: Boolean
+  val videoWidthHeight: Pair<Int, Int>
+  val implementationName: String
+  val audioSessionId: Int
 
-    fun setPlayerStateListener(listener: PlayerStateListener)
+  fun seekTo(newPositionMillis: Int)
 
-    interface PlayerStateListener {
-        fun onCompleted() {}
-        fun onError(message: String) {}
-        fun onBufferingStart() {}
-        fun onBuffering(bufferedDuration: Int) {}
-        fun onBufferingStop() {}
-        fun onSeekCompleted() {}
-        fun videoSizeChanged(width: Int, height: Int) {}
-        fun statusUpdated() {}
-    }
+  fun setPlayerStateListener(listener: PlayerStateListener)
 
-    interface ProgressUpdateStatusListener {
-        fun startUpdating()
-        fun stopUpdating()
-    }
+  interface PlayerStateListener {
+    fun onCompleted() {}
+    fun onError(message: String) {}
+    fun onBufferingStart() {}
+    fun onBuffering(bufferedDuration: Int) {}
+    fun onBufferingStop() {}
+    fun onSeekCompleted() {}
+    fun videoSizeChanged(width: Int, height: Int) {}
+    fun statusUpdated() {}
+  }
 
 }
