@@ -126,9 +126,9 @@ LikesNav.navigationOptions = {
 const MainTabNavigator = createBottomTabNavigator(
   {
     Feed: FeedNav,
-    Explore: ExploreNav,
+    // Explore: ExploreNav,
     Media: mediaStack,
-    Likes: LikesNav,
+    // Likes: LikesNav,
     Profile: ProfileNav,
   },
   {

@@ -11,7 +11,7 @@ export default createBottomTabNavigator(
     SocialUI: MainUITabNavigator,
   },
   {
-    initialRouteName: 'SocialUI',
+    // initialRouteName: 'SocialUI',
     tabBarComponent: () => <View />,
     swipeEnabled: true,
     animationEnabled: true,

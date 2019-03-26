@@ -24,8 +24,8 @@ import {
   createMaterialTopTabNavigator,
   createAppContainer,
 } from 'react-navigation';
-import SearchBar from './components/SearchBar';
 import * as Font from 'expo-font';
+import SearchBar from './components/SearchBar';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import EvilIcons from '@expo/vector-icons/EvilIcons';
 import Slider from './Slider';
@@ -38,6 +38,8 @@ import Genres from './data/Genres.json';
 import InstaIcon from './InstaIcon';
 import Assets from './Assets';
 import dispatch from './rematch/dispatch';
+import { connect } from 'react-redux';
+import NavigationService from './navigation/NavigationService';
 
 const { height } = Dimensions.get('window');
 
@@ -200,9 +202,12 @@ class CameraScreen extends React.Component {
         <Camera style={{ flex: 1 }} />
         <Header>
           {headerLeft({ name: headerLeftIconName })}
-          <IconButton name={'chevron-right'} onPress={() => {
-            NavigationService.navigate('SocialUI');
-          }} />
+          <IconButton
+            name={'chevron-right'}
+            onPress={() => {
+              NavigationService.navigate('SocialUI');
+            }}
+          />
         </Header>
       </View>
     );
@@ -442,17 +447,14 @@ const MusicNav = createAppContainer(
     }
   )
 );
-import { connect } from 'react-redux';
-import NavigationService from './navigation/NavigationService';
-
 
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 class EditorComboScreen extends React.Component {
   render() {
-    // if (this.props.image) {
-    //   return <EditorScreen image={this.props.image}/>
-    // }
+    if (this.props.image) {
+      return <EditorScreen image={this.props.image} />;
+    }
     return <MediaContainerScreen />;
   }
 }
@@ -462,9 +464,26 @@ const ConnectedEditorComboScreen = connect(({ image }) => ({ image }))(EditorCom
 export default ConnectedEditorComboScreen;
 
 class EditorScreen extends React.Component {
-
   render() {
-    return (<View style={{flex: 1}}><Image style={{flex: 1, resizeMode: 'cover'}} source={this.props.image}/></View>)
+    return (
+      <View style={{ flex: 1 }}>
+        <Image style={{ flex: 1, resizeMode: 'cover' }} source={this.props.image} />
+        <Header>
+          <IconButton
+            name={'close'}
+            onPress={() => {
+              dispatch().image.set(null);
+            }}
+          />
+          <IconButton
+            name={'chevron-right'}
+            onPress={() => {
+              NavigationService.navigate('SocialUI');
+            }}
+          />
+        </Header>
+      </View>
+    );
   }
 }
 
@@ -524,6 +543,8 @@ class BlurredOptionsContainer extends React.Component {
           style={{ ...StyleSheet.absoluteFillObject, opacity }}
           pointerEvents={this.props.isEnabled ? 'auto' : 'none'}>
           <BlurView
+            tint={'dark'}
+            intensity={100}
             style={{
               flex: 1,
               justifyContent: 'flex-end',
@@ -574,7 +595,7 @@ class MediaScreen extends React.Component {
 
 class MediaItem extends React.Component {
   onPress = () => {
-    console.log("set image", this.props.image)
+    console.log('set image', this.props.image);
     dispatch().image.set(this.props.image);
   };
   render() {
@@ -640,15 +661,17 @@ class CameraContainerScreen extends React.Component {
         }}>
         <CameraScreen headerLeftIconName={page.headerLeftIconName} />
 
-       {false && (<View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-          {page.screen &&
-            page.screen({
-              typeface,
-              onPressTypefaceButton: this.onPressTypefaceButton,
-              gradient,
-              gradientTheme,
-            })}
-        </View>)}
+        {false && (
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+            {page.screen &&
+              page.screen({
+                typeface,
+                onPressTypefaceButton: this.onPressTypefaceButton,
+                gradient,
+                gradientTheme,
+              })}
+          </View>
+        )}
         <MainFooter
           page={page}
           index={this.state.index}
@@ -846,7 +869,7 @@ class MainFooter extends React.Component {
           <View style={footerStyle}>
             <GradientButton gradient={gradient} onPress={onPressGradientButton} />
             <CaptureButton selectedIndex={index} icon={page.icon} />
-            <IconButton key="camera" name={"camera"} />
+            <IconButton key="camera" name={'camera'} />
           </View>
         );
       default: {
@@ -1289,12 +1312,12 @@ class RotatingIcon extends React.Component {
     return (
       <ViewPager
         pagingEnabled
-        pointerEvents={'none'}
         scroll={this.animatedValue}
         ref={ref => (this.viewPager = ref)}
         data={data}
         renderItem={this.renderItem}
         style={{
+          scrollIndicator: 'none',
           minHeight: itemWidth,
           maxHeight: itemWidth,
           maxWidth: itemWidth,
