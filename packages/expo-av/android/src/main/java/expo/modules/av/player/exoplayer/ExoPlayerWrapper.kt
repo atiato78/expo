@@ -40,7 +40,7 @@ internal class ExoPlayerWrapper(private val context: Context,
   private var firstFrameRendered = false
   private var lastPlaybackState: Int? = null
   private var loading = true
-  private var playerStateListener = dummyPlayerStateListener()
+  private var playerStateListener: ExpoPlayer.PlayerStateListener? = null
 
   // --------- PlayerManager implementation ---------
 
@@ -48,8 +48,6 @@ internal class ExoPlayerWrapper(private val context: Context,
 
   override fun load(status: Bundle, uri: Uri, cookies: List<HttpCookie>,
                     loadCompletionListener: PlayerManager.LoadCompletionListener) {
-    this.loadCompletionListener = loadCompletionListener
-
     // Create a default TrackSelector
     val mainHandler = Handler()
     // Measures bandwidth during playback. Can be null if not required.
@@ -70,6 +68,7 @@ internal class ExoPlayerWrapper(private val context: Context,
       simpleExoPlayer!!.prepare(source)
       loadCompletionListener.onLoadSuccess(status)
     } catch (e: IllegalStateException) {
+      this.loadCompletionListener = loadCompletionListener
       onFatalError(e)
     }
 
@@ -156,9 +155,9 @@ internal class ExoPlayerWrapper(private val context: Context,
   override fun onLoadingChanged(isLoading: Boolean) {
     loading = isLoading
     if (!isLoading) {
-      playerStateListener.onBufferingStop()
+      playerStateListener?.onBufferingStop()
     } else {
-      playerStateListener.onBufferingStart()
+      playerStateListener?.onBufferingStart()
     }
   }
 
@@ -172,9 +171,9 @@ internal class ExoPlayerWrapper(private val context: Context,
     if (lastPlaybackState != null
         && playbackState != lastPlaybackState
         && playbackState == Player.STATE_ENDED) {
-      playerStateListener.onCompleted()
+      playerStateListener?.onCompleted()
     } else {
-      playerStateListener.statusUpdated()
+      playerStateListener?.statusUpdated()
     }
     lastPlaybackState = playbackState
   }
@@ -192,7 +191,7 @@ internal class ExoPlayerWrapper(private val context: Context,
     // So I guess it's safe to say that when a period transition happens,
     // media file transition happens, so we just finished playing one.
     if (reason == Player.DISCONTINUITY_REASON_PERIOD_TRANSITION) {
-      playerStateListener.onCompleted()
+      playerStateListener?.onCompleted()
     }
   }
 
@@ -209,7 +208,7 @@ internal class ExoPlayerWrapper(private val context: Context,
       loadCompletionListener = null
       listener!!.onLoadError(error.toString())
     } else {
-      playerStateListener.onError("ExpoPlayer error: " + error.message)
+      playerStateListener?.onError("ExpoPlayer error: " + error.message)
     }
     release()
   }
@@ -220,13 +219,13 @@ internal class ExoPlayerWrapper(private val context: Context,
                                   pixelWidthHeightRatio: Float) {
     this.videoWidthHeight = Pair(width, height)
     if (firstFrameRendered) {
-      playerStateListener.videoSizeChanged(width, height)
+      playerStateListener?.videoSizeChanged(width, height)
     }
   }
 
   override fun onRenderedFirstFrame() {
     if (!firstFrameRendered) {
-      playerStateListener.videoSizeChanged(
+      playerStateListener?.videoSizeChanged(
           this.videoWidthHeight.first, this.videoWidthHeight.second)
     }
     firstFrameRendered = true
@@ -302,27 +301,6 @@ internal class ExoPlayerWrapper(private val context: Context,
 
   override fun setPlayerStateListener(listener: ExpoPlayer.PlayerStateListener) {
     this.playerStateListener = listener
-  }
-
-  private fun dummyPlayerStateListener(): ExpoPlayer.PlayerStateListener {
-    return object : ExpoPlayer.PlayerStateListener {
-
-      override fun onCompleted() {}
-
-      override fun onError(message: String) {}
-
-      override fun onBufferingStart() {}
-
-      override fun onBuffering(bufferedDuration: Int) {}
-
-      override fun onBufferingStop() {}
-
-      override fun onSeekCompleted() {}
-
-      override fun videoSizeChanged(width: Int, height: Int) {}
-
-      override fun statusUpdated() {}
-    }
   }
 
   companion object {
