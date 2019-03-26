@@ -115,7 +115,7 @@ internal class MediaPlayerWrapper(private val context: Context,
   // TODO: We should be able to determine shouldPlay within this class. Passing it to this method does not look good.
   override fun setSurface(surface: Surface, shouldPlay: Boolean) {
     if (mediaPlayer == null) {
-      return
+      return // TODO: Throw an exception which will determine that load should be called before!
     }
     mediaPlayer!!.setSurface(surface)
     if (!mediaPlayerHasEverStarted && !shouldPlay) {
@@ -148,7 +148,7 @@ internal class MediaPlayerWrapper(private val context: Context,
       if (rate != 0f && (!mediaPlayer!!.isPlaying || !rateAndPitchAreSetCorrectly)) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
           playMediaPlayerWithRateMAndHigher(rate, shouldCorrectPitch)
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        } else {
           // Bizarrely, I wasn't able to change rate while a sound was playing unless I had
           // changed the rate to something other than 1f before the sound started.
           // This workaround seems to fix this issue (which is said to only be fixed in N):
@@ -211,7 +211,7 @@ internal class MediaPlayerWrapper(private val context: Context,
       mediaPlayer!!.isLooping = looping
     }
 
-  override var volume: Float = 0.0f
+  override var volume: Float = 1.0f
     set(value) {
       mediaPlayer?.setVolume(value, value)
     }

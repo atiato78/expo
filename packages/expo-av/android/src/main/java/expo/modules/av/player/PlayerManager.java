@@ -278,23 +278,22 @@ public class PlayerManager implements AudioEventHandler, ExpoPlayer.PlayerStateL
       mPlayer.setLooping(status.getBoolean(STATUS_IS_LOOPING_KEY_PATH));
     }
 
-    updateVolumeMuteAndDuck();
-
     if (!shouldPlayerPlay()) {
       mPlayer.pauseImmediately();
+    } else {
+      try {
+        mAVModule.acquireAudioFocus();
+        updateVolumeMuteAndDuck();
+        mPlayer.play(mIsMuted, mRate, mShouldCorrectPitch);
+
+        mAVModule.abandonAudioFocusIfUnused();
+      } catch (AudioFocusNotAcquiredException ex) {
+        mAVModule.abandonAudioFocusIfUnused();
+        setStatusCompletionListener.onSetStatusError(ex.toString());
+      }
     }
+    setStatusCompletionListener.onSetStatusComplete();
 
-    try {
-      mAVModule.acquireAudioFocus();
-
-      mPlayer.play(mIsMuted, mRate, mShouldCorrectPitch);
-
-      mAVModule.abandonAudioFocusIfUnused();
-      setStatusCompletionListener.onSetStatusComplete();
-    } catch (AudioFocusNotAcquiredException ex) {
-      mAVModule.abandonAudioFocusIfUnused();
-      setStatusCompletionListener.onSetStatusError(ex.toString());
-    }
   }
 
   public final void setStatus(final Bundle status, final Promise promise) {
@@ -371,7 +370,22 @@ public class PlayerManager implements AudioEventHandler, ExpoPlayer.PlayerStateL
 
     map.putBoolean(STATUS_DID_JUST_FINISH_KEY_PATH, false);
 
-    // TODO: Create rest of status based on deleted getExtraStatusFields method from SimpleExoPlayerdata and MediaPlayerWrapper
+    Integer duration = mPlayer.getDuration();
+    duration = duration < 0 ? null : duration;
+    if (duration != null) {
+      map.putInt(STATUS_DURATION_MILLIS_KEY_PATH, duration);
+    }
+    map.putInt(STATUS_POSITION_MILLIS_KEY_PATH, getClippedIntegerForValue(mPlayer.getCurrentPosition(), 0, duration));
+
+    Integer mPlayableDurationMillis = mPlayer.getPlayableDuration();
+    if (mPlayableDurationMillis != null) {
+      map.putInt(STATUS_PLAYABLE_DURATION_MILLIS_KEY_PATH, getClippedIntegerForValue(mPlayableDurationMillis, 0, duration));
+    }
+
+    map.putBoolean(STATUS_IS_PLAYING_KEY_PATH, mPlayer.getPlaying());
+    map.putBoolean(STATUS_IS_BUFFERING_KEY_PATH, mPlayer.getBuffering());
+
+    map.putBoolean(STATUS_IS_LOOPING_KEY_PATH, mPlayer.getLooping());
 
     return map;
   }

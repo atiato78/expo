@@ -14,7 +14,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.util.Log;
 
 import org.unimodules.core.ModuleRegistry;
 import org.unimodules.core.Promise;
@@ -28,6 +27,7 @@ import org.unimodules.interfaces.permissions.Permissions;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -353,9 +353,7 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
     data.load(status.toBundle(), new PlayerManager.LoadCompletionListener() {
       @Override
       public void onLoadSuccess(final Bundle status) {
-        Throwable e = new Exception();
-        Log.e("Wwww", "Wat?", e);
-//        promise.resolve(Arrays.asList(key, status));
+        promise.resolve(Arrays.asList(key, status));
       }
 
       @Override
