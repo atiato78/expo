@@ -8,10 +8,11 @@ import { connect } from 'react-redux';
 import Indicator from './Indicator';
 
 import dispatch from '../../rematch/dispatch';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 // indicator={CircleSnail}
 
-const ENABLE_TOUCHABLES = false;
+const ENABLE_TOUCHABLES = true;
 
 const circleSnailProps = { thickness: 1, color: '#ddd', size: 80 };
 const { width, height } = Dimensions.get('window');
@@ -35,7 +36,7 @@ class Story extends React.Component {
       );
     }
     return (
-      <TouchableWithoutFeedback
+      <TouchableOpacity
         onPress={() => {
           dispatch().stories.onNextItem();
         }}
@@ -53,7 +54,7 @@ class Story extends React.Component {
           {this.renderCloseButton()}
           {this.renderBackButton()}
         </View>
-      </TouchableWithoutFeedback>
+      </TouchableOpacity>
     );
   }
 
@@ -123,7 +124,7 @@ const styles = StyleSheet.create({
   deck: {
     width,
     height,
-    backgroundColor: 'white',
+    backgroundColor: 'black',
   },
 
   progressIndicator: {

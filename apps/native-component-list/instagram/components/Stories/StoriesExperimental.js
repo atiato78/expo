@@ -1,21 +1,28 @@
 import React from 'react';
 import {
-  Animated,
+  StyleSheet,
+  Platform,
+  View,
+  ScrollView,
+  PanResponder,
   Dimensions,
   FlatList,
-  PanResponder,
+  Animated,
   StatusBar,
-  StyleSheet,
-  View,
 } from 'react-native';
 import { connect } from 'react-redux';
-
-import dispatch from '../../rematch/dispatch';
-import { verticalSwipe } from '../../rematch/stories';
 import Story from './Story';
+import dispatch from '../../rematch/dispatch';
+import { verticalSwipe, horizontalSwipe } from '../../rematch/stories';
 
 const { width, height } = Dimensions.get('window');
+const halfWidth = width * 0.5;
+const perspective = width;
+const angle = Math.atan(perspective / halfWidth);
+const ratio = 2; //Platform.OS === 'ios' ? 2 : 1.2;
+
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 export const swipeDirections = {
   SWIPE_UP: 'SWIPE_UP',
@@ -36,19 +43,18 @@ function isValidSwipe(velocity, velocityThreshold, directionalOffset, directiona
   );
 }
 class StoriesView extends React.Component {
-  horizontalSwipe = new Animated.Value(0);
+  onScroll = Animated.event(
+    [
+      {
+        nativeEvent: { contentOffset: { x: horizontalSwipe } },
+      },
+    ],
+    {
+      useNativeDriver: true,
+    }
+  );
   constructor(props) {
     super(props);
-    this.onScroll = Animated.event(
-      [
-        {
-          nativeEvent: { contentOffset: { x: this.horizontalSwipe } },
-        },
-      ],
-      {
-        useNativeDriver: true,
-      }
-    );
     this.swipeConfig = Object.assign(swipeConfig, props.config);
 
     this.panResponder = PanResponder.create({
@@ -60,13 +66,14 @@ class StoriesView extends React.Component {
       onPanResponderTerminate: this._handlePanResponderEnd,
       onPanResponderGrant: () => {
         console.log('Start Gesture');
+        // dispatch().stories.onPanResponderGrant();
         dispatch().stories.pause();
         dispatch().stories.setBackOpacity(0);
       },
-      onPanResponderMove: (e, gesture) => {
-        console.log('onPanResponderMove');
-        dispatch().stories.onPanResponderMove({ e, gesture });
-      },
+      //   onPanResponderMove: (e, gesture) => {
+      //     console.log('onPanResponderMove');
+      //     dispatch().stories.onPanResponderMove({ e, gesture });
+      //   },
     });
   }
 
@@ -141,14 +148,20 @@ class StoriesView extends React.Component {
     return isValidSwipe(vy, velocityThreshold, dx, directionalOffsetThreshold);
   };
 
+  componentDidMount() {
+    StatusBar.setHidden(true);
+  }
+
   renderItem = ({ item, index }) => {
     return (
       <Animated.View
-        style={[{ width, height, transform: this._getTransformsFor(index) }]}
+        style={[
+          { position: 'absolute', top: 0, left: 0, width, height },
+          { transform: this._getTransformsFor(index) },
+        ]}
         key={`child-${index}`}>
         <Story story={item} currentDeck={this.props.deckIdx === index} />
         <Animated.View
-          pointerEvents={'none'}
           style={[
             StyleSheet.absoluteFill,
             { backgroundColor: 'black' },
@@ -161,7 +174,7 @@ class StoriesView extends React.Component {
 
   _getOpacityFor = i => {
     let pageX = width * i;
-    let opacity = this.horizontalSwipe.interpolate({
+    let opacity = horizontalSwipe.interpolate({
       inputRange: [pageX - width, pageX, pageX + width],
       outputRange: [0.9, 0, 0.9],
       extrapolate: 'clamp',
@@ -172,27 +185,31 @@ class StoriesView extends React.Component {
     };
   };
 
+  _renderPlaceholders = (child, i) => {
+    return <View key={`placeholder-${i}`} pointerEvents={'none'} style={{ width, height }} />;
+  };
+
   _getTransformsFor = i => {
-    let scrollX = this.horizontalSwipe;
+    let scrollX = horizontalSwipe;
     let pageX = width * i;
-    // let translateX = scrollX.interpolate({
-    //   inputRange: [pageX - width, pageX, pageX + width],
-    //   outputRange: [width / 2, 0, -width / 2],
-    //   extrapolate: 'clamp',
-    // });
+    let translateX = scrollX.interpolate({
+      inputRange: [pageX - width, pageX, pageX + width],
+      outputRange: [width / 2, 0, -width / 2],
+      extrapolate: 'clamp',
+    });
 
-    // let rotateY = scrollX.interpolate({
-    //   inputRange: [pageX - width, pageX, pageX + width],
-    //   outputRange: ['60deg', '0deg', '-60deg'],
-    //   extrapolate: 'clamp',
-    // });
+    let rotateY = scrollX.interpolate({
+      inputRange: [pageX - width, pageX, pageX + width],
+      outputRange: ['60deg', '0deg', '-60deg'],
+      extrapolate: 'clamp',
+    });
 
-    // let translateXAfterRotate = scrollX.interpolate({
-    //   //   inputRange: [pageX - width, pageX, pageX + width],
-    //   inputRange: [pageX - width, pageX - width + 0.1, pageX, pageX + width - 0.1, pageX + width],
-    //   outputRange: [width, width / 2.38, 0, -width / 2.38, -width],
-    //   extrapolate: 'clamp',
-    // });
+    let translateXAfterRotate = scrollX.interpolate({
+      //   inputRange: [pageX - width, pageX, pageX + width],
+      inputRange: [pageX - width, pageX - width + 0.1, pageX, pageX + width - 0.1, pageX + width],
+      outputRange: [width, width / 2.38, 0, -width / 2.38, -width],
+      extrapolate: 'clamp',
+    });
 
     const dismissTranslationY = {
       translateY: verticalSwipe.interpolate({
@@ -211,80 +228,129 @@ class StoriesView extends React.Component {
     }
 
     return [
-      //   { perspective: width },
-      //   { translateX },
-      //   { rotateY },
-      //   { translateX: translateXAfterRotate },
+      { perspective: width },
+      { translateX },
+      { rotateY },
+      { translateX: translateXAfterRotate },
       dismissTranslationY,
       { scale },
     ];
   };
 
   get node() {
-    if (!this.list || !this.list.getNode) {
+    if (!this.viewPager || !this.viewPager._component) {
       return null;
     }
-    return this.list.getNode();
+    return this.viewPager._component;
   }
+
   componentDidUpdate(prevProps) {
     if (this.props.deckIdx !== prevProps.deckIdx) {
-      this.scrollToIndex(this.props.deckIdx);
+      if (this.node) {
+        this.node.scrollTo({ x: this.props.deckIdx * width, duration: 1000 });
+      }
     }
   }
-
-  componentDidMount() {
-    StatusBar.setHidden(true);
-
-    this.scrollToIndex(this.props.deckIdx, false);
-  }
-
-  scrollToIndex = (index, animated = true) => {
-    if (this.node) {
-      this.pendingIndex = null;
-      console.log('TO INDEX', index);
-      this.node.scrollToIndex({ index, animated });
-    } else {
-      this.pendingIndex = index;
-    }
-  };
-
-  getItemLayout = (data, index) => {
-    return {
-      length: width,
-      offset: width * index,
-      index,
-    };
-  };
 
   render() {
-    const { stories = [] } = this.props;
+    const { stories = [], swipedHorizontally } = this.props;
+    //
     return (
       <View style={styles.container}>
-        <AnimatedFlatList
+        <AnimatedScrollView
           {...this.panResponder.panHandlers}
-          ref={ref => {
-            this.list = ref;
-            if (this.pendingIndex != null) {
-              this.scrollToIndex(this.pendingIndex, false);
-            }
-          }}
+          ref={ref => (this.viewPager = ref)}
           onScroll={this.onScroll}
           scrollEventThrottle={16}
           horizontal
-          getItemLayout={this.getItemLayout}
           style={{ flex: 1 }}
           bounces={false}
           alwaysBounceHorizontal={false}
           showsHorizontalScrollIndicator={false}
           data={stories}
-          renderItem={this.renderItem}
-          pagingEnabled
-        />
+          pagingEnabled>
+          <Animated.View
+            style={[
+              { position: 'absolute', top: 0, left: 0, width, height },
+              { transform: [{ translateX: horizontalSwipe }] },
+            ]}>
+            {stories.map((item, index) => this.renderItem({ item, index }))}
+          </Animated.View>
+          {this.props.stories.map(this._renderPlaceholders)}
+        </AnimatedScrollView>
       </View>
     );
+    // children={stories.map((item, index) => this.renderItem({ item, index }))}
   }
 }
 
+// {stories.map((story, idx) => {
+//     //   let scale = verticalSwipe.interpolate({
+//     //     inputRange: [-1, 0, height],
+//     //     outputRange: [1, 1, 0.75],
+//     //   });
+
+//     //   if (swipedHorizontally) {
+//     //     scale = horizontalSwipe.interpolate({
+//     //       inputRange: [width * (idx - 1), width * idx, width * (idx + 1)],
+//     //       outputRange: [0.79, 1, 0.78],
+//     //     });
+//     //   }
+
+//     const offset = idx * width;
+//     const inputRange = [offset - width, offset + width];
+//     const translateX = horizontalSwipe.interpolate({
+//       inputRange,
+//       outputRange: [width / ratio, -width / ratio],
+//       extrapolate: 'clamp',
+//     });
+
+//     const rotateY = horizontalSwipe.interpolate({
+//       inputRange,
+//       outputRange: [`${angle}rad`, `-${angle}rad`],
+//       extrapolate: 'clamp',
+//     });
+//     const rotateYValue = rotateY.__getValue();
+
+//     const parsed = parseFloat(rotateYValue.substr(0, rotateYValue.indexOf('rad')), 10);
+//     const alpha = Math.abs(parsed);
+//     const gamma = angle - alpha;
+//     const beta = Math.PI - alpha - gamma;
+//     const w = halfWidth - (halfWidth * Math.sin(gamma)) / Math.sin(beta);
+//     const translateX2 = parsed > 0 ? w : -w;
+
+//     return (
+//       <Animated.View
+//         key={idx}
+//         style={[
+//           styles.deck,
+//           {
+//             transform: [
+//               { perspective },
+//               { translateX },
+//               { rotateY },
+//               { translateX: translateX2 },
+
+//               // {
+//               //   translateX: horizontalSwipe.interpolate({
+//               //     inputRange: [width * (idx - 1), width * idx, width * (idx + 1)],
+//               //     outputRange: [width, 0, -width],
+//               //   }),
+//               // },
+//               // {
+//               //   translateY: verticalSwipe.interpolate({
+//               //     inputRange: [-1, 0, height],
+//               //     outputRange: [0, 0, height / 2],
+//               //   }),
+//               // },
+//               // { scale },
+//             ],
+//           },
+//         ]}>
+//         <Story story={story} currentDeck={deckIdx === idx} />
+//       </Animated.View>
+//     );
+//   })}
 export default connect(({ stories }) => ({ ...stories }))(StoriesView);
 
 const styles = StyleSheet.create({

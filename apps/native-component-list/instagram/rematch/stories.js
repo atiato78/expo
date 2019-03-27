@@ -7,7 +7,6 @@ export const VERTICAL_THRESHOLD = 80;
 export const HORIZONTAL_THRESHOLD = 60;
 
 export let indicatorAnim = new Animated.Value(0);
-export let horizontalSwipe = new Animated.Value(0);
 export let verticalSwipe = new Animated.Value(0);
 
 export const data = [
@@ -122,7 +121,6 @@ const stories = {
   effects: {
     openCarousel({ index, offset }, state) {
       dispatch().stories.update({ offset, deckIdx: index });
-      horizontalSwipe.setValue(index * width);
 
       requestAnimationFrame(() => {
         LayoutAnimation.easeInEaseOut();
@@ -157,11 +155,6 @@ const stories = {
         stories: { swipedHorizontally },
       }
     ) {
-      if (swipedHorizontally) {
-        horizontalSwipe.setOffset(horizontalSwipe._value);
-        horizontalSwipe.setValue(0);
-      }
-
       dispatch().stories.pause();
       dispatch().stories.setBackOpacity(0);
     },
@@ -175,52 +168,53 @@ const stories = {
         stories: { swipedHorizontally },
       }
     ) {
-      if (swipedHorizontally) {
-        horizontalSwipe.setValue(-dx);
-      } else {
+      if (!swipedHorizontally) {
+        // horizontalSwipe.setValue(-dx);
+        // } else {
         verticalSwipe.setValue(dy);
       }
     },
 
     onPanResponderRelease(
       {
-        e,
-        gesture: { dx, dy },
+        direction,
+        // gesture: { dx, vy, ...gesture },
       },
       {
         stories: { swipedHorizontally, deckIdx, stories },
       }
     ) {
       if (!swipedHorizontally) {
-        if (dy > VERTICAL_THRESHOLD) {
-          return dispatch().stories.leaveStories();
+        // console.log('DISMISS: ', gesture, vy, VERTICAL_THRESHOLD);
+        if (direction === 'SWIPE_DOWN') {
+          dispatch().stories.leaveStories();
+        } else {
+          dispatch().stories.play();
+          dispatch().stories.resetVerticalSwipe();
         }
-        dispatch().stories.play();
-        return dispatch().stories.resetVerticalSwipe();
+        return;
       }
 
-      horizontalSwipe.flattenOffset();
+      // horizontalSwipe.flattenOffset();
 
-      if (dx > HORIZONTAL_THRESHOLD) {
+      if (direction === 'SWIPE_RIGHT') {
         // previous deck
-        if (deckIdx == 0) {
-          return dispatch().stories.leaveStories();
+        if (deckIdx === 0) {
+          dispatch().stories.leaveStories();
+        } else {
+          // dispatch().stories.animateDeck({ toValue: width * (deckIdx - 1), reset: true });
         }
-
-        return dispatch().stories.animateDeck({ toValue: width * (deckIdx - 1), reset: true });
-      }
-
-      if (dx < -HORIZONTAL_THRESHOLD) {
+      } else if (direction === 'SWIPE_LEFT') {
         // -> next deck
-        if (deckIdx == stories.length - 1) {
-          return dispatch().stories.leaveStories();
+        if (deckIdx === stories.length - 1) {
+          dispatch().stories.leaveStories();
+        } else {
+          // dispatch().stories.animateDeck({ toValue: width * (deckIdx + 1), reset: true });
         }
-
-        return dispatch().stories.animateDeck({ toValue: width * (deckIdx + 1), reset: true });
+      } else {
+        dispatch().stories.play();
+        dispatch().stories.animateDeck({ toValue: width * deckIdx });
       }
-
-      dispatch().stories.play();
-      return dispatch().stories.animateDeck({ toValue: width * deckIdx });
     },
 
     dismissCarousel() {
@@ -358,11 +352,6 @@ const stories = {
         dispatch().stories.update({ deckIdx: nextDeckIndex });
         dispatch().stories.animateIndicator(true);
       }
-
-      Animated.spring(horizontalSwipe, {
-        toValue,
-        friction: 9,
-      }).start();
     },
   },
 };
