@@ -431,52 +431,27 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
 
   @Override
   public void loadForVideo(final Integer tag, final ReadableArguments source, final ReadableArguments status, final Promise promise) {
-    tryRunWithVideoView(tag, new VideoViewCallback() {
-      @Override
-      public void runWithVideoView(final VideoView videoView) {
-        videoView.setSource(source, status, promise);
-      }
-    }, promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
+    tryRunWithVideoView(tag, videoView -> videoView.setSource(source, status, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
   }
 
   @Override
   public void unloadForVideo(final Integer tag, final Promise promise) {
-    tryRunWithVideoView(tag, new VideoViewCallback() {
-      @Override
-      public void runWithVideoView(final VideoView videoView) {
-        videoView.setSource(null, null, promise);
-      }
-    }, promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
+    tryRunWithVideoView(tag, videoView -> videoView.setSource(null, null, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
   }
 
   @Override
   public void setStatusForVideo(final Integer tag, final ReadableArguments status, final Promise promise) {
-    tryRunWithVideoView(tag, new VideoViewCallback() {
-      @Override
-      public void runWithVideoView(final VideoView videoView) {
-        videoView.setStatus(status, promise);
-      }
-    }, promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
+    tryRunWithVideoView(tag, videoView -> videoView.setStatus(status, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
   }
 
   @Override
   public void replayVideo(final Integer tag, final ReadableArguments status, final Promise promise) {
-    tryRunWithVideoView(tag, new VideoViewCallback() {
-      @Override
-      public void runWithVideoView(final VideoView videoView) {
-        videoView.setStatus(status, promise);
-      }
-    }, promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
+    tryRunWithVideoView(tag, videoView -> videoView.setStatus(status, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
   }
 
   @Override
   public void getStatusForVideo(final Integer tag, final Promise promise) {
-    tryRunWithVideoView(tag, new VideoViewCallback() {
-      @Override
-      public void runWithVideoView(final VideoView videoView) {
-        promise.resolve(videoView.getStatus());
-      }
-    }, promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
+    tryRunWithVideoView(tag, videoView -> promise.resolve(videoView.getStatus()), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
   }
 
   // Note that setStatusUpdateCallback happens in the JS for video via onStatusUpdate

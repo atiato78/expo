@@ -76,18 +76,14 @@ internal class ExoPlayerWrapper(private val context: Context,
 
   @Synchronized
   override fun release() {
-    if (simpleExoPlayer != null) {
-      simpleExoPlayer!!.release()
-      simpleExoPlayer = null
-    }
+    simpleExoPlayer?.release()
+    simpleExoPlayer = null
   }
 
   // Set status
 
-  override fun setSurface(surface: Surface, shouldPlay: Boolean) {
-    if (simpleExoPlayer != null) {
-      simpleExoPlayer!!.setVideoSurface(surface)
-    }
+  override fun setSurface(surface: Surface?, shouldPlay: Boolean) {
+    simpleExoPlayer?.setVideoSurface(surface)
   }
 
   override fun play(mute: Boolean, rate: Float, shouldCorrectPitch: Boolean) {

@@ -8,7 +8,7 @@ import java.net.HttpCookie
 
 interface ExpoPlayer {
 
-  fun setSurface(surface: Surface, shouldPlay: Boolean)
+  fun setSurface(surface: Surface?, shouldPlay: Boolean)
 
   fun play(mute: Boolean, rate: Float, shouldCorrectPitch: Boolean)
   fun pauseImmediately()

@@ -113,7 +113,7 @@ internal class MediaPlayerWrapper(private val context: Context,
   // Video specific
 
   // TODO: We should be able to determine shouldPlay within this class. Passing it to this method does not look good.
-  override fun setSurface(surface: Surface, shouldPlay: Boolean) {
+  override fun setSurface(surface: Surface?, shouldPlay: Boolean) {
     if (mediaPlayer == null) {
       return // TODO: Throw an exception which will determine that load should be called before!
     }
