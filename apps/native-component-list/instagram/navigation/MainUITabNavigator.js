@@ -123,6 +123,8 @@ LikesNav.navigationOptions = {
   header: null,
 };
 
+import initialScreens from '../constants/initialScreens'
+
 const MainTabNavigator = createBottomTabNavigator(
   {
     Feed: FeedNav,
@@ -132,7 +134,7 @@ const MainTabNavigator = createBottomTabNavigator(
     Profile: ProfileNav,
   },
   {
-    initialRouteName: 'Profile',
+    initialRouteName: initialScreens.UI,
     tabBarOptions: {
       showLabel: false,
     },

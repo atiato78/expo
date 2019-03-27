@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from 'react-navigation';
 
 import MainUITabNavigator from './MainUITabNavigator';
 import MediaCreationNavigator from './MediaCreationNavigator';
+import initialScreens from '../constants/initialScreens';
 
 export default createBottomTabNavigator(
   {
@@ -11,7 +12,7 @@ export default createBottomTabNavigator(
     SocialUI: MainUITabNavigator,
   },
   {
-    // initialRouteName: 'SocialUI',
+    initialRouteName: initialScreens.app,
     tabBarComponent: () => <View />,
     swipeEnabled: true,
     animationEnabled: true,

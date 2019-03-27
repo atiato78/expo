@@ -3,7 +3,7 @@ import { BlurView } from 'expo-blur';
 import { Camera } from 'expo-camera';
 import Constants from 'expo-constants';
 import * as Font from 'expo-font';
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from 'expo';
 import * as Permissions from 'expo-permissions';
 import React from 'react';
 import {
@@ -16,6 +16,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableWithoutFeedback,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -37,6 +38,8 @@ import NavigationService from './navigation/NavigationService';
 import dispatch from './rematch/dispatch';
 import Slider from './Slider';
 import ViewPager from './ViewPager';
+
+import MediaLibraryData from './constants/MediaLibraryData';
 
 // import Popular from './data/Popular.json';
 const { height } = Dimensions.get('window');
@@ -72,6 +75,27 @@ const pages = [
   };
 });
 
+const GradientHeader = ({ style, ...props }) => (
+  <LinearGradient
+    colors={['black', 'red']}
+    style={StyleSheet.flatten([
+      {
+        position: 'absolute',
+        top: 0,
+        paddingTop: Constants.statusBarHeight || 16,
+        left: 0,
+        right: 0,
+        flexDirection: 'row',
+        paddingHorizontal: 16,
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        paddingBottom: 12,
+      },
+      style,
+    ])}
+    {...props}
+  />
+);
 const Header = ({ style, ...props }) => (
   <View
     style={StyleSheet.flatten([
@@ -186,6 +210,7 @@ const TypeScreen = ({ gradient, gradientTheme, onPressTypefaceButton, typeface }
   );
 };
 
+let takePictureGlobal;
 class CameraScreen extends React.Component {
   static defaultProps = {
     headerLeftIconName: 'settings',
@@ -198,12 +223,25 @@ class CameraScreen extends React.Component {
     ),
   };
 
+  componentDidMount() {
+    takePictureGlobal = this.takePicture;
+  }
+
+  takePicture = () => {
+    if (this.camera) {
+      this.camera.takePictureAsync({
+        onPictureSaved: photo => {
+          dispatch().image.set(photo);
+        },
+      });
+    }
+  };
+
   render() {
     const { headerLeft, camera = {}, headerLeftIconName = 'settings' } = this.props;
-    console.log('CAMERA', camera);
     return (
       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-        <Camera style={{ flex: 1 }} {...camera} />
+        <Camera ref={ref => (this.camera = ref)} style={{ flex: 1 }} {...camera} />
         <Header>
           {headerLeft({ name: headerLeftIconName })}
           <IconButton
@@ -459,10 +497,12 @@ const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 class EditorComboScreen extends React.Component {
   render() {
-    if (this.props.image) {
-      return <EditorScreen image={this.props.image} />;
-    }
-    return <MediaContainerScreen />;
+    return (
+      <View style={{ flex: 1 }}>
+        <MediaContainerScreen />
+        {this.props.image && <EditorScreen image={this.props.image} />}
+      </View>
+    );
   }
 }
 
@@ -472,27 +512,72 @@ export default ConnectedEditorComboScreen;
 
 class EditorScreen extends React.Component {
   render() {
+    const sendButtonHeight = 36;
+
     return (
-      <View style={{ flex: 1 }}>
+      <View style={[StyleSheet.absoluteFill, { backgroundColor: 'black' }]}>
         <Image style={{ flex: 1, resizeMode: 'cover' }} source={this.props.image} />
-        <Header>
-          <IconButton
-            name={'close'}
+        <GradientHeader>
+          <EditorIcon
+            name={'cancel'}
             onPress={() => {
               dispatch().image.set(null);
             }}
           />
-          <IconButton
-            name={'chevron-right'}
-            onPress={() => {
-              NavigationService.navigate('SocialUI');
-            }}
-          />
-        </Header>
+          <View style={{ flexDirection: 'row' }}>
+            <EditorIcon name="save" onPress={() => {}} />
+            <FaceButton
+              containerStyle={{ marginHorizontal: 4 }}
+              onPress={() => NavigationService.navigate('SocialUI')}
+            />
+            <EditorIcon name="stickers" onPress={() => NavigationService.navigate('SocialUI')} />
+            <EditorIcon name="draw" onPress={() => NavigationService.navigate('SocialUI')} />
+            <EditorIcon name="letter" onPress={() => NavigationService.navigate('SocialUI')} />
+          </View>
+        </GradientHeader>
+
+        <View
+          style={{
+            display: 'flex',
+            paddingVertical: 24,
+            justifyContent: 'space-between',
+            flexDirection: 'row',
+            alignItems: 'center',
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            paddingHorizontal: 16,
+          }}>
+          <View />
+          <TouchableOpacity style={{}}>
+            <View
+              style={{
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: 'white',
+                height: sendButtonHeight,
+                borderRadius: sendButtonHeight / 2,
+                shadowRadius: 6,
+                shadowOpacity: 0.3,
+                paddingHorizontal: 12,
+                flexDirection: 'row',
+              }}>
+              <Text style={{ textAlign: 'left', marginBottom: 2, fontSize: 12 }} onPress={() => {}}>
+                Send To
+              </Text>
+              <InstaIcon name="chevron-right" color="black" size={18} />
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
 }
+
+const EditorIcon = ({ style, ...props }) => (
+  <IconButton containerStyle={[{ marginHorizontal: 4 }, style]} color="white" {...props} />
+);
 
 const DISABLE_BOTTOM_DRAWER = false;
 const DISABLE_CAMERA_SETTINGS = true;
@@ -518,8 +603,14 @@ class MediaContainerScreen extends React.Component {
     if (DISABLE_BOTTOM_DRAWER || !this.scrollView) {
       return;
     }
-    console.log(this.scrollView);
-    this.scrollView._component.scrollToEnd({ duration: 500, animated: true });
+    this.scrollView._component.scrollToEnd({ duration: 300, animated: true });
+  };
+  openCamera = () => {
+    console.log('open camera');
+    if (DISABLE_BOTTOM_DRAWER || !this.scrollView) {
+      return;
+    }
+    this.scrollView._component.scrollTo({ x: 0, y: 0, duration: 300 });
   };
 
   render() {
@@ -537,7 +628,7 @@ class MediaContainerScreen extends React.Component {
         pagingEnabled
         style={{ flex: 1 }}
         contentContainerStyle={{ height: height + drawerHeight }}>
-        <BlurredOptionsContainer animation={this.animation}>
+        <BlurredOptionsContainer animation={this.animation} onPress={this.openCamera}>
           <CameraContainerScreen openMediaDrawer={this.openMediaDrawer} />
         </BlurredOptionsContainer>
         <MediaScreen
@@ -565,28 +656,30 @@ class BlurredOptionsContainer extends React.Component {
         <Animated.View
           style={{ ...StyleSheet.absoluteFillObject, opacity }}
           pointerEvents={this.props.isEnabled ? 'auto' : 'none'}>
-          <BlurView
-            tint={'dark'}
-            intensity={100}
-            style={{
-              flex: 1,
-              justifyContent: 'flex-end',
-              alignItems: 'stretch',
-            }}>
-            <View
+          <TouchableWithoutFeedback style={StyleSheet.absoluteFill} onPress={this.props.onPress}>
+            <BlurView
+              tint={'dark'}
+              intensity={100}
               style={{
-                alignItems: 'center',
-                padding: 8,
-                justifyContent: 'space-between',
-                flexDirection: 'row',
+                flex: 1,
+                justifyContent: 'flex-end',
+                alignItems: 'stretch',
               }}>
-              <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
-                LAST 24 HOURS
-              </Text>
+              <View
+                style={{
+                  alignItems: 'center',
+                  padding: 8,
+                  justifyContent: 'space-between',
+                  flexDirection: 'row',
+                }}>
+                <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>
+                  LAST 24 HOURS
+                </Text>
 
-              <IconButton name={'camera'} />
-            </View>
-          </BlurView>
+                <IconButton name={'camera'} />
+              </View>
+            </BlurView>
+          </TouchableWithoutFeedback>
         </Animated.View>
       </View>
     );
@@ -604,11 +697,7 @@ class MediaScreen extends React.Component {
           renderItem={({ item }) => <MediaItem {...item} />}
           contentContainerStyle={{ padding: 1 }}
           style={{ flex: 1 }}
-          data={new Array(30).fill({
-            image: {
-              uri: 'https://i.pinimg.com/originals/7d/f3/91/7df3915b9345e5a95540779bd6359886.jpg',
-            },
-          })}
+          data={MediaLibraryData}
           numColumns={3}
         />
       </View>
@@ -811,7 +900,7 @@ class WhosActive extends React.Component {
 
 class GoLiveButton extends React.Component {
   render() {
-    const { animation } = this.props;
+    const { animation, isActive } = this.props;
 
     const opacity = animation.interpolate({
       inputRange: [0, 0.5],
@@ -819,7 +908,7 @@ class GoLiveButton extends React.Component {
     });
 
     return (
-      <Animated.View style={{ width: '100%', opacity }}>
+      <Animated.View pointerEvents={isActive ? 'auto' : 'none'} style={{ width: '100%', opacity }}>
         <TouchableOpacity style={{ flex: 1 }}>
           <View
             style={{
@@ -963,6 +1052,7 @@ class MainFooter extends React.Component {
               }}>
               <FlashButtonContainer openMediaDrawer={this.props.openMediaDrawer} {...page} />
               <CaptureButtonContainer
+                onCapture={() => takePictureGlobal()}
                 selectedIndex={index}
                 animation={this.liveAnimation}
                 icon={page.icon}
@@ -980,7 +1070,7 @@ class MainFooter extends React.Component {
 
 class CaptureButtonContainer extends React.Component {
   render() {
-    const { isActive, selectedIndex, animation, icon } = this.props;
+    const { isActive, selectedIndex, animation, icon, onCapture } = this.props;
 
     const opacity = animation.interpolate({
       inputRange: [0.2, 1],
@@ -1007,7 +1097,7 @@ class CaptureButtonContainer extends React.Component {
             alignItems: 'center',
             justifyContent: 'center',
           }}>
-          <CaptureButton selectedIndex={selectedIndex} icon={icon} />
+          <CaptureButton onPress={onCapture} selectedIndex={selectedIndex} icon={icon} />
         </Animated.View>
         <GoLiveButton
           animation={animation}
@@ -1152,7 +1242,6 @@ class FaceButton extends React.Component {
         {...this.props}
         onPress={this.onPress}
         active={this.state.isActive}
-        enabled={false}
         name={`face`}
       />
     );
@@ -1246,8 +1335,12 @@ class CaptureButton extends React.Component {
     const width = 72;
     const innerWidth = width * 0.75;
     return (
-      <TouchableOpacity style={{ height: width }}>
+      <TouchableOpacity
+        style={{ height: width, width }}
+        pointerEvents="box-only"
+        onPress={this.props.onPress}>
         <BlurView
+          pointerEvents="none"
           tint={'light'}
           style={{
             width,
@@ -1389,11 +1482,20 @@ class RotatingIcon extends React.Component {
 
 const iconButtonSize = 30;
 
-const IconButton = ({ enabled = true, onPress, active, name, size, color }) => (
+const IconButton = ({
+  style,
+  containerStyle,
+  enabled = true,
+  onPress,
+  active,
+  name,
+  size,
+  color,
+}) => (
   <TouchableOpacity
     pointerEvents={!enabled && 'none'}
-    style={{ width: iconButtonSize, height: iconButtonSize }}
+    style={[containerStyle, { width: iconButtonSize, height: iconButtonSize }]}
     onPress={onPress}>
-    <InstaIcon style={{ opacity: !enabled && 0.7 }} active={active} name={name} />
+    <InstaIcon style={[style, { opacity: !enabled && 0.7 }]} active={active} name={name} />
   </TouchableOpacity>
 );
