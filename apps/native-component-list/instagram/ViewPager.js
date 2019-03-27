@@ -22,13 +22,14 @@ class ViewPager extends Component {
   };
 
   get size() {
-    const { size, horizontal } = this.props;
-    if (size) {
-      return size;
-    } else {
-      const { width, height } = this.state;
-      return horizontal ? width : height;
-    }
+    return this.props.size;
+    // const { size, horizontal } = this.props;
+    // if (size) {
+    //   return size;
+    // } else {
+    //   const { width, height } = this.state;
+    //   return horizontal ? width : height;
+    // }
   }
 
   get offset() {
@@ -64,14 +65,13 @@ class ViewPager extends Component {
     return this.list.getNode();
   }
 
-  scrollToIndex = ({ index, animated }) => {
+  scrollToIndex = ({ index, ...props }) => {
     if (this.node) {
-      console.log('scrollto', index, animated, Object.keys(this.node));
       const { data } = this.props;
       const maxItems = data.length - 1;
       this.node.scrollToIndex({
-        animated,
         index: Math.max(0, Math.min(index, maxItems)),
+        ...props,
       });
     }
   };
@@ -140,12 +140,12 @@ class ViewPager extends Component {
     } = event;
 
     if (horizontal) {
-      if (width != this.state.width) {
+      if (width !== this.state.width) {
         console.log('horizontal', width);
         this.setState({ width, height });
       }
     } else {
-      if (height != this.state.height) {
+      if (height !== this.state.height) {
         console.log('vertical', height);
         this.setState({ width, height });
       }
@@ -181,6 +181,7 @@ class ViewPager extends Component {
           this.list = ref;
           onRef && onRef(ref);
         }}
+        removeClippedSubviews
         keyExtractor={keyExtractor || this.keyExtractor}
         data={data}
         snapToAlignment={snapToAlignment}

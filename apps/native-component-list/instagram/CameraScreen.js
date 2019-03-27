@@ -1402,28 +1402,28 @@ class RotatingIcon extends React.Component {
   componentDidUpdate(prevProps) {
     if (this.props.index !== prevProps.index) {
       if (this.viewPager) {
-        this.viewPager.scrollToIndex({ index: this.props.index, animated: true });
+        this.viewPager.scrollToIndex({ index: this.props.index, duration: 1000 });
       }
     }
   }
 
-  get currentPage() {
-    return this.pages[this.viewPager.index];
-  }
+  // get currentPage() {
+  //   return this.pages[this.viewPager.index];
+  // }
 
-  previous = () => {
-    if (this.viewPager) {
-      console.log(this.viewPager.index);
-      this.viewPager.previous();
-    }
-  };
+  // previous = () => {
+  //   if (this.viewPager) {
+  //     console.log(this.viewPager.index);
+  //     this.viewPager.previous();
+  //   }
+  // };
 
-  next = () => {
-    if (this.viewPager) {
-      console.log(this.viewPager.index);
-      this.viewPager.next();
-    }
-  };
+  // next = () => {
+  //   if (this.viewPager) {
+  //     console.log(this.viewPager.index);
+  //     this.viewPager.next();
+  //   }
+  // };
 
   renderItem = ({ item, index }) => {
     const { itemWidth } = this.props;
@@ -1462,12 +1462,12 @@ class RotatingIcon extends React.Component {
     return (
       <ViewPager
         pagingEnabled
+        useNativeDriver
         scroll={this.animatedValue}
         ref={ref => (this.viewPager = ref)}
         data={data}
         renderItem={this.renderItem}
         style={{
-          scrollIndicator: 'none',
           minHeight: itemWidth,
           maxHeight: itemWidth,
           maxWidth: itemWidth,
