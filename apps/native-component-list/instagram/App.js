@@ -31,7 +31,7 @@ class InnerApp extends React.Component {
         <View
           style={[
             { overflow: 'hidden', ...StyleSheet.absoluteFillObject },
-            offset,
+            // offset,
             carouselOpen ? { display: 'flex' } : { display: 'none' },
           ]}>
           <Stories />

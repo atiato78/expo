@@ -76,7 +76,7 @@ export default class NativeLinearGradient extends React.PureComponent {
         // TODO: Bacon: In the future we could consider adding `backgroundRepeat: "no-repeat"`. For more browser support.
         return (<View style={[
             style,
-            backgroundImage !== null && {
+            backgroundImage != null && {
                 // @ts-ignore: [ts] Property 'backgroundImage' does not exist on type 'ViewStyle'.
                 backgroundImage,
             },

@@ -11,15 +11,38 @@ import dispatch from '../../rematch/dispatch';
 
 // indicator={CircleSnail}
 
+const ENABLE_TOUCHABLES = false;
+
 const circleSnailProps = { thickness: 1, color: '#ddd', size: 80 };
 const { width, height } = Dimensions.get('window');
 
 class Story extends React.Component {
   render() {
-    const { story, onNextItem, pause } = this.props;
+    const { story } = this.props;
 
+    if (!ENABLE_TOUCHABLES) {
+      return (
+        <View style={{ flex: 1 }}>
+          <Image
+            source={{ uri: story.items[story.idx].src }}
+            style={styles.deck}
+            indicatorProps={circleSnailProps}
+          />
+          {this.renderIndicators()}
+          {this.renderCloseButton()}
+          {this.renderBackButton()}
+        </View>
+      );
+    }
     return (
-      <TouchableWithoutFeedback onPress={onNextItem} delayPressIn={200} onPressIn={pause}>
+      <TouchableWithoutFeedback
+        onPress={() => {
+          dispatch().stories.onNextItem();
+        }}
+        delayPressIn={200}
+        onPressIn={() => {
+          dispatch().stories.pause();
+        }}>
         <View style={{ flex: 1 }}>
           <Image
             source={{ uri: story.items[story.idx].src }}
@@ -35,9 +58,11 @@ class Story extends React.Component {
   }
 
   renderCloseButton() {
-    const { dismissCarousel } = this.props;
     return (
-      <TouchableWithoutFeedback onPress={dismissCarousel}>
+      <TouchableWithoutFeedback
+        onPress={() => {
+          dispatch().stories.dismissCarousel();
+        }}>
         <View style={styles.closeButton}>
           <View style={[styles.closeCross, { transform: [{ rotate: '45deg' }] }]} />
           <View style={[styles.closeCross, { transform: [{ rotate: '-45deg' }] }]} />
@@ -67,10 +92,12 @@ class Story extends React.Component {
   }
 
   renderBackButton() {
-    const { onPrevItem, backOpacity } = this.props;
+    const { backOpacity } = this.props;
     return (
       <TouchableWithoutFeedback
-        onPress={onPrevItem}
+        onPress={() => {
+          dispatch().stories.onPrevItem();
+        }}
         onPressIn={() => dispatch().stories.setBackOpacity(1)}
         onLongPress={() => dispatch().stories.setBackOpacity(0)}>
         <LinearGradient
