@@ -15,16 +15,22 @@ const persistPlugin = createRematchPersist({
   storage: AsyncStorage,
 });
 
+const PERSIST_DATA = false;
 export const store = init({
   models,
-  plugins: [persistPlugin],
+  plugins: [PERSIST_DATA && persistPlugin],
 });
 
+global.__rematch_store = store;
 global.__rematch_dispatch = store.dispatch;
+
 class Gate extends React.Component {
   render() {
     const { children } = this.props;
 
+    if (!PERSIST_DATA) {
+      return <Provider store={store}>{children}</Provider>;
+    }
     return (
       <Provider store={store}>
         <PersistGate persistor={getPersistor()}>{children}</PersistGate>

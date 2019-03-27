@@ -36,3 +36,4 @@ export const camera = {
     },
   },
 };
+export { default as stories } from './stories';

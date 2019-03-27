@@ -8,7 +8,7 @@ import initialScreens from '../constants/initialScreens';
 
 export default createBottomTabNavigator(
   {
-    MediaCreation: MediaCreationNavigator,
+    // MediaCreation: MediaCreationNavigator,
     SocialUI: MainUITabNavigator,
   },
   {

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
-
+import { Image, TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native';
+import dispatch from '../rematch/dispatch';
 class OutlineImage extends React.Component {
   render() {
     const { style, renderImage, imageSize, ...props } = this.props;
@@ -50,13 +50,30 @@ class OutlineImage extends React.Component {
 }
 
 const ICON_SIZE = 56;
+class Story extends React.Component {
+  render() {
+    const { title, index, source, renderImage } = this.props;
 
-const Story = ({ title, source, renderImage }) => (
-  <View style={{ alignItems: 'center', marginRight: 12 }}>
-    <OutlineImage source={source} renderImage={renderImage} imageSize={ICON_SIZE} />
-    <Text style={{ fontSize: 16, marginTop: 6 }}>{title}</Text>
-  </View>
-);
+    return (
+      <TouchableOpacity
+        ref={ref => (this.item = ref)}
+        onPress={() => {
+          this.item.measure((ox, oy, width, height, px, py) => {
+            const offset = {
+              top: py + ICON_SIZE / 2,
+              left: px + ICON_SIZE / 2,
+            };
+
+            dispatch().stories.openCarousel({ index, offset });
+          });
+        }}
+        style={{ alignItems: 'center', marginRight: 12 }}>
+        <OutlineImage source={source} renderImage={renderImage} imageSize={ICON_SIZE} />
+        <Text style={{ fontSize: 16, marginTop: 6 }}>{title}</Text>
+      </TouchableOpacity>
+    );
+  }
+}
 
 const NewStory = () => {
   return (
@@ -79,8 +96,8 @@ const NewStory = () => {
 const Stories = ({ stories, hasNew }) => (
   <ScrollView horizontal style={styles.row}>
     {hasNew && <NewStory />}
-    {stories.map(story => (
-      <Story {...story} />
+    {stories.map((story, index) => (
+      <Story {...story} index={index} />
     ))}
   </ScrollView>
 );
