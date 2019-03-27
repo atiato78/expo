@@ -14,3 +14,25 @@ export const image = {
     },
   },
 };
+export const camera = {
+  state: {
+    type: 'back',
+  },
+  reducers: {
+    update: (state, payload) => ({ ...state, ...payload }),
+    set: (state, payload) => payload,
+    flip: ({ type, ...state }) => {
+      return {
+        ...state,
+        type: type === 'back' ? 'front' : 'back',
+      };
+    },
+  },
+  effects: {
+    getAsync: async (props = {}) => {
+      //   const { permission } = props;
+      //   const { status } = await Permissions.getAsync(permission);
+      //   dispatch.permissions.update({ [permission]: status });
+    },
+  },
+};

@@ -84,7 +84,7 @@ export default class FeedList extends React.Component {
       <FlatList
         renderItem={({ item }) => <Item {...item} />}
         ListFooterComponent={props => <Footer {...props} onPress={onPressFooter} />}
-        keyExtractor={item => item.key}
+        keyExtractor={(item, index) => item.key + ' ' + index}
         {...props}
       />
     );

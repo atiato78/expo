@@ -1,46 +1,44 @@
+import EvilIcons from '@expo/vector-icons/EvilIcons';
+import { BlurView } from 'expo-blur';
+import { Camera } from 'expo-camera';
+import Constants from 'expo-constants';
+import * as Font from 'expo-font';
+import { LinearGradient } from 'expo-linear-gradient';
+import * as Permissions from 'expo-permissions';
 import React from 'react';
 import {
-  View,
-  Platform,
-  Text,
-  Image,
   Animated,
   Dimensions,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  LayoutAnimation,
   FlatList,
+  Image,
+  LayoutAnimation,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
-import Constants from 'expo-constants';
-import { Camera } from 'expo-camera';
-import * as Permissions from 'expo-permissions';
-import * as Animatable from 'react-native-animatable';
-import { BlurView } from 'expo-blur';
 import {
-  SafeAreaView,
-  createStackNavigator,
-  createMaterialTopTabNavigator,
   createAppContainer,
+  createMaterialTopTabNavigator,
+  createStackNavigator,
+  SafeAreaView,
 } from 'react-navigation';
-import * as Font from 'expo-font';
+import { connect } from 'react-redux';
+
+import Assets from './Assets';
 import SearchBar from './components/SearchBar';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import EvilIcons from '@expo/vector-icons/EvilIcons';
+import Genres from './data/Genres.json';
+import Moods from './data/Moods.json';
+import Popular from './data/Popular-itunes.json';
+import InstaIcon from './InstaIcon';
+import NavigationService from './navigation/NavigationService';
+import dispatch from './rematch/dispatch';
 import Slider from './Slider';
 import ViewPager from './ViewPager';
 
-import Popular from './data/Popular-itunes.json';
 // import Popular from './data/Popular.json';
-import Moods from './data/Moods.json';
-import Genres from './data/Genres.json';
-import InstaIcon from './InstaIcon';
-import Assets from './Assets';
-import dispatch from './rematch/dispatch';
-import { connect } from 'react-redux';
-import NavigationService from './navigation/NavigationService';
-
 const { height } = Dimensions.get('window');
 
 const pages = [
@@ -60,7 +58,7 @@ const pages = [
   //   icon: Assets['inf.png'],
   //   screen: () => <MusicScreen />,
   // },
-  // { name: 'Live', id: 'live', isFilterable: true, icon: null },
+  { name: 'Live', id: 'live', isFilterable: true, icon: null },
   { name: 'Normal', id: 'normal', isFilterable: true, icon: null },
   { name: 'Boomerang', id: 'boomerang', isFilterable: true, icon: Assets['inf.png'] },
   { name: 'Superzoom', id: 'superzoom', isFilterable: false, icon: Assets['rewind.png'] },
@@ -191,15 +189,21 @@ const TypeScreen = ({ gradient, gradientTheme, onPressTypefaceButton, typeface }
 class CameraScreen extends React.Component {
   static defaultProps = {
     headerLeftIconName: 'settings',
-    headerLeft: props => <IconButton {...props} />,
+    headerLeft: props => (
+      <IconButton
+        enabled={!DISABLE_CAMERA_SETTINGS}
+        {...props}
+        onPress={() => NavigationService.navigate('CameraSettingsScreen')}
+      />
+    ),
   };
 
   render() {
-    const { headerLeft, headerLeftIconName = 'settings' } = this.props;
-
+    const { headerLeft, camera = {}, headerLeftIconName = 'settings' } = this.props;
+    console.log('CAMERA', camera);
     return (
       <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-        <Camera style={{ flex: 1 }} />
+        <Camera style={{ flex: 1 }} {...camera} />
         <Header>
           {headerLeft({ name: headerLeftIconName })}
           <IconButton
@@ -213,6 +217,9 @@ class CameraScreen extends React.Component {
     );
   }
 }
+
+const ConnectedCameraScreen = connect(({ camera }) => ({ camera }))(CameraScreen);
+
 const MusicScreen = () => {
   return (
     <BlurView
@@ -487,6 +494,9 @@ class EditorScreen extends React.Component {
   }
 }
 
+const DISABLE_BOTTOM_DRAWER = false;
+const DISABLE_CAMERA_SETTINGS = true;
+
 class MediaContainerScreen extends React.Component {
   animation = new Animated.Value(0);
 
@@ -504,18 +514,31 @@ class MediaContainerScreen extends React.Component {
     );
   }
 
+  openMediaDrawer = () => {
+    if (DISABLE_BOTTOM_DRAWER || !this.scrollView) {
+      return;
+    }
+    console.log(this.scrollView);
+    this.scrollView._component.scrollToEnd({ duration: 500, animated: true });
+  };
+
   render() {
     const { height } = Dimensions.get('window');
     const drawerHeight = height * 0.9;
+
+    if (DISABLE_BOTTOM_DRAWER) {
+      return <CameraContainerScreen />;
+    }
     return (
       <AnimatedScrollView
+        ref={ref => (this.scrollView = ref)}
         scrollEventThrottle={16}
         onScroll={this.onScroll}
         pagingEnabled
         style={{ flex: 1 }}
         contentContainerStyle={{ height: height + drawerHeight }}>
         <BlurredOptionsContainer animation={this.animation}>
-          <CameraContainerScreen />
+          <CameraContainerScreen openMediaDrawer={this.openMediaDrawer} />
         </BlurredOptionsContainer>
         <MediaScreen
           style={{
@@ -606,7 +629,7 @@ class MediaItem extends React.Component {
     const itemHeight = itemWidth * aspectRatio;
     return (
       <TouchableOpacity
-        style={{ margin: 1, width: itemWidth, height: itemHeight, backgroundColor: 'red' }}
+        style={{ margin: 1, width: itemWidth, height: itemHeight, backgroundColor: 'black' }}
         onPress={this.onPress}>
         <Image style={{ flex: 1, resizeMode: 'cover' }} source={this.props.image} />
       </TouchableOpacity>
@@ -615,14 +638,29 @@ class MediaItem extends React.Component {
 }
 
 class CameraContainerScreen extends React.Component {
-  state = {
-    ready: false,
-    index: 0,
-    selectedGradient: 0,
-    selectedFont: 0,
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      ready: false,
+      index: 0,
+      height: Dimensions.get('window').height,
+      selectedGradient: 0,
+      selectedFont: 0,
+    };
+  }
+
+  componentWillUnmount() {
+    Dimensions.removeEventListener('change', this.onResize);
+  }
+
+  onResize = ({ window: { height } }) => {
+    this.setState({ height });
   };
 
   async componentDidMount() {
+    Dimensions.addEventListener('change', this.onResize);
+
     try {
       await Permissions.askAsync(Permissions.CAMERA);
       await Font.loadAsync({
@@ -655,11 +693,11 @@ class CameraContainerScreen extends React.Component {
       <View
         style={{
           flex: 1,
-          height: Dimensions.get('window').height,
-          backgroundColor: '#4630EB',
+          height: this.state.height,
+          backgroundColor: 'black',
           justifyContent: 'flex-end',
         }}>
-        <CameraScreen headerLeftIconName={page.headerLeftIconName} />
+        <ConnectedCameraScreen headerLeftIconName={page.headerLeftIconName} />
 
         {false && (
           <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
@@ -676,6 +714,7 @@ class CameraContainerScreen extends React.Component {
           page={page}
           index={this.state.index}
           gradient={gradient}
+          openMediaDrawer={this.props.openMediaDrawer}
           onPressGradientButton={() => {
             this.setState({
               selectedGradient: (this.state.selectedGradient + 1) % gradients.length,
@@ -718,44 +757,61 @@ class CameraContainerScreen extends React.Component {
 
 const userProfilePictureSize = 24;
 const userProfilePictureIndicatorSize = userProfilePictureSize * 0.3;
-const UserProfilePicture = ({ source }) => (
-  <View style={{ width: userProfilePictureSize, height: userProfilePictureSize, marginLeft: 4 }}>
-    <Image style={{ flex: 1, borderRadius: userProfilePictureSize / 2 }} source={source} />
-    <View
-      style={{
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: 'black',
-        width: userProfilePictureIndicatorSize,
-        height: userProfilePictureIndicatorSize,
-        borderRadius: userProfilePictureIndicatorSize / 2,
-        backgroundColor: 'lime',
-      }}
-    />
-  </View>
-);
-const WhosActive = ({ users }) => (
-  <View style={{ flexDirection: 'row', width: '90%', justifyContent: 'space-between' }}>
-    <Text style={{ fontSize: 10, color: 'white' }}>
-      {users
-        .slice(0, 2)
-        .map(({ name }) => name)
-        .join(', ') + `, and ${users.length - 2} others are active now`}
-    </Text>
+class UserProfilePicture extends React.Component {
+  render() {
+    const { source } = this.props;
 
-    <View style={{ flexDirection: 'row' }}>
-      {users.slice(0, 3).map((user, index) => (
-        <UserProfilePicture key={index + '-img'} source={user.image} />
-      ))}
-    </View>
-  </View>
-);
+    return (
+      <View
+        style={{ width: userProfilePictureSize, height: userProfilePictureSize, marginLeft: 4 }}>
+        <Image style={{ flex: 1, borderRadius: userProfilePictureSize / 2 }} source={source} />
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            right: 0,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: 'black',
+            width: userProfilePictureIndicatorSize,
+            height: userProfilePictureIndicatorSize,
+            borderRadius: userProfilePictureIndicatorSize / 2,
+            backgroundColor: 'lime',
+          }}
+        />
+      </View>
+    );
+  }
+}
+
+class WhosActive extends React.Component {
+  render() {
+    const { users } = this.props;
+
+    return (
+      <View style={{ flexDirection: 'row', width: '90%', justifyContent: 'space-between' }}>
+        <Text style={{ fontSize: 10, color: 'white' }}>
+          {users
+            .slice(0, 2)
+            .map(({ name }) => name)
+            .join(', ') + `, and ${users.length - 2} others are active now`}
+        </Text>
+
+        <View style={{ flexDirection: 'row' }}>
+          {users.slice(0, 3).map((user, index) => (
+            <UserProfilePicture
+              key={index + '-img'}
+              source={`https://avatars.io/instagram/${user.account}/Small`}
+            />
+          ))}
+        </View>
+      </View>
+    );
+  }
+}
 
 class GoLiveButton extends React.Component {
   render() {
-    const { isActive, animation } = this.props;
+    const { animation } = this.props;
 
     const opacity = animation.interpolate({
       inputRange: [0, 0.5],
@@ -809,26 +865,20 @@ const GradientButton = ({ gradient, onPress }) => (
 const users = [
   {
     name: 'Brent Vatne',
-    image: {
-      uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
-    },
+    account: 'notbrent',
   },
   {
     name: 'Charlie Cheever',
-    image: {
-      uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
-    },
+    account: 'ccheever',
   },
   {
-    name: 'james',
-    image: {
-      uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
-    },
+    name: 'James Ide',
+    account: 'jameside',
   },
   {
-    name: 'evan',
+    name: 'quin',
     image: {
-      uri: 'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
+      uri: 'quinlanjung',
     },
   },
 ];
@@ -869,7 +919,7 @@ class MainFooter extends React.Component {
           <View style={footerStyle}>
             <GradientButton gradient={gradient} onPress={onPressGradientButton} />
             <CaptureButton selectedIndex={index} icon={page.icon} />
-            <IconButton key="camera" name={'camera'} />
+            <IconButton enabled={false} key="camera" name={'camera'} />
           </View>
         );
       default: {
@@ -911,7 +961,7 @@ class MainFooter extends React.Component {
                 flexDirection: 'row',
                 alignItems: 'center',
               }}>
-              <FlashButtonContainer {...page} />
+              <FlashButtonContainer openMediaDrawer={this.props.openMediaDrawer} {...page} />
               <CaptureButtonContainer
                 selectedIndex={index}
                 animation={this.liveAnimation}
@@ -1018,6 +1068,7 @@ class FlashButtonContainer extends React.Component {
             style={{ position: 'absolute', left: 0, opacity: fadeFace }}
             pointerEvents={isLive ? 'none' : 'auto'}>
             <GalleryButton
+              onPress={this.props.openMediaDrawer}
               source={{
                 uri:
                   'https://pbs.twimg.com/profile_images/1052466125055746048/kMLDBsaD_400x400.jpg',
@@ -1033,7 +1084,7 @@ class FlashButtonContainer extends React.Component {
               // transform: [{ rotate: rotateFace }],
             }}>
             {!isLive && <FlashButton />}
-            {isLive && <IconButton name="questions" />}
+            {isLive && <IconButton enabled={false} name="questions" />}
           </Animated.View>
         </View>
       </View>
@@ -1054,12 +1105,12 @@ class FlipCameraButton extends React.Component {
   animation = new Animated.Value(0);
   currentValue = 0;
   onPress = () => {
-    console.log('AAA');
     this.currentValue -= 180;
     Animated.timing(this.animation, {
       toValue: this.currentValue,
       duration: 200,
     }).start();
+    dispatch().camera.flip();
   };
   render() {
     const rotate = this.animation.interpolate({
@@ -1101,6 +1152,7 @@ class FaceButton extends React.Component {
         {...this.props}
         onPress={this.onPress}
         active={this.state.isActive}
+        enabled={false}
         name={`face`}
       />
     );
@@ -1228,13 +1280,18 @@ class CaptureButton extends React.Component {
   }
 }
 
-const GalleryButton = ({ source }) => {
+const GalleryButton = ({ onPress, source }) => {
   const size = 36;
+  const enabled = !DISABLE_BOTTOM_DRAWER;
   return (
-    <TouchableOpacity style={{ width: size, height: size }} onPress={() => {}}>
+    <TouchableOpacity
+      style={{ width: size, height: size }}
+      pointerEvents={!enabled && 'none'}
+      onPress={onPress}>
       <Image
         source={source}
         style={{
+          opacity: enabled ? 1 : 0.5,
           flex: 1,
           resizeMode: 'contain',
           borderRadius: 4,
@@ -1332,8 +1389,11 @@ class RotatingIcon extends React.Component {
 
 const iconButtonSize = 30;
 
-const IconButton = ({ onPress, active, name, size, color }) => (
-  <TouchableOpacity style={{ width: iconButtonSize, height: iconButtonSize }} onPress={onPress}>
-    <InstaIcon active={active} name={name} />
+const IconButton = ({ enabled = true, onPress, active, name, size, color }) => (
+  <TouchableOpacity
+    pointerEvents={!enabled && 'none'}
+    style={{ width: iconButtonSize, height: iconButtonSize }}
+    onPress={onPress}>
+    <InstaIcon style={{ opacity: !enabled && 0.7 }} active={active} name={name} />
   </TouchableOpacity>
 );

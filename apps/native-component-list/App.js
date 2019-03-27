@@ -42,15 +42,17 @@ export default class App extends React.Component {
   // }
 
   render() {
-    // if (this.state.appIsReady) {
-    return (
-      <View style={styles.container} testID="native_component_list">
-        {Platform.OS === 'android' && <View style={styles.statusBarUnderlay} />}
-        <RootNavigation />
+    return <RootNavigation />;
 
-        {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-      </View>
-    );
+    // // if (this.state.appIsReady) {
+    // return (
+    //   <View style={styles.container} testID="native_component_list">
+    //     {Platform.OS === 'android' && <View style={styles.statusBarUnderlay} />}
+    //     <RootNavigation />
+
+    //     {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
+    //   </View>
+    // );
     // } else {
     //   return <AppLoading />;
     // }

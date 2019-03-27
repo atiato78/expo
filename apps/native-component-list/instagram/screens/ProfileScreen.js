@@ -9,8 +9,8 @@ import {
   TouchableHighlight,
   TouchableOpacity,
   View,
+  FlatList,
 } from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
 import FeedList from '../components/FeedList';
 import NavigationService from '../navigation/NavigationService';
 import InstaIcon from '../InstaIcon';
@@ -262,7 +262,7 @@ class PhotoGrid extends React.Component {
         }}
         contentContainerStyle={{ marginBottom: 64 }}
         renderItem={({ item }) => <PhotoGridItem {...item} />}
-        keyExtractor={item => item.key}
+        keyExtractor={(item, index) => item.key + ' ' + index}
         {...props}
       />
     );

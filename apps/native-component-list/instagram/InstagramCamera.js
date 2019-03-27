@@ -10,7 +10,6 @@ import {
   MaterialCommunityIcons,
   Octicons,
 } from '@expo/vector-icons';
-import GalleryScreen from './GalleryScreen';
 
 const landmarkSize = 2;
 
@@ -171,9 +170,7 @@ export default class CameraScreen extends React.Component {
     this.setState({ pictureSize: this.state.pictureSizes[newId], pictureSizeId: newId });
   };
 
-  renderGallery() {
-    return <GalleryScreen photos={photos} onPress={this.toggleView} />;
-  }
+  
 
   renderFace({ bounds, faceID, rollAngle, yawAngle }) {
     return (
@@ -365,8 +362,7 @@ export default class CameraScreen extends React.Component {
     const cameraScreenContent = this.state.permissionsGranted
       ? this.renderCamera()
       : this.renderNoPermissions();
-    const content = this.state.showGallery ? this.renderGallery() : cameraScreenContent;
-    return <View style={styles.container}>{content}</View>;
+    return <View style={styles.container}>{cameraScreenContent}</View>;
   }
 }
 
