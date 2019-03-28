@@ -69,19 +69,31 @@ const pages = [
 const types = [
   {
     name: 'Strong',
-    fontFamily: 'insta-strong',
+    style: {
+      fontFamily: 'insta-strong',
+      fontSize: 36,
+    },
   },
   {
     name: 'Modern',
-    fontFamily: 'insta-modern',
+    style: {
+      fontFamily: 'insta-modern',
+      fontSize: 36,
+    },
   },
   {
     name: 'Neon',
-    fontFamily: 'insta-neon',
+    style: {
+      fontFamily: 'insta-neon',
+      fontSize: 56,
+    },
   },
   {
     name: 'Typewriter',
-    fontFamily: 'insta-typewriter',
+    style: {
+      fontFamily: 'insta-typewriter',
+      fontSize: 36,
+    },
   },
 ];
 
@@ -319,6 +331,7 @@ class MediaItem extends React.Component {
     );
   }
 }
+const USE_GRADIENT = true;
 
 class CameraContainerScreen extends React.Component {
   constructor(props) {
@@ -382,11 +395,12 @@ class CameraContainerScreen extends React.Component {
         }}>
         <ConnectedCameraScreen headerLeftIconName={page.headerLeftIconName} />
 
-        {false && (
+        {USE_GRADIENT && (
           <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
             {page.screen &&
               page.screen({
                 typeface,
+                useGradientCamera: this.state.useGradientCamera,
                 onPressTypefaceButton: this.onPressTypefaceButton,
                 gradient,
                 gradientTheme,
@@ -398,6 +412,11 @@ class CameraContainerScreen extends React.Component {
           index={this.state.index}
           gradient={gradient}
           openMediaDrawer={this.props.openMediaDrawer}
+          onPressGradientCameraButton={() => {
+            this.setState({
+              useGradientCamera: !this.state.useGradientCamera,
+            });
+          }}
           onPressGradientButton={() => {
             this.setState({
               selectedGradient: (this.state.selectedGradient + 1) % gradients.length,
@@ -584,7 +603,13 @@ class MainFooter extends React.Component {
   }
 
   render() {
-    const { page, gradient, index, onPressGradientButton } = this.props;
+    const {
+      page,
+      gradient,
+      index,
+      onPressGradientCameraButton,
+      onPressGradientButton,
+    } = this.props;
 
     const footerStyle = {
       display: page.hideFooter ? 'none' : 'flex',
@@ -598,10 +623,10 @@ class MainFooter extends React.Component {
     switch (page.id) {
       case 'type':
         return (
-          <View style={footerStyle}>
+          <View style={[footerStyle, { paddingHorizontal: 24 }]}>
             <GradientButton gradient={gradient} onPress={onPressGradientButton} />
             <CaptureButton selectedIndex={index} icon={page.icon} />
-            <IconButton enabled={false} key="camera" name={'camera'} />
+            <IconButton onPress={onPressGradientCameraButton} key="camera" name={'camera'} />
           </View>
         );
       default: {
@@ -947,28 +972,35 @@ class CaptureButton extends React.Component {
   }
 }
 
-const GalleryButton = ({ onPress, source }) => {
-  const size = 36;
-  const enabled = !DISABLE_BOTTOM_DRAWER;
-  return (
-    <TouchableOpacity
-      style={{ width: size, height: size }}
-      pointerEvents={enabled ? 'auto' : 'none'}
-      onPress={onPress}>
-      <Image
-        source={source}
-        style={{
-          opacity: enabled ? 1 : 0.5,
-          flex: 1,
-          resizeMode: 'contain',
-          borderRadius: 4,
-          borderWidth: StyleSheet.hairlineWidth,
-          borderColor: 'white',
-        }}
-      />
-    </TouchableOpacity>
-  );
-};
+class GalleryButton extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    const { onPress, source } = this.props;
+    const size = 36;
+    const enabled = !DISABLE_BOTTOM_DRAWER;
+    return (
+      <TouchableOpacity
+        style={{ width: size, height: size }}
+        pointerEvents={enabled ? 'auto' : 'none'}
+        onPress={onPress}>
+        <Image
+          source={source}
+          style={{
+            opacity: enabled ? 1 : 0.5,
+            flex: 1,
+            resizeMode: 'contain',
+            borderRadius: 4,
+            borderWidth: StyleSheet.hairlineWidth,
+            borderColor: 'white',
+          }}
+        />
+      </TouchableOpacity>
+    );
+  }
+}
 
 class RotatingIcon extends React.Component {
   state = { index: 0 };

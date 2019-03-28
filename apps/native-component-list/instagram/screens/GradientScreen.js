@@ -1,11 +1,12 @@
 import { LinearGradient } from 'expo';
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, StyleSheet, TouchableOpacity, View } from 'react-native';
 
 import IconButton from '../components/IconButton';
 import Header from '../components/MediaHeader';
 
 const typefaceButtonSize = 36;
+
 class TypefaceButton extends React.Component {
   render() {
     const { onPress, title } = this.props;
@@ -33,29 +34,50 @@ class TypefaceButton extends React.Component {
 }
 
 class TypeScreen extends React.Component {
+  state = { useEffect: false };
+
+  onEffectPressed = () => {
+    this.setState({ useEffect: !this.state.useEffect });
+  };
   render() {
-    const { gradient, gradientTheme, onPressTypefaceButton, typeface } = this.props;
+    const {
+      gradient,
+      gradientTheme,
+      onPressTypefaceButton,
+      useGradientCamera,
+      typeface,
+    } = this.props;
+    const opacity = this.state.useEffect ? 1 : 0.5;
+    const isLight = gradientTheme === 'light';
     return (
-      <LinearGradient
-        style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-        {...gradient}>
-        <Text
-          style={{
-            fontFamily: typeface.fontFamily,
-            color: gradientTheme === 'light' ? 'white' : 'black',
-            fontSize: 28,
-            // fontWeight: 'bold',
-            opacity: 0.5,
-            textAlign: 'center',
-          }}>
-          Tap to Type
-        </Text>
-        <Header>
-          <IconButton name={'text-effect'} />
-          <TypefaceButton title={typeface.name} onPress={onPressTypefaceButton} />
-          <View />
-        </Header>
-      </LinearGradient>
+      <View style={{ flex: 1 }}>
+        <LinearGradient
+          style={[StyleSheet.absoluteFill, { opacity: useGradientCamera ? 0.5 : 1 }]}
+          {...gradient}
+        />
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text
+            style={[
+              {
+                color: isLight ? `rgba(255,255,255,${opacity})` : `rgba(0,0,0,${opacity})`,
+                fontSize: 28,
+                // fontWeight: 'bold',
+                textAlign: 'center',
+                padding: 6,
+                borderRadius: 4,
+              },
+              this.state.useEffect && { backgroundColor: isLight ? 'red' : 'white' },
+              typeface.style,
+            ]}>
+            Tap to Type
+          </Text>
+          <Header>
+            <IconButton name={'text-effect'} onPress={this.onEffectPressed} />
+            <TypefaceButton title={typeface.name} onPress={onPressTypefaceButton} />
+            <View />
+          </Header>
+        </View>
+      </View>
     );
   }
 }

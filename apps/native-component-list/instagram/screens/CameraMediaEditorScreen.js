@@ -11,7 +11,9 @@ import dispatch from '../rematch/dispatch';
 
 const GradientHeader = ({ style, ...props }) => (
   <LinearGradient
-    colors={['black', 'red']}
+    colors={['transparent', 'rgba(0,0,0,1)']}
+    start={[0.5, 0.0]}
+    end={[0.5, 1.0]}
     style={StyleSheet.flatten([
       {
         position: 'absolute',
