@@ -56,7 +56,9 @@ export default class Slider extends React.Component {
   render() {
     return (
       <LinearGradient
-        colors={['transparent', 'rgba(0,0,0,0.3)']}
+        colors={['rgba(0,0,0,0.3)', 'rgba(0,0,0,0.0)']}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
         style={{ flex: 1, maxHeight: sliderHeight }}>
         <ViewPager
           pagingEnabled

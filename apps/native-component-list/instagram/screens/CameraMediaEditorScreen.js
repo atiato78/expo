@@ -3,6 +3,7 @@ import Constants from 'expo-constants';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { connect } from 'react-redux';
 import FaceButton from '../components/FaceButton';
 import IconButton from '../components/IconButton';
 import InstaIcon from '../components/InstaIcon';
@@ -11,7 +12,7 @@ import dispatch from '../rematch/dispatch';
 
 const GradientHeader = ({ style, ...props }) => (
   <LinearGradient
-    colors={['transparent', 'rgba(0,0,0,1)']}
+    colors={['transparent', 'rgba(0,0,0,0.3)']}
     start={[0.5, 0.0]}
     end={[0.5, 1.0]}
     style={StyleSheet.flatten([
@@ -33,7 +34,7 @@ const GradientHeader = ({ style, ...props }) => (
   />
 );
 
-export default class EditorScreen extends React.Component {
+class EditorScreen extends React.Component {
   render() {
     const sendButtonHeight = 36;
 
@@ -48,14 +49,22 @@ export default class EditorScreen extends React.Component {
             }}
           />
           <View style={{ flexDirection: 'row' }}>
-            <EditorIcon name="save" onPress={() => {}} />
-            <FaceButton
-              containerStyle={{ marginHorizontal: 4 }}
-              onPress={() => NavigationService.navigate('SocialUI')}
+            <EditorIcon
+              name="save"
+              onPress={() => {
+                const ancorTag = document.createElement('a');
+                ancorTag.download = `Expo-Finstaham-${Date.now()}.png`;
+                ancorTag.href = this.props.image;
+                ancorTag.target = '_blank';
+                document.body.appendChild(ancorTag);
+                ancorTag.click();
+                document.body.removeChild(ancorTag);
+              }}
             />
-            <EditorIcon name="stickers" onPress={() => NavigationService.navigate('SocialUI')} />
-            <EditorIcon name="draw" onPress={() => NavigationService.navigate('SocialUI')} />
-            <EditorIcon name="letter" onPress={() => NavigationService.navigate('SocialUI')} />
+            <FaceButton containerStyle={{ marginHorizontal: 4 }} />
+            <EditorIcon name="stickers" enabled={false} onPress={() => {}} />
+            <EditorIcon name="draw" enabled={false} onPress={() => {}} />
+            <EditorIcon name="letter" enabled={false} onPress={() => {}} />
           </View>
         </GradientHeader>
 
@@ -97,6 +106,8 @@ export default class EditorScreen extends React.Component {
     );
   }
 }
+
+export default connect(({ image }) => ({ image }))(EditorScreen);
 
 const EditorIcon = ({ style, ...props }) => (
   <IconButton containerStyle={[{ marginHorizontal: 4 }, style]} color="white" {...props} />

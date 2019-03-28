@@ -66,7 +66,8 @@ const pages = [
   };
 });
 
-const INITIAL_TAB_ID = 'normal';
+const INITIAL_TAB_ID = 'type';
+// const INITIAL_TAB_ID = 'normal';
 const INITIAL_TAB = Math.max(0, pages.findIndex(({ id }) => id === INITIAL_TAB_ID));
 
 const types = [
@@ -417,6 +418,7 @@ class CameraContainerScreen extends React.Component {
           index={index}
           gradient={gradient}
           openMediaDrawer={this.props.openMediaDrawer}
+          
           onPressGradientCameraButton={() => {
             this.setState({
               useGradientCamera: !useGradientCamera,
@@ -631,7 +633,7 @@ class MainFooter extends React.Component {
         return (
           <View style={[footerStyle, { paddingHorizontal: 24 }]}>
             <GradientButton gradient={gradient} onPress={onPressGradientButton} />
-            <CaptureButton selectedIndex={index} icon={page.icon} />
+            <CaptureButton onPress={global.takeGradientPictureGlobal} selectedIndex={index} icon={page.icon} />
             <IconButton onPress={onPressGradientCameraButton} key="camera" name={'camera'} />
           </View>
         );

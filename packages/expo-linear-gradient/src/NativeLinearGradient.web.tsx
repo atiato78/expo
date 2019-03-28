@@ -60,10 +60,7 @@ export default class NativeLinearGradient extends React.PureComponent<Props, Sta
 
   calculateGradientAngleFromControlPoints = (): number => {
     const [start, end] = this.getControlPoints();
-    const { width = 0, height = 0 } = this.state;
-    const radians = Math.atan2(height * (end[0] - start[0]), width * (end[1] - start[1])) + PI_2;
-    const degrees = radToDeg(radians);
-    return degrees;
+    return Math.atan2(end[0] - start[0], end[1] - start[1]);
   };
 
   getWebGradientColorStyle = (): string => {
@@ -89,7 +86,7 @@ export default class NativeLinearGradient extends React.PureComponent<Props, Sta
 
   getBackgroundImage = (): string | null => {
     if (this.state.width && this.state.height) {
-      return `linear-gradient(${this.calculateGradientAngleFromControlPoints()}deg, ${this.getWebGradientColorStyle()})`;
+      return `linear-gradient(${this.calculateGradientAngleFromControlPoints()}rad, ${this.getWebGradientColorStyle()})`;
     }
     return null;
   };
@@ -115,6 +112,9 @@ export default class NativeLinearGradient extends React.PureComponent<Props, Sta
 }
 
 function hexStringFromProcessedColor(argbColor: number): string {
+  if (argbColor === 0) {
+    return `#00000000`;
+  }
   const hexColorString = argbColor.toString(16);
   const withoutAlpha = hexColorString.substring(2);
   const alpha = hexColorString.substring(0, 2);
