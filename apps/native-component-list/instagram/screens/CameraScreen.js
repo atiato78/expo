@@ -1,7 +1,6 @@
 import { LinearGradient } from 'expo';
 import { BlurView } from 'expo-blur';
 import { Camera } from 'expo-camera';
-import Constants from 'expo-constants';
 import * as Font from 'expo-font';
 import * as Permissions from 'expo-permissions';
 import React from 'react';
@@ -22,27 +21,29 @@ import {
 import { connect } from 'react-redux';
 
 import Assets from '../Assets';
-import InstaIcon from '../components/InstaIcon';
+import FaceButton from '../components/FaceButton';
+import IconButton from '../components/IconButton';
+import Header from '../components/MediaHeader';
 import ProfileImage from '../components/ProfileImage';
 import Slider from '../components/Slider';
 import ViewPager from '../components/ViewPager';
 import MediaLibraryData from '../constants/MediaLibraryData';
 import NavigationService from '../navigation/NavigationService';
 import dispatch from '../rematch/dispatch';
+import EditorScreen from './CameraMediaEditorScreen';
+import GradientScreen from './GradientScreen';
 import MusicScreen from './MusicScreen';
 
 // import Popular from './data/Popular.json';
-const { height } = Dimensions.get('window');
-
 const pages = [
-  // {
-  //   name: 'Type',
-  //   icon: null,
-  //   id: 'type',
-  //   isFlipable: true,
-  //   screen: props => <TypeScreen {...props} />,
-  //   headerLeftIconName: null,
-  // },
+  {
+    name: 'Type',
+    icon: null,
+    id: 'type',
+    isFlipable: true,
+    screen: props => <GradientScreen {...props} />,
+    headerLeftIconName: null,
+  },
   {
     name: 'Music',
     id: 'music',
@@ -64,46 +65,6 @@ const pages = [
     name: value.name.toUpperCase(),
   };
 });
-
-const GradientHeader = ({ style, ...props }) => (
-  <LinearGradient
-    colors={['black', 'red']}
-    style={StyleSheet.flatten([
-      {
-        position: 'absolute',
-        top: 0,
-        paddingTop: Constants.statusBarHeight || 16,
-        left: 0,
-        right: 0,
-        flexDirection: 'row',
-        paddingHorizontal: 16,
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        paddingBottom: 12,
-      },
-      style,
-    ])}
-    {...props}
-  />
-);
-const Header = ({ style, ...props }) => (
-  <View
-    style={StyleSheet.flatten([
-      {
-        position: 'absolute',
-        top: Constants.statusBarHeight || 16,
-        left: 0,
-        right: 0,
-        flexDirection: 'row',
-        paddingHorizontal: 16,
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-      },
-      style,
-    ])}
-    {...props}
-  />
-);
 
 const types = [
   {
@@ -150,55 +111,6 @@ const gradients = [
     theme: 'light',
   },
 ];
-
-const typefaceButtonSize = 36;
-const TypefaceButton = ({ onPress, title }) => {
-  return (
-    <TouchableOpacity style={{ height: typefaceButtonSize }} onPress={onPress}>
-      <View
-        style={{
-          borderWidth: 2,
-          borderRadius: typefaceButtonSize + 4,
-          borderColor: 'white',
-          paddingVertical: 4,
-          paddingHorizontal: 16,
-          minWidth: 80,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'rgba(0,0,0,0.05)',
-        }}>
-        <Text style={{ color: 'white', fontSize: 12, textAlign: 'center' }}>
-          {title.toUpperCase()}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
-};
-
-const TypeScreen = ({ gradient, gradientTheme, onPressTypefaceButton, typeface }) => {
-  return (
-    <LinearGradient
-      style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
-      {...gradient}>
-      <Text
-        style={{
-          fontFamily: typeface.fontFamily,
-          color: gradientTheme === 'light' ? 'white' : 'black',
-          fontSize: 28,
-          // fontWeight: 'bold',
-          opacity: 0.5,
-          textAlign: 'center',
-        }}>
-        Tap to Type
-      </Text>
-      <Header>
-        <IconButton name={'text-effect'} />
-        <TypefaceButton title={typeface.name} onPress={onPressTypefaceButton} />
-        <View />
-      </Header>
-    </LinearGradient>
-  );
-};
 
 let takePictureGlobal;
 class CameraScreen extends React.Component {
@@ -264,75 +176,6 @@ class EditorComboScreen extends React.Component {
 const ConnectedEditorComboScreen = connect(({ image }) => ({ image }))(EditorComboScreen);
 
 export default ConnectedEditorComboScreen;
-
-class EditorScreen extends React.Component {
-  render() {
-    const sendButtonHeight = 36;
-
-    return (
-      <View style={[StyleSheet.absoluteFill, { backgroundColor: 'black' }]}>
-        <Image style={{ flex: 1, resizeMode: 'cover' }} source={this.props.image} />
-        <GradientHeader>
-          <EditorIcon
-            name={'cancel'}
-            onPress={() => {
-              dispatch().image.set(null);
-            }}
-          />
-          <View style={{ flexDirection: 'row' }}>
-            <EditorIcon name="save" onPress={() => {}} />
-            <FaceButton
-              containerStyle={{ marginHorizontal: 4 }}
-              onPress={() => NavigationService.navigate('SocialUI')}
-            />
-            <EditorIcon name="stickers" onPress={() => NavigationService.navigate('SocialUI')} />
-            <EditorIcon name="draw" onPress={() => NavigationService.navigate('SocialUI')} />
-            <EditorIcon name="letter" onPress={() => NavigationService.navigate('SocialUI')} />
-          </View>
-        </GradientHeader>
-
-        <View
-          style={{
-            display: 'flex',
-            paddingVertical: 24,
-            justifyContent: 'space-between',
-            flexDirection: 'row',
-            alignItems: 'center',
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            paddingHorizontal: 16,
-          }}>
-          <View />
-          <TouchableOpacity style={{}}>
-            <View
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: 'white',
-                height: sendButtonHeight,
-                borderRadius: sendButtonHeight / 2,
-                shadowRadius: 6,
-                shadowOpacity: 0.3,
-                paddingHorizontal: 12,
-                flexDirection: 'row',
-              }}>
-              <Text style={{ textAlign: 'left', marginBottom: 2, fontSize: 12 }} onPress={() => {}}>
-                Send To
-              </Text>
-              <InstaIcon name="chevron-right" color="black" size={18} />
-            </View>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
-}
-
-const EditorIcon = ({ style, ...props }) => (
-  <IconButton containerStyle={[{ marginHorizontal: 4 }, style]} color="white" {...props} />
-);
 
 const DISABLE_BOTTOM_DRAWER = false;
 const DISABLE_CAMERA_SETTINGS = true;
@@ -442,8 +285,6 @@ class BlurredOptionsContainer extends React.Component {
 
 class MediaScreen extends React.Component {
   render() {
-    const { height } = Dimensions.get('window');
-
     return (
       <View style={this.props.style}>
         <FlatList
@@ -981,25 +822,6 @@ class FlashButton extends React.Component {
   }
 }
 
-class FaceButton extends React.Component {
-  state = {
-    isActive: false,
-  };
-  onPress = () => {
-    this.setState({ isActive: !this.state.isActive });
-  };
-  render() {
-    return (
-      <IconButton
-        {...this.props}
-        onPress={this.onPress}
-        active={this.state.isActive}
-        name={`face`}
-      />
-    );
-  }
-}
-
 class FlipButtonContainer extends React.Component {
   constructor(props) {
     super(props);
@@ -1083,7 +905,7 @@ class CaptureButton extends React.Component {
   }
 
   render() {
-    const { selectedIndex, icon } = this.props;
+    const { selectedIndex } = this.props;
     const width = 72;
     const innerWidth = width * 0.75;
     return (
@@ -1213,23 +1035,3 @@ class RotatingIcon extends React.Component {
     );
   }
 }
-
-const iconButtonSize = 30;
-
-const IconButton = ({
-  style,
-  containerStyle,
-  enabled = true,
-  onPress,
-  active,
-  name,
-  size,
-  color,
-}) => (
-  <TouchableOpacity
-    pointerEvents={enabled ? 'auto' : 'none'}
-    style={[containerStyle, { width: iconButtonSize, height: iconButtonSize }]}
-    onPress={onPress}>
-    <InstaIcon style={[style, { opacity: enabled ? 1 : 0.7 }]} active={active} name={name} />
-  </TouchableOpacity>
-);
