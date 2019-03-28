@@ -66,6 +66,9 @@ const pages = [
   };
 });
 
+const INITIAL_TAB_ID = 'normal';
+const INITIAL_TAB = Math.max(0, pages.findIndex(({ id }) => id === INITIAL_TAB_ID));
+
 const types = [
   {
     name: 'Strong',
@@ -331,6 +334,7 @@ class MediaItem extends React.Component {
     );
   }
 }
+
 const USE_GRADIENT = true;
 
 class CameraContainerScreen extends React.Component {
@@ -339,7 +343,7 @@ class CameraContainerScreen extends React.Component {
 
     this.state = {
       ready: false,
-      index: 0,
+      index: INITIAL_TAB,
       height: Dimensions.get('window').height,
       selectedGradient: 0,
       selectedFont: 0,
@@ -378,18 +382,19 @@ class CameraContainerScreen extends React.Component {
   };
 
   render() {
-    if (!this.state.ready) {
+    const { ready, index, selectedFont, selectedGradient, useGradientCamera, height } = this.state;
+    if (!ready) {
       return <View />;
     }
     LayoutAnimation.easeInEaseOut();
-    const page = pages[this.state.index];
-    const typeface = types[this.state.selectedFont];
-    const { theme: gradientTheme, ...gradient } = gradients[this.state.selectedGradient];
+    const page = pages[index];
+    const typeface = types[selectedFont];
+    const { theme: gradientTheme, ...gradient } = gradients[selectedGradient];
     return (
       <View
         style={{
           flex: 1,
-          height: this.state.height,
+          height: height,
           backgroundColor: 'black',
           justifyContent: 'flex-end',
         }}>
@@ -400,7 +405,7 @@ class CameraContainerScreen extends React.Component {
             {page.screen &&
               page.screen({
                 typeface,
-                useGradientCamera: this.state.useGradientCamera,
+                useGradientCamera,
                 onPressTypefaceButton: this.onPressTypefaceButton,
                 gradient,
                 gradientTheme,
@@ -409,21 +414,22 @@ class CameraContainerScreen extends React.Component {
         )}
         <MainFooter
           page={page}
-          index={this.state.index}
+          index={index}
           gradient={gradient}
           openMediaDrawer={this.props.openMediaDrawer}
           onPressGradientCameraButton={() => {
             this.setState({
-              useGradientCamera: !this.state.useGradientCamera,
+              useGradientCamera: !useGradientCamera,
             });
           }}
           onPressGradientButton={() => {
             this.setState({
-              selectedGradient: (this.state.selectedGradient + 1) % gradients.length,
+              selectedGradient: (selectedGradient + 1) % gradients.length,
             });
           }}
         />
         <Slider
+          initialIndex={INITIAL_TAB}
           data={pages.map(value => value.name)}
           onIndexChange={index => {
             this.setState({ index });
@@ -973,10 +979,6 @@ class CaptureButton extends React.Component {
 }
 
 class GalleryButton extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     const { onPress, source } = this.props;
     const size = 36;
@@ -1005,6 +1007,10 @@ class GalleryButton extends React.Component {
 class RotatingIcon extends React.Component {
   state = { index: 0 };
 
+  componentDidMount() {
+    if (this.viewPager) 
+    this.viewPager.scrollToIndex({ index: this.props.index, animated: false });
+  }
   componentDidUpdate(prevProps) {
     if (this.props.index !== prevProps.index) {
       if (this.viewPager) {

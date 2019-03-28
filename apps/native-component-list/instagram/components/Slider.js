@@ -61,6 +61,7 @@ export default class Slider extends React.Component {
         <ViewPager
           pagingEnabled
           centerContent
+          initialIndex={this.props.initialIndex}
           onMomentumScrollEnd={() => {
             // TODO: Bacon: PR this method into RNWeb
             // const { index } = this.viewPager;

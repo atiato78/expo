@@ -18,6 +18,7 @@ class ViewPager extends Component {
     onEndReachedThreshold: 50,
     horizontal: true,
     useNativeDriver: true,
+    initialIndex: 0,
     scroll: new Animated.Value(0),
   };
 
@@ -63,6 +64,12 @@ class ViewPager extends Component {
       return null;
     }
     return this.list.getNode();
+  }
+
+  componentDidMount() {
+    if (this.props.initialIndex) {
+      this.scrollToIndex({ index: this.props.initialIndex, animated: false });
+    }
   }
 
   scrollToIndex = ({ index, ...props }) => {
