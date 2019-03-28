@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 
-import InstaIcon from '../InstaIcon';
+import InstaIcon from './InstaIcon';
 import LikeButton from './LikeButton';
 
 export default class IconBar extends React.Component {

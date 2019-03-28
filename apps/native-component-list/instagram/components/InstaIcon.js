@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image } from 'react-native';
 
-import Assets from './Assets';
+import Assets from '../Assets';
 
 export default class InstaIcon extends React.PureComponent {
   render() {
@@ -26,7 +26,6 @@ export default class InstaIcon extends React.PureComponent {
     } else if (Assets.icons[name + '-off' + '.png']) {
       icon = Assets.icons[name + '-off' + '.png'];
     }
-    console.log(name, icon);
     return <Image source={icon} style={colorStyle} {...props} />;
   }
 }

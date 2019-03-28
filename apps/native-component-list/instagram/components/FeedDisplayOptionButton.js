@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableHighlight, View } from 'react-native';
 
-import InstaIcon from '../InstaIcon';
+import InstaIcon from './InstaIcon';
 
 export class FeedDisplayOptionButton extends React.Component {
   render() {

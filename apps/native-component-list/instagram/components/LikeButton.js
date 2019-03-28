@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity } from 'react-native';
 
-import InstaIcon from '../InstaIcon';
+import InstaIcon from './InstaIcon';
 
 export default class LikeButton extends React.Component {
   state = { active: false };

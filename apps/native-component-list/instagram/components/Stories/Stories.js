@@ -59,12 +59,10 @@ class StoriesView extends React.Component {
       onPanResponderRelease: this._handlePanResponderEnd,
       onPanResponderTerminate: this._handlePanResponderEnd,
       onPanResponderGrant: () => {
-        console.log('Start Gesture');
         dispatch().stories.pause();
         dispatch().stories.setBackOpacity(0);
       },
       onPanResponderMove: (e, gesture) => {
-        console.log('onPanResponderMove');
         dispatch().stories.onPanResponderMove({ e, gesture });
       },
     });
@@ -81,7 +79,6 @@ class StoriesView extends React.Component {
       dispatch().stories.update({ swipedHorizontally: false });
       return true;
     }
-    // console.log('should capture: ', isSingleFinger);
     dispatch().stories.update({ swipedHorizontally: true });
 
     return false;
@@ -123,8 +120,6 @@ class StoriesView extends React.Component {
 
   _handlePanResponderEnd = (evt, gestureState) => {
     const direction = this._getSwipeDirection(gestureState);
-
-    console.log('End Gesture', direction);
     // this._triggerSwipeHandlers(swipeDirection, gestureState);
     dispatch().stories.onPanResponderRelease({ direction });
   };
@@ -241,7 +236,6 @@ class StoriesView extends React.Component {
   scrollToIndex = (index, animated = true) => {
     if (this.node) {
       this.pendingIndex = null;
-      console.log('TO INDEX', index);
       this.node.scrollToIndex({ index, animated });
     } else {
       this.pendingIndex = index;

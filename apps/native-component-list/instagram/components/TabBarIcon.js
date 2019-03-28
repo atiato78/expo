@@ -1,8 +1,8 @@
-import { Icon } from 'expo';
 import React from 'react';
 import { View } from 'react-native';
+
 import Colors from '../constants/Colors';
-import InstaIcon from '../InstaIcon';
+import InstaIcon from './InstaIcon';
 
 export default class TabBarIcon extends React.Component {
   render() {

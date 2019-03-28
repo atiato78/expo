@@ -141,12 +141,10 @@ class ViewPager extends Component {
 
     if (horizontal) {
       if (width !== this.state.width) {
-        console.log('horizontal', width);
         this.setState({ width, height });
       }
     } else {
       if (height !== this.state.height) {
-        console.log('vertical', height);
         this.setState({ width, height });
       }
     }

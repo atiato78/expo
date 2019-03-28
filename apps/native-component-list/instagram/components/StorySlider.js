@@ -17,7 +17,6 @@ class OutlineImage extends React.Component {
     if (renderImage) {
       imageComponent = renderImage({ imageWrapperSize });
     } else {
-      console.log(account, source);
       imageComponent = (
         <ProfileImage
           style={[

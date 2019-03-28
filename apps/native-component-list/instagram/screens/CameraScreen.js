@@ -28,19 +28,19 @@ import {
 } from 'react-navigation';
 import { connect } from 'react-redux';
 
-import Assets from './Assets';
-import SearchBar from './components/SearchBar';
-import Genres from './data/Genres.json';
-import Moods from './data/Moods.json';
-import Popular from './data/Popular-itunes.json';
-import InstaIcon from './InstaIcon';
-import NavigationService from './navigation/NavigationService';
-import dispatch from './rematch/dispatch';
-import Slider from './Slider';
-import ViewPager from './ViewPager';
+import Assets from '../Assets';
+import SearchBar from '../components/SearchBar';
+import Genres from '../data/Genres.json';
+import Moods from '../data/Moods.json';
+import Popular from '../data/Popular-itunes.json';
+import InstaIcon from '../components/InstaIcon';
+import NavigationService from '../navigation/NavigationService';
+import dispatch from '../rematch/dispatch';
+import Slider from '../components/Slider';
+import ViewPager from '../components/ViewPager';
 
-import MediaLibraryData from './constants/MediaLibraryData';
-import ProfileImage from './components/ProfileImage';
+import MediaLibraryData from '../constants/MediaLibraryData';
+import ProfileImage from '../components/ProfileImage';
 
 // import Popular from './data/Popular.json';
 const { height } = Dimensions.get('window');
@@ -607,7 +607,6 @@ class MediaContainerScreen extends React.Component {
     this.scrollView._component.scrollToEnd({ duration: 300, animated: true });
   };
   openCamera = () => {
-    console.log('open camera');
     if (DISABLE_BOTTOM_DRAWER || !this.scrollView) {
       return;
     }
@@ -708,7 +707,6 @@ class MediaScreen extends React.Component {
 
 class MediaItem extends React.Component {
   onPress = () => {
-    console.log('set image', this.props.image);
     dispatch().image.set(this.props.image);
   };
   render() {
@@ -814,7 +812,6 @@ class CameraContainerScreen extends React.Component {
         <Slider
           data={pages.map(value => value.name)}
           onIndexChange={index => {
-            console.log(index);
             this.setState({ index });
           }}
         />
@@ -891,10 +888,7 @@ class WhosActive extends React.Component {
 
         <View style={{ flexDirection: 'row' }}>
           {users.slice(0, 3).map((user, index) => (
-            <UserProfilePicture
-              key={index + '-img'}
-              account={user.account}
-            />
+            <UserProfilePicture key={index + '-img'} account={user.account} />
           ))}
         </View>
       </View>
@@ -1383,7 +1377,7 @@ const GalleryButton = ({ onPress, source }) => {
   return (
     <TouchableOpacity
       style={{ width: size, height: size }}
-      pointerEvents={!enabled && 'none'}
+      pointerEvents={enabled ? 'auto' : 'none'}
       onPress={onPress}>
       <Image
         source={source}
@@ -1410,24 +1404,6 @@ class RotatingIcon extends React.Component {
       }
     }
   }
-
-  // get currentPage() {
-  //   return this.pages[this.viewPager.index];
-  // }
-
-  // previous = () => {
-  //   if (this.viewPager) {
-  //     console.log(this.viewPager.index);
-  //     this.viewPager.previous();
-  //   }
-  // };
-
-  // next = () => {
-  //   if (this.viewPager) {
-  //     console.log(this.viewPager.index);
-  //     this.viewPager.next();
-  //   }
-  // };
 
   renderItem = ({ item, index }) => {
     const { itemWidth } = this.props;
@@ -1497,9 +1473,9 @@ const IconButton = ({
   color,
 }) => (
   <TouchableOpacity
-    pointerEvents={!enabled && 'none'}
+    pointerEvents={enabled ? 'auto' : 'none'}
     style={[containerStyle, { width: iconButtonSize, height: iconButtonSize }]}
     onPress={onPress}>
-    <InstaIcon style={[style, { opacity: !enabled && 0.7 }]} active={active} name={name} />
+    <InstaIcon style={[style, { opacity: enabled ? 1 : 0.7 }]} active={active} name={name} />
   </TouchableOpacity>
 );

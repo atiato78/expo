@@ -1,6 +1,6 @@
 import { createStackNavigator } from 'react-navigation';
 
-import CameraScreen from '../CameraScreen';
+import CameraScreen from '../screens/CameraScreen';
 import CameraSettingsScreen from '../screens/CameraSettingsScreen';
 export default createStackNavigator(
   {

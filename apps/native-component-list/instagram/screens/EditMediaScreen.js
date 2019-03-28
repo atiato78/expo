@@ -142,7 +142,6 @@ const BottomTabBar = ({ items }) => (
       backgroundColor: '#fff',
       borderTopWidth: StyleSheet.hairlineWidth,
       borderTopColor: 'rgba(0, 0, 0, .3)',
-      flexDirection: 'row',
       height: 49,
     }}>
     {items.map(item => (

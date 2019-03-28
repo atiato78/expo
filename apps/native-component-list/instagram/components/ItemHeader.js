@@ -2,7 +2,7 @@ import { connectActionSheet } from '@expo/react-native-action-sheet';
 import React from 'react';
 import { Text, View } from 'react-native';
 
-import InstaHeaderButton from '../InstaHeaderButton';
+import InstaHeaderButton from './InstaHeaderButton';
 import { profileImageSize } from './FeedList';
 import ProfileImage from './ProfileImage';
 

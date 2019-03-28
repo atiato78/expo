@@ -4,10 +4,6 @@ import { Dimensions, Text, View } from 'react-native';
 
 import ViewPager from './ViewPager';
 
-const pages = ['Type', 'Music', 'Live', 'Normal', 'Boomerang', 'Rewind', 'Hands-Free'].map(value =>
-  value.toUpperCase()
-);
-
 const { width } = Dimensions.get('window');
 const HORIZONTAL_ITEM_WIDTH = 95;
 // const width = HORIZONTAL_ITEM_WIDTH;
@@ -22,14 +18,12 @@ export default class Slider extends React.Component {
 
   previous = () => {
     if (this.viewPager) {
-      console.log(this.viewPager.index);
       this.viewPager.previous();
     }
   };
 
   next = () => {
     if (this.viewPager) {
-      console.log(this.viewPager.index);
       this.viewPager.next();
     }
   };
@@ -70,17 +64,14 @@ export default class Slider extends React.Component {
           onMomentumScrollEnd={() => {
             // TODO: Bacon: PR this method into RNWeb
             // const { index } = this.viewPager;
-            // console.log('eng', this.state.index, index);
             // if (this.state.index !== index) {
             //   this.props.onIndexChange(index, this.state.index);
             //   this.setState({ index });
             // }
           }}
           onScroll={({ value }) => {
-            // console.log('scroll', value);
             const { index } = this.viewPager;
             if (this.state.index !== index) {
-              // console.log('eng', this.state.index, index);
               this.setState({ index }, () => {
                 this.props.onIndexChange(index, this.state.index);
               });
@@ -89,7 +80,7 @@ export default class Slider extends React.Component {
           ref={ref => (this.viewPager = ref)}
           data={this.props.data}
           renderItem={this.renderItem}
-          style={{ flex: 1, scrollIndicator: 'none' }}
+          style={{ flex: 1 }}
           size={width}
           horizontal
         />

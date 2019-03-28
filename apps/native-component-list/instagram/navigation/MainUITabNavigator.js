@@ -16,9 +16,11 @@ import EditMediaScreen from '../screens/EditMediaScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import createAppNavigator from './createAppNavigator';
 import LikesTabNavigator from './LikesTabNavigator';
-import InstaHeaderButton from '../InstaHeaderButton';
+import InstaHeaderButton from '../components/InstaHeaderButton';
 import NavigationService from './NavigationService';
-import InstaIcon from '../InstaIcon';
+import InstaIcon from '../components/InstaIcon';
+
+import initialScreens from '../constants/initialScreens';
 
 const mediaStack = createStackNavigator(
   {
@@ -123,8 +125,6 @@ LikesNav.navigationOptions = {
   header: null,
 };
 
-import initialScreens from '../constants/initialScreens'
-
 const MainTabNavigator = createBottomTabNavigator(
   {
     Feed: FeedNav,
@@ -141,7 +141,6 @@ const MainTabNavigator = createBottomTabNavigator(
   }
 );
 const CustomDrawerContentComponent = ({ items, ...props }) => {
-  console.log(props);
   return (
     <SafeAreaView style={{ flex: 1 }} forceInset={{ top: 'always', horizontal: 'never' }}>
       <DrawerHeader>Baconbrix</DrawerHeader>

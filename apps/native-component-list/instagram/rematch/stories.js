@@ -185,7 +185,6 @@ const stories = {
       }
     ) {
       if (!swipedHorizontally) {
-        // console.log('DISMISS: ', gesture, vy, VERTICAL_THRESHOLD);
         if (direction === 'SWIPE_DOWN') {
           dispatch().stories.leaveStories();
         } else {
@@ -348,7 +347,6 @@ const stories = {
     animateDeck({ toValue, reset = false }, state) {
       if (reset) {
         const nextDeckIndex = parseInt(toValue / width);
-        console.log('DECK INDEX:  ', nextDeckIndex);
         dispatch().stories.update({ deckIdx: nextDeckIndex });
         dispatch().stories.animateIndicator(true);
       }
