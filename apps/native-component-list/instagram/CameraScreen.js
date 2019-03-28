@@ -40,6 +40,7 @@ import Slider from './Slider';
 import ViewPager from './ViewPager';
 
 import MediaLibraryData from './constants/MediaLibraryData';
+import ProfileImage from './components/ProfileImage';
 
 // import Popular from './data/Popular.json';
 const { height } = Dimensions.get('window');
@@ -848,12 +849,15 @@ const userProfilePictureSize = 24;
 const userProfilePictureIndicatorSize = userProfilePictureSize * 0.3;
 class UserProfilePicture extends React.Component {
   render() {
-    const { source } = this.props;
+    const { account } = this.props;
 
     return (
       <View
         style={{ width: userProfilePictureSize, height: userProfilePictureSize, marginLeft: 4 }}>
-        <Image style={{ flex: 1, borderRadius: userProfilePictureSize / 2 }} source={source} />
+        <ProfileImage
+          style={{ flex: 1, borderRadius: userProfilePictureSize / 2 }}
+          account={account}
+        />
         <View
           style={{
             position: 'absolute',
@@ -889,7 +893,7 @@ class WhosActive extends React.Component {
           {users.slice(0, 3).map((user, index) => (
             <UserProfilePicture
               key={index + '-img'}
-              source={`https://avatars.io/instagram/${user.account}/Small`}
+              account={user.account}
             />
           ))}
         </View>

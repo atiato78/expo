@@ -1,35 +1,56 @@
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableHighlight, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
 import LikeButton from './LikeButton';
+import ProfileImage from './ProfileImage';
 import ReplyButton from './ReplyButton';
+import FollowButton from './FollowButton';
 
-import InstaIcon from '../InstaIcon';
-
-export default class Comment extends React.Component {
+export default class UserListItem extends React.Component {
   onPress = () => {
-    this.props.onPress(this.props);
+    this.props.onPress(this.props.item);
+  };
+
+  renderLikeButton = () => {
+    const { hasLike, isLiked } = this.props.item;
+    if (hasLike) {
+      return (
+        <View style={{ flex: 1, maxWidth: 36 }}>
+          <TouchableOpacity
+            onPress={() => {}}
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <LikeButton size={16} active={isLiked} color="gray" />
+          </TouchableOpacity>
+        </View>
+      );
+    }
+  };
+
+  renderFollowButton = () => {
+    const { hasFollowButton, isFollowing } = this.props.item;
+    const { onPressFollowing } = this.props;
+
+    if (hasFollowButton) {
+      return (
+        <View>
+          <FollowButton isFollowing={isFollowing} onPress={onPressFollowing} />
+        </View>
+      );
+    }
   };
   render() {
-    const {
-      title,
-      hasReply,
-      hasLike,
-      hasFollowButton,
-      isFirst,
-      name,
-      source,
-      date,
-      isLiked,
-
-      likes,
-    } = this.props;
+    const { title, hasReply, isFirst, account, date } = this.props.item;
 
     return (
       <TouchableOpacity
         onPress={this.onPress}
         style={{
-          borderBottomColor: 'rgba(0,0,0,0.3)',
           borderBottomWidth: isFirst ? StyleSheet.hairlineWidth : 0,
+          borderBottomColor: 'rgba(0,0,0,0.3)',
           flexDirection: 'row',
           paddingHorizontal: 12,
           paddingVertical: 8,
@@ -38,8 +59,8 @@ export default class Comment extends React.Component {
           alignItems: 'stretch',
         }}>
         <View>
-          <Image
-            source={source}
+          <ProfileImage
+            account={account}
             style={{
               width: 36,
               height: 36,
@@ -63,7 +84,7 @@ export default class Comment extends React.Component {
               justifyContent: 'space-between',
             }}>
             <Text style={{ flexWrap: 'wrap' }}>
-              <Text style={{ fontWeight: '500' }}>{name}</Text> {title}
+              <Text style={{ fontWeight: '500' }}>{account}</Text> {title}
             </Text>
             <View style={{ flexDirection: 'row' }}>
               <Text style={{ opacity: 0.6, marginRight: 12 }}>{date}</Text>
@@ -71,53 +92,10 @@ export default class Comment extends React.Component {
             </View>
           </View>
 
-          {hasFollowButton && (
-            <View>
-              <FollowButton
-                isFollowing={this.props.isFollowing}
-                onPress={this.props.onPressFollowing}
-              />
-            </View>
-          )}
-          {hasLike && (
-            <View style={{ flex: 1, maxWidth: 36 }}>
-              <TouchableOpacity
-                onPress={() => {}}
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
-                <LikeButton size={16} active={isLiked} color="gray" />
-              </TouchableOpacity>
-            </View>
-          )}
+          {this.renderFollowButton()}
+          {this.renderLikeButton()}
         </View>
       </TouchableOpacity>
     );
   }
 }
-
-const FollowButton = ({ isFollowing, onPress }) => (
-  <View
-    style={{
-      borderColor: '#DBDBDB',
-      borderRadius: 4,
-      borderWidth: isFollowing ? 1 : 0,
-      overflow: 'hidden',
-      backgroundColor: isFollowing ? 'white' : '#3C95EC',
-    }}>
-    <TouchableHighlight
-      underlayColor={'#DBDBDB'}
-      onPress={onPress}
-      style={{
-        justifyContent: 'center',
-        paddingVertical: 6,
-        paddingHorizontal: 16,
-      }}>
-      <Text style={{ color: isFollowing ? '#272727' : 'white' }}>
-        {isFollowing ? 'Following' : 'Follow'}
-      </Text>
-    </TouchableHighlight>
-  </View>
-);

@@ -254,7 +254,7 @@ class StoriesView extends React.Component {
 
   render() {
     const { stories = [], swipedHorizontally } = this.props;
-    //
+
     return (
       <View style={styles.container}>
         <AnimatedScrollView

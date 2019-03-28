@@ -1,27 +1,28 @@
+import { connectActionSheet } from '@expo/react-native-action-sheet';
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { ActionSheetProvider, connectActionSheet } from '@expo/react-native-action-sheet';
-import InstaIcon from '../InstaIcon';
-import { profileImageSize } from './FeedList';
 import InstaHeaderButton from '../InstaHeaderButton';
+import { profileImageSize } from './FeedList';
+import ProfileImage from './ProfileImage';
 
-@connectActionSheet
 class ItemHeader extends React.Component {
   render() {
-    const { name, location, source } = this.props;
+    const { item } = this.props;
+    const { account, location } = item;
     return (
       <View
         style={{
           flexDirection: 'row',
-          paddingHorizontal: 16,
+          paddingLeft: 16,
+          paddingRight: 4,
           paddingVertical: 16,
           justifyContent: 'space-between',
           alignItems: 'center',
           borderBottomWidth: 0.5,
         }}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Image
+          <ProfileImage
             style={{
               aspectRatio: 1,
               minHeight: profileImageSize,
@@ -32,10 +33,10 @@ class ItemHeader extends React.Component {
               marginRight: 12,
               resizeMode: 'cover',
             }}
-            source={source}
+            account={account}
           />
           <View>
-            <Text style={{ fontSize: 14, color: '#262626', fontWeight: '600' }}>{name}</Text>
+            <Text style={{ fontSize: 14, color: '#262626', fontWeight: '600' }}>{account}</Text>
             <Text style={{ fontSize: 12, color: '#262626' }}>{location || 'Legoland'}</Text>
           </View>
         </View>
@@ -82,4 +83,4 @@ class ItemHeader extends React.Component {
   }
 }
 
-export { ItemHeader };
+export default connectActionSheet(ItemHeader);

@@ -1,11 +1,12 @@
+import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import * as React from 'react';
-import { ActionSheetProvider, connectActionSheet } from '@expo/react-native-action-sheet';
-import { View, StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { connect } from 'react-redux';
-import Gate from './rematch/Gate';
+
 import Stories from './components/Stories/Stories';
 import MainNavigation from './navigation/MainNavigation';
 import NavigationService from './navigation/NavigationService';
+import Gate from './rematch/Gate';
 
 export default class App extends React.Component {
   render() {

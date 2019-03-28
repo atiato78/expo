@@ -9,13 +9,7 @@ export default class CameraSettingsScreen extends React.Component {
     title: 'Story Controls',
     renderLeft: () => <InstaIcon name="cancel" color="black" onPress={() => navigation.goBack()} />,
   });
-
-  openComments = () => {
-    NavigationService.navigate('Profile_Comments', this.props.comments);
-  };
   render() {
-    return (
-      <View />
-    );
+    return <View />;
   }
 }

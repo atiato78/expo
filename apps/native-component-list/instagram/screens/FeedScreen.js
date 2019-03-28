@@ -1,6 +1,5 @@
-import { WebBrowser } from 'expo';
 import React from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 import FeedList from '../components/FeedList';
 import Posts from '../constants/Posts';
@@ -11,7 +10,7 @@ export default class HomeScreen extends React.Component {
   };
   render() {
     // <FeedList style={styles.container} data={Posts} />
-    return <FeedList style={styles.container} data={[]} />;
+    return <FeedList style={styles.container} data={Posts} />;
   }
 }
 

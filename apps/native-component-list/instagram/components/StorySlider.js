@@ -1,10 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
-import { Image, TouchableOpacity, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
 import dispatch from '../rematch/dispatch';
+import ProfileImage from './ProfileImage';
+
 class OutlineImage extends React.Component {
   render() {
-    const { style, renderImage, imageSize, ...props } = this.props;
+    const { style, source, renderImage, account, imageSize, ...props } = this.props;
 
     const imagePadding = 4;
     const imageBorderWidth = 1;
@@ -14,11 +17,11 @@ class OutlineImage extends React.Component {
     if (renderImage) {
       imageComponent = renderImage({ imageWrapperSize });
     } else {
+      console.log(account, source);
       imageComponent = (
-        <Image
+        <ProfileImage
           style={[
             {
-              aspectRatio: 1,
               height: imageSize,
               width: imageSize,
               borderRadius: imageSize / 2,
@@ -28,6 +31,8 @@ class OutlineImage extends React.Component {
             },
             style,
           ]}
+          account={account}
+          source={source}
           {...props}
         />
       );
@@ -50,9 +55,15 @@ class OutlineImage extends React.Component {
 }
 
 const ICON_SIZE = 56;
-class Story extends React.Component {
+
+class StoryItem extends React.Component {
   render() {
-    const { title, index, source, renderImage } = this.props;
+    const { title, items, account, index, renderImage } = this.props;
+
+    let source = undefined;
+    if (!account && Array.isArray(items)) {
+      source = { uri: items[0].uri };
+    }
 
     return (
       <TouchableOpacity
@@ -68,7 +79,12 @@ class Story extends React.Component {
           });
         }}
         style={{ alignItems: 'center', marginRight: 12 }}>
-        <OutlineImage source={source} renderImage={renderImage} imageSize={ICON_SIZE} />
+        <OutlineImage
+          source={source}
+          account={account}
+          renderImage={renderImage}
+          imageSize={ICON_SIZE}
+        />
         <Text style={{ fontSize: 16, marginTop: 6 }}>{title}</Text>
       </TouchableOpacity>
     );
@@ -77,7 +93,7 @@ class Story extends React.Component {
 
 const NewStory = () => {
   return (
-    <Story
+    <StoryItem
       title="new"
       renderImage={() => (
         <View
@@ -93,14 +109,21 @@ const NewStory = () => {
     />
   );
 };
-const Stories = ({ stories, hasNew }) => (
-  <ScrollView horizontal style={styles.row}>
-    {hasNew && <NewStory />}
-    {stories.map((story, index) => (
-      <Story {...story} index={index} />
-    ))}
-  </ScrollView>
-);
+
+class Stories extends React.Component {
+  render() {
+    const { stories, hasNew } = this.props;
+
+    return (
+      <ScrollView horizontal style={styles.row}>
+        {hasNew && <NewStory />}
+        {stories.map((story, index) => (
+          <StoryItem {...story} index={index} />
+        ))}
+      </ScrollView>
+    );
+  }
+}
 
 export default Stories;
 

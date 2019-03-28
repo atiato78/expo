@@ -6,7 +6,7 @@ import { UserList } from '../components/UserList';
 import NavigationService from '../navigation/NavigationService';
 
 const someUser = {
-  name: 'lol anyone else',
+  account: 'ccheever',
   hasFollowButton: true,
   isFollowing: true,
   onPressFollowing: () => {},

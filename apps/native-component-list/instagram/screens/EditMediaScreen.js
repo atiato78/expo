@@ -5,7 +5,7 @@ import { View, Button, Image, FlatList, StyleSheet, Text, TouchableOpacity } fro
 import NavigationService from '../navigation/NavigationService';
 
 const someUser = {
-  name: 'Avocoder',
+  account: 'notbrent',
   source: {
     uri: 'https://i.cspa.io/user_1092/89c808b0-24f0-4be3-94d4-b2b7af2ca987/400x.png',
   },
@@ -101,9 +101,6 @@ export default class EditMediaScreen extends React.Component {
     date: 'August 29',
   };
 
-  openComments = () => {
-    NavigationService.navigate('Profile_Comments', this.props.comments);
-  };
   render() {
     const uri =
       'https://vignette.wikia.nocookie.net/fairytail/images/c/ca/Natsu_X792.png/revision/latest?cb=20181111122101';

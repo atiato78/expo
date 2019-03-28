@@ -8,10 +8,6 @@ import NavigationService from '../navigation/NavigationService';
 
 import Square from '../components/Square';
 
-const PhotoGridIcon = ({ name }) => (
-  <Ionicons style={{ marginHorizontal: 4 }} name={name} size={26} color={'black'} />
-);
-
 class PhotoGridItem extends React.PureComponent {
   render() {
     const { hasMulti, onSelect } = this.props;
@@ -108,7 +104,7 @@ export default class SettingsScreen extends React.Component {
 const posts = [
   {
     key: 'a',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
@@ -116,7 +112,7 @@ const posts = [
   },
   {
     key: 'b',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     hasMulti: true,
     source: {
@@ -125,7 +121,7 @@ const posts = [
   },
   {
     key: 'asdb',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri:
@@ -135,7 +131,7 @@ const posts = [
 
   {
     key: 'advasd',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri: 'https://i.ebayimg.com/images/g/MuwAAOSwax5YoZOp/s-l300.jpg',
@@ -143,7 +139,7 @@ const posts = [
   },
   {
     key: 'agre',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri:
@@ -152,7 +148,7 @@ const posts = [
   },
   {
     key: 'asdfsdfsd',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
@@ -160,7 +156,7 @@ const posts = [
   },
   {
     key: 'bsdfsge',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     hasMulti: true,
     source: {
@@ -169,7 +165,7 @@ const posts = [
   },
   {
     key: 'asdsdfb',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri:
@@ -186,7 +182,7 @@ const posts = [
   },
   {
     key: 'a',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
@@ -194,7 +190,7 @@ const posts = [
   },
   {
     key: 'b',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     hasMulti: true,
     source: {
@@ -203,7 +199,7 @@ const posts = [
   },
   {
     key: 'asdb',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri:
@@ -213,7 +209,7 @@ const posts = [
 
   {
     key: 'advasd',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri: 'https://i.ebayimg.com/images/g/MuwAAOSwax5YoZOp/s-l300.jpg',
@@ -221,7 +217,7 @@ const posts = [
   },
   {
     key: 'agre',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri:
@@ -230,7 +226,7 @@ const posts = [
   },
   {
     key: 'asdfsdfsd',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
@@ -238,7 +234,7 @@ const posts = [
   },
   {
     key: 'bsdfsge',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     hasMulti: true,
     source: {
@@ -247,7 +243,7 @@ const posts = [
   },
   {
     key: 'asdsdfb',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri:
@@ -264,7 +260,7 @@ const posts = [
   },
   {
     key: 'a',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
@@ -272,7 +268,7 @@ const posts = [
   },
   {
     key: 'b',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     hasMulti: true,
     source: {
@@ -281,7 +277,7 @@ const posts = [
   },
   {
     key: 'asdb',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri:
@@ -291,7 +287,7 @@ const posts = [
 
   {
     key: 'advasd',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri: 'https://i.ebayimg.com/images/g/MuwAAOSwax5YoZOp/s-l300.jpg',
@@ -299,7 +295,7 @@ const posts = [
   },
   {
     key: 'agre',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri:
@@ -308,7 +304,7 @@ const posts = [
   },
   {
     key: 'asdfsdfsd',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
@@ -316,7 +312,7 @@ const posts = [
   },
   {
     key: 'bsdfsge',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     hasMulti: true,
     source: {
@@ -325,7 +321,7 @@ const posts = [
   },
   {
     key: 'asdsdfb',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri:
@@ -342,7 +338,7 @@ const posts = [
   },
   {
     key: 'a',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
@@ -350,7 +346,7 @@ const posts = [
   },
   {
     key: 'b',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     hasMulti: true,
     source: {
@@ -359,7 +355,7 @@ const posts = [
   },
   {
     key: 'asdb',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri:
@@ -369,7 +365,7 @@ const posts = [
 
   {
     key: 'advasd',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri: 'https://i.ebayimg.com/images/g/MuwAAOSwax5YoZOp/s-l300.jpg',
@@ -377,7 +373,7 @@ const posts = [
   },
   {
     key: 'agre',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri:
@@ -386,7 +382,7 @@ const posts = [
   },
   {
     key: 'asdfsdfsd',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
@@ -394,7 +390,7 @@ const posts = [
   },
   {
     key: 'bsdfsge',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     hasMulti: true,
     source: {
@@ -403,7 +399,7 @@ const posts = [
   },
   {
     key: 'asdsdfb',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri:
@@ -420,7 +416,7 @@ const posts = [
   },
   {
     key: 'a',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
@@ -428,7 +424,7 @@ const posts = [
   },
   {
     key: 'b',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     hasMulti: true,
     source: {
@@ -437,7 +433,7 @@ const posts = [
   },
   {
     key: 'asdb',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri:
@@ -447,7 +443,7 @@ const posts = [
 
   {
     key: 'advasd',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri: 'https://i.ebayimg.com/images/g/MuwAAOSwax5YoZOp/s-l300.jpg',
@@ -455,7 +451,7 @@ const posts = [
   },
   {
     key: 'agre',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri:
@@ -464,7 +460,7 @@ const posts = [
   },
   {
     key: 'asdfsdfsd',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri: 'https://regularshowwiki.weebly.com/uploads/7/4/1/1/7411048/8617815_orig.png',
@@ -472,7 +468,7 @@ const posts = [
   },
   {
     key: 'bsdfsge',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     hasMulti: true,
     source: {
@@ -481,7 +477,7 @@ const posts = [
   },
   {
     key: 'asdsdfb',
-    author: 'baconbrix',
+    account: 'baconbrix',
     description: 'enjoying a hammysammy',
     source: {
       uri:
