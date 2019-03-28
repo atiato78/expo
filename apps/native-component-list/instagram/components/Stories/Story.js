@@ -1,14 +1,20 @@
 import { LinearGradient } from 'expo';
 import React from 'react';
-import { Dimensions, Image, StyleSheet, TouchableWithoutFeedback, View } from 'react-native';
-// import Image from 'react-native-image-progress';
-// import CircleSnail from 'react-native-progress/CircleSnail';
-
+import {
+  Dimensions,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import { connect } from 'react-redux';
-import Indicator from './Indicator';
 
 import dispatch from '../../rematch/dispatch';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import Indicator from './Indicator';
+
+// import Image from 'react-native-image-progress';
+// import CircleSnail from 'react-native-progress/CircleSnail';
 
 // indicator={CircleSnail}
 
@@ -25,7 +31,7 @@ class Story extends React.Component {
       return (
         <View style={{ flex: 1 }}>
           <Image
-            source={{ uri: story.items[story.idx].src }}
+            source={story.items[story.idx]}
             style={styles.deck}
             indicatorProps={circleSnailProps}
           />
@@ -46,7 +52,7 @@ class Story extends React.Component {
         }}>
         <View style={{ flex: 1 }}>
           <Image
-            source={{ uri: story.items[story.idx].src }}
+            source={story.items[story.idx]}
             style={styles.deck}
             indicatorProps={circleSnailProps}
           />

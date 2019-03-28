@@ -13,7 +13,7 @@ import {
 import { connect } from 'react-redux';
 import Story from './Story';
 import dispatch from '../../rematch/dispatch';
-import { verticalSwipe, horizontalSwipe } from '../../rematch/stories';
+import { verticalSwipe } from '../../rematch/stories';
 
 const { width, height } = Dimensions.get('window');
 const halfWidth = width * 0.5;
@@ -43,18 +43,20 @@ function isValidSwipe(velocity, velocityThreshold, directionalOffset, directiona
   );
 }
 class StoriesView extends React.Component {
-  onScroll = Animated.event(
-    [
-      {
-        nativeEvent: { contentOffset: { x: horizontalSwipe } },
-      },
-    ],
-    {
-      useNativeDriver: true,
-    }
-  );
+  horizontalSwipe = new Animated.Value(0);
+
   constructor(props) {
     super(props);
+    this.onScroll = Animated.event(
+      [
+        {
+          nativeEvent: { contentOffset: { x: this.horizontalSwipe } },
+        },
+      ],
+      {
+        useNativeDriver: true,
+      }
+    );
     this.swipeConfig = Object.assign(swipeConfig, props.config);
 
     this.panResponder = PanResponder.create({
@@ -174,7 +176,7 @@ class StoriesView extends React.Component {
 
   _getOpacityFor = i => {
     let pageX = width * i;
-    let opacity = horizontalSwipe.interpolate({
+    let opacity = this.horizontalSwipe.interpolate({
       inputRange: [pageX - width, pageX, pageX + width],
       outputRange: [0.9, 0, 0.9],
       extrapolate: 'clamp',
@@ -190,7 +192,7 @@ class StoriesView extends React.Component {
   };
 
   _getTransformsFor = i => {
-    let scrollX = horizontalSwipe;
+    let scrollX = this.horizontalSwipe;
     let pageX = width * i;
     let translateX = scrollX.interpolate({
       inputRange: [pageX - width, pageX, pageX + width],
@@ -272,7 +274,7 @@ class StoriesView extends React.Component {
           <Animated.View
             style={[
               { position: 'absolute', top: 0, left: 0, width, height },
-              { transform: [{ translateX: horizontalSwipe }] },
+              { transform: [{ translateX: this.horizontalSwipe }] },
             ]}>
             {stories.map((item, index) => this.renderItem({ item, index }))}
           </Animated.View>
