@@ -17,6 +17,7 @@ import {
   SafeAreaView,
 } from 'react-navigation';
 
+import { Audio } from 'expo';
 import SearchBar from '../components/SearchBar';
 import Genres from '../data/Genres.json';
 import Moods from '../data/Moods.json';
@@ -68,7 +69,7 @@ const ListScreenItem = ({ renderImage, title, subtitle, renderAction, onPress })
           backgroundColor: 'gray',
         },
       })}
-      <View style={{ justifyContent: 'space-between', marginLeft: 12 }}>
+      <View style={{ justifyContent: 'space-between', marginLeft: 12, maxWidth: '80%' }}>
         <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>{title}</Text>
         {subtitle && (
           <Text style={{ marginTop: 4, color: 'white', opacity: 0.7, fontSize: 14 }}>
@@ -122,10 +123,37 @@ const ListScreen = ({ onPress, ...props }) => (
           />
         );
       }
-      return <SongListScreenItem onPress={onPress} {...item} />;
+      return (
+        <SongListScreenItem
+          onPress={() => {
+            playSongAsync(item);
+          }}
+          {...item}
+        />
+      );
     }}
   />
 );
+
+let playingAudio;
+async function playSongAsync({ audio }) {
+  if (playingAudio) {
+    await playingAudio.pauseAsync();
+  }
+
+  playingAudio = new Audio.Sound();
+  try {
+    await playingAudio.loadAsync({ uri: audio }, { progressUpdateIntervalMillis: 100 });
+    await playingAudio.playAsync();
+    //   soundObject.setOnPlaybackStatusUpdate(this._updateStateToStatus);
+    //   const status = await soundObject.getStatusAsync();
+    //   this._updateStateToStatus(status);
+    //   this._sound = soundObject;
+  } catch (error) {
+    alert(error.message);
+    // this.setState({ errorMessage: error.message });
+  }
+}
 
 const createGenreScreen = data => props => <ListScreen {...props} data={data} />;
 
