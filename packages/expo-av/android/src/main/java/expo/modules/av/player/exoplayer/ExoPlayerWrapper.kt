@@ -4,7 +4,6 @@ package expo.modules.av.player.exoplayer
 
 import android.content.Context
 import android.net.Uri
-import android.os.Bundle
 import android.os.Handler
 import android.text.TextUtils
 import android.util.Pair
@@ -24,6 +23,7 @@ import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.util.Util
+import expo.modules.av.PlayerStatus
 import expo.modules.av.player.ExpoPlayer
 import expo.modules.av.player.PlayerManager
 import java.io.IOException
@@ -46,7 +46,7 @@ internal class ExoPlayerWrapper(private val context: Context,
 
   // Lifecycle
 
-  override fun load(status: Bundle, uri: Uri, cookies: List<HttpCookie>,
+  override fun load(status: PlayerStatus, uri: Uri, cookies: List<HttpCookie>,
                     loadCompletionListener: PlayerManager.LoadCompletionListener) {
     // Create a default TrackSelector
     val mainHandler = Handler()
@@ -86,9 +86,9 @@ internal class ExoPlayerWrapper(private val context: Context,
     simpleExoPlayer?.setVideoSurface(surface)
   }
 
-  override fun play(mute: Boolean, rate: Float, shouldCorrectPitch: Boolean) {
+  override fun play(mute: Boolean, rate: Double, shouldCorrectPitch: Boolean) {
     simpleExoPlayer?.playbackParameters =
-        PlaybackParameters(rate, if (shouldCorrectPitch) 1.0f else rate)
+        PlaybackParameters(rate.toFloat(), if (shouldCorrectPitch) 1.0f else rate.toFloat())
     simpleExoPlayer?.playWhenReady = true
   }
 

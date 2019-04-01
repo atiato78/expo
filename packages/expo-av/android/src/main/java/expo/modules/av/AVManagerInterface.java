@@ -5,6 +5,7 @@ import android.content.Context;
 import org.unimodules.core.ModuleRegistry;
 import org.unimodules.core.Promise;
 import org.unimodules.core.arguments.ReadableArguments;
+
 import expo.modules.av.video.VideoView;
 
 public interface AVManagerInterface {
@@ -24,23 +25,23 @@ public interface AVManagerInterface {
 
   void setAudioMode(final ReadableArguments map);
 
-  void loadForSound(final ReadableArguments source, final ReadableArguments status, final Promise promise);
+  void loadForSound(final Source source, final PlayerStatus status, final Promise promise);
 
   void unloadForSound(final Integer key, final Promise promise);
 
-  void setStatusForSound(final Integer key, final ReadableArguments status, final Promise promise);
+  void setStatusForSound(final Integer key, final PlayerStatus status, final Promise promise);
 
-  void replaySound(final Integer key, final ReadableArguments status, final Promise promise);
+  void replaySound(final Integer key, final PlayerStatus status, final Promise promise);
 
   void getStatusForSound(final Integer key, final Promise promise);
 
-  void loadForVideo(final Integer tag, final ReadableArguments source, final ReadableArguments status, final Promise promise);
+  void loadForVideo(final Integer tag, final Source source, final PlayerStatus status, final Promise promise);
 
   void unloadForVideo(final Integer tag, final Promise promise);
 
-  void setStatusForVideo(final Integer tag, final ReadableArguments status, final Promise promise);
+  void setStatusForVideo(final Integer tag, final PlayerStatus status, final Promise promise);
 
-  void replayVideo(final Integer tag, final ReadableArguments status, final Promise promise);
+  void replayVideo(final Integer tag, final PlayerStatus status, final Promise promise);
 
   void getStatusForVideo(final Integer tag, final Promise promise);
 

@@ -29,13 +29,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
+import expo.modules.av.audio.AudioEventHandler;
+import expo.modules.av.audio.AudioEventHandlers;
+import expo.modules.av.audio.AudioFocusHandler;
+import expo.modules.av.player.PlayerCreator;
 import expo.modules.av.player.PlayerManager;
 import expo.modules.av.video.VideoView;
 import expo.modules.av.video.VideoViewWrapper;
@@ -54,9 +54,6 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   private static final String RECORDING_OPTION_NUMBER_OF_CHANNELS_KEY = "numberOfChannels";
   private static final String RECORDING_OPTION_BIT_RATE_KEY = "bitRate";
   private static final String RECORDING_OPTION_MAX_FILE_SIZE_KEY = "maxFileSize";
-  private static final String AUDIO_MODE_PLAY_THROUGH_EARPIECE = "playThroughEarpieceAndroid";
-
-  private boolean mShouldRouteThroughEarpiece = false;
 
   private enum AudioInterruptionMode {
     DO_NOT_MIX,
@@ -67,7 +64,6 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
 
   private boolean mEnabled = true;
 
-  private final AudioManager mAudioManager;
   private final BroadcastReceiver mNoisyAudioStreamReceiver;
   private boolean mAcquiredAudioFocus = false;
 
@@ -78,9 +74,8 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   private boolean mIsDuckingAudio = false;
 
   private int mSoundMapKeyCount = 0;
-  // There will never be many PlayerManager objects in the map, so HashMap is most efficient.
-  private final Map<Integer, PlayerManager> mSoundMap = new HashMap<>();
-  private final Set<VideoView> mVideoViewSet = new HashSet<>();
+
+  private final AudioEventHandlers mAudioEventHandlers = AudioEventHandlers.INSTANCE;
 
   private MediaRecorder mAudioRecorder = null;
   private String mAudioRecordingFilePath = null;
@@ -91,10 +86,22 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
 
   private ModuleRegistry mModuleRegistry;
 
+  private final PlayerCreator mPlayerCreator;
+
+  private final AudioFocusHandler mAudioFocusHandler;
+
   public AVManager(final Context reactContext) {
     mContext = reactContext;
+    mPlayerCreator = new PlayerCreator(mContext, this);
 
-    mAudioManager = (AudioManager) reactContext.getSystemService(Context.AUDIO_SERVICE);
+    AudioManager audioManager = (AudioManager) reactContext.getSystemService(Context.AUDIO_SERVICE);
+
+    if (audioManager == null) {
+      throw new IllegalStateException("Unable to process sound, AudioManager not available");
+    }
+
+
+    mAudioFocusHandler = new AudioFocusHandler(audioManager);
     // Implemented because of the suggestion here:
     // https://developer.android.com/guide/topics/media-apps/volume-and-earphones.html
     mNoisyAudioStreamReceiver = new BroadcastReceiver() {
@@ -132,7 +139,7 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
 
   @Override
   public List<Class> getExportedInterfaces() {
-    return Collections.singletonList((Class) AVManagerInterface.class);
+    return Collections.singletonList(AVManagerInterface.class);
   }
 
   private void sendEvent(String eventName, Bundle params) {
@@ -150,11 +157,8 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   public void onHostResume() {
     if (mAppIsPaused) {
       mAppIsPaused = false;
-      for (final AudioEventHandler handler : getAllRegisteredAudioEventHandlers()) {
+      for (final AudioEventHandler handler : mAudioEventHandlers.getAudioEventHandlers()) {
         handler.onResume();
-      }
-      if (mShouldRouteThroughEarpiece) {
-        updatePlaySoundThroughEarpiece(true);
       }
     }
   }
@@ -163,24 +167,20 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   public void onHostPause() {
     if (!mAppIsPaused) {
       mAppIsPaused = true;
-      for (final AudioEventHandler handler : getAllRegisteredAudioEventHandlers()) {
+      for (final AudioEventHandler handler : mAudioEventHandlers.getAudioEventHandlers()) {
         handler.onPause();
       }
       abandonAudioFocus();
-
-      if (mShouldRouteThroughEarpiece) {
-        updatePlaySoundThroughEarpiece(false);
-      }
     }
   }
 
   @Override
   public void onHostDestroy() {
     mContext.unregisterReceiver(mNoisyAudioStreamReceiver);
-    for (final Integer key : mSoundMap.keySet()) {
+    for (final Integer key : mAudioEventHandlers.getAudios().keySet()) {
       removeSoundForKey(key);
     }
-    for (final VideoView videoView : mVideoViewSet) {
+    for (final VideoView videoView : mAudioEventHandlers.getVideoHandlers()) {
       videoView.unloadPlayerAndMediaController();
     }
 
@@ -192,19 +192,12 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
 
   @Override
   public void registerVideoViewForAudioLifecycle(final VideoView videoView) {
-    mVideoViewSet.add(videoView);
+    mAudioEventHandlers.addVideo(videoView);
   }
 
   @Override
   public void unregisterVideoViewForAudioLifecycle(final VideoView videoView) {
-    mVideoViewSet.remove(videoView);
-  }
-
-  private Set<AudioEventHandler> getAllRegisteredAudioEventHandlers() {
-    final Set<AudioEventHandler> set = new HashSet<>();
-    set.addAll(mVideoViewSet);
-    set.addAll(mSoundMap.values());
-    return set;
+    mAudioEventHandlers.removeVideo(videoView);
   }
 
   @Override // AudioManager.OnAudioFocusChangeListener
@@ -221,14 +214,14 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
       case AudioManager.AUDIOFOCUS_LOSS:
         mIsDuckingAudio = false;
         mAcquiredAudioFocus = false;
-        for (final AudioEventHandler handler : getAllRegisteredAudioEventHandlers()) {
+        for (final AudioEventHandler handler : mAudioEventHandlers.getAudioEventHandlers()) {
           handler.handleAudioFocusInterruptionBegan();
         }
         break;
       case AudioManager.AUDIOFOCUS_GAIN:
         mIsDuckingAudio = false;
         mAcquiredAudioFocus = true;
-        for (final AudioEventHandler handler : getAllRegisteredAudioEventHandlers()) {
+        for (final AudioEventHandler handler : mAudioEventHandlers.getAudioEventHandlers()) {
           handler.handleAudioFocusGained();
         }
         break;
@@ -249,28 +242,27 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
       return;
     }
 
-    final int audioFocusRequest = mAudioInterruptionMode == AudioInterruptionMode.DO_NOT_MIX
-        ? AudioManager.AUDIOFOCUS_GAIN : AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK;
+//    final int audioFocusRequest = mAudioInterruptionMode == AudioInterruptionMode.DO_NOT_MIX
+//        ? AudioManager.AUDIOFOCUS_GAIN : AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK;
 
-    int result = mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, audioFocusRequest);
-    mAcquiredAudioFocus = result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
-    if (!mAcquiredAudioFocus) {
-      throw new AudioFocusNotAcquiredException("Audio focus could not be acquired from the OS at this time.");
-    }
+    // TODO: Prepare proper focus requests for both pre and post oreo devices.
+    mAudioFocusHandler.requestFocus(
+        new AudioFocusHandler.PreOreoFocusParams(AudioFocusHandler.StreamType.MUSIC, AudioFocusHandler.FocusGain.GAIN)
+    );
   }
 
   private void abandonAudioFocus() {
-    for (final AudioEventHandler handler : getAllRegisteredAudioEventHandlers()) {
+    for (final AudioEventHandler handler : mAudioEventHandlers.getAudioEventHandlers()) {
       if (handler.requiresAudioFocus()) {
         handler.pauseImmediately();
       }
     }
     mAcquiredAudioFocus = false;
-    mAudioManager.abandonAudioFocus(this);
+    mAudioFocusHandler.releaseAudioFocus();
   }
 
   public void abandonAudioFocusIfUnused() { // used by PlayerManager
-    for (final AudioEventHandler handler : getAllRegisteredAudioEventHandlers()) {
+    for (final AudioEventHandler handler : mAudioEventHandlers.getAudioEventHandlers()) {
       if (handler.requiresAudioFocus()) {
         return;
       }
@@ -280,18 +272,13 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
 
   @Override
   public float getVolumeForDuckAndFocus(final boolean isMuted, final float volume) {
-    return (!mAcquiredAudioFocus || isMuted) ? 0f : mIsDuckingAudio ? volume / 2f : volume;
+    return (!mAcquiredAudioFocus || isMuted) ? 0.0f : mIsDuckingAudio ? volume / 2.0f : volume;
   }
 
   private void updateDuckStatusForAllPlayersPlaying() {
-    for (final AudioEventHandler handler : getAllRegisteredAudioEventHandlers()) {
+    for (final AudioEventHandler handler : mAudioEventHandlers.getAudioEventHandlers()) {
       handler.updateVolumeMuteAndDuck();
     }
-  }
-
-  private void updatePlaySoundThroughEarpiece(boolean playThroughEarpiece) {
-    mAudioManager.setMode(playThroughEarpiece ? AudioManager.MODE_IN_COMMUNICATION : AudioManager.MODE_NORMAL);
-    mAudioManager.setSpeakerphoneOn(!playThroughEarpiece);
   }
 
   @Override
@@ -310,11 +297,6 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
       updateDuckStatusForAllPlayersPlaying();
     }
 
-    if (map.containsKey(AUDIO_MODE_PLAY_THROUGH_EARPIECE)) {
-      mShouldRouteThroughEarpiece = map.getBoolean(AUDIO_MODE_PLAY_THROUGH_EARPIECE);
-      updatePlaySoundThroughEarpiece(mShouldRouteThroughEarpiece);
-    }
-
     final int interruptionModeInt = map.getInt(AUDIO_MODE_INTERRUPTION_MODE_KEY);
     switch (interruptionModeInt) {
       case 1:
@@ -329,15 +311,16 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
 
   // Rejects the promise and returns null if the PlayerManager is not found.
   private PlayerManager tryGetSoundForKey(final Integer key, final Promise promise) {
-    final PlayerManager data = this.mSoundMap.get(key);
+    final PlayerManager data = mAudioEventHandlers.getAudios().get(key).get(); //TODO: Convert to kotlin and optional chaining!
     if (data == null && promise != null) {
-      promise.reject("E_AUDIO_NOPLAYER", "ExpoPlayer does not exist.");
+      promise.reject("E_AUDIO_NOPLAYER", "Player does not exist.");
     }
     return data;
   }
 
   private void removeSoundForKey(final Integer key) {
-    final PlayerManager data = mSoundMap.remove(key);
+    final PlayerManager data = mAudioEventHandlers.getAudios().get(key).get();
+    mAudioEventHandlers.removeAudio(key);
     if (data != null) {
       data.release();
       abandonAudioFocusIfUnused();
@@ -345,20 +328,20 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   }
 
   @Override
-  public void loadForSound(final ReadableArguments source, final ReadableArguments status, final Promise promise) {
+  public void loadForSound(final Source source, final PlayerStatus status, final Promise promise) {
     final int key = mSoundMapKeyCount++;
-    final PlayerManager data = PlayerManager.createUnloadedPlayerData(this, mContext, source, status.toBundle());
+    final PlayerManager data = mPlayerCreator.createUnloadedPlayerData(source, status);
     data.setErrorListener(error -> removeSoundForKey(key));
-    mSoundMap.put(key, data);
-    data.load(status.toBundle(), new PlayerManager.LoadCompletionListener() {
+    mAudioEventHandlers.addAudio(key, data);
+    data.load(status, new PlayerManager.LoadCompletionListener() {
       @Override
-      public void onLoadSuccess(final Bundle status) {
-        promise.resolve(Arrays.asList(key, status));
+      public void onLoadSuccess(final PlayerStatus status) {
+        promise.resolve(Arrays.asList(key, status.toBundle()));
       }
 
       @Override
       public void onLoadError(final String error) {
-        mSoundMap.remove(key);
+        mAudioEventHandlers.removeAudio(key);
         promise.reject("E_LOAD_ERROR", error, null);
       }
     });
@@ -366,7 +349,7 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
     data.setStatusUpdateListener(status1 -> {
       Bundle payload = new Bundle();
       payload.putInt("key", key);
-      payload.putBundle("status", status1);
+      payload.putBundle("status", status1.toBundle());
       sendEvent("didUpdatePlaybackStatus", payload);
     });
   }
@@ -375,23 +358,23 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   public void unloadForSound(final Integer key, final Promise promise) {
     if (tryGetSoundForKey(key, promise) != null) {
       removeSoundForKey(key);
-      promise.resolve(PlayerManager.getUnloadedStatus());
+      promise.resolve(PlayerStatus.unloadedPlayerStatus());
     } // Otherwise, tryGetSoundForKey has already rejected the promise.
   }
 
   @Override
-  public void setStatusForSound(final Integer key, final ReadableArguments status, final Promise promise) {
+  public void setStatusForSound(final Integer key, final PlayerStatus status, final Promise promise) {
     final PlayerManager data = tryGetSoundForKey(key, promise);
     if (data != null) {
-      data.setStatus(status.toBundle(), promise);
+      data.setStatus(status, promise);
     } // Otherwise, tryGetSoundForKey has already rejected the promise.
   }
 
   @Override
-  public void replaySound(final Integer key, final ReadableArguments status, final Promise promise) {
+  public void replaySound(final Integer key, final PlayerStatus status, final Promise promise) {
     final PlayerManager data = tryGetSoundForKey(key, promise);
     if (data != null) {
-      data.setStatus(status.toBundle(), promise);
+      data.setStatus(status, promise);
     } // Otherwise, tryGetSoundForKey has already rejected the promise.
   }
 
@@ -399,14 +382,15 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   public void getStatusForSound(final Integer key, final Promise promise) {
     final PlayerManager data = tryGetSoundForKey(key, promise);
     if (data != null) {
-      promise.resolve(data.getStatus());
+      promise.resolve(data.getStatus().toBundle());
     } // Otherwise, tryGetSoundForKey has already rejected the promise.
   }
 
-  // Unified playback API - Video
+// Unified playback API - Video
 
   private interface VideoViewCallback {
     void runWithVideoView(final VideoView videoView);
+
   }
 
   // Rejects the promise if the VideoView is not found, otherwise executes the callback.
@@ -430,7 +414,7 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   }
 
   @Override
-  public void loadForVideo(final Integer tag, final ReadableArguments source, final ReadableArguments status, final Promise promise) {
+  public void loadForVideo(final Integer tag, final Source source, final PlayerStatus status, final Promise promise) {
     tryRunWithVideoView(tag, videoView -> videoView.setSource(source, status, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
   }
 
@@ -440,12 +424,12 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   }
 
   @Override
-  public void setStatusForVideo(final Integer tag, final ReadableArguments status, final Promise promise) {
+  public void setStatusForVideo(final Integer tag, final PlayerStatus status, final Promise promise) {
     tryRunWithVideoView(tag, videoView -> videoView.setStatus(status, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
   }
 
   @Override
-  public void replayVideo(final Integer tag, final ReadableArguments status, final Promise promise) {
+  public void replayVideo(final Integer tag, final PlayerStatus status, final Promise promise) {
     tryRunWithVideoView(tag, videoView -> videoView.setStatus(status, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
   }
 

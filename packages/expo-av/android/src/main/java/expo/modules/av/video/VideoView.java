@@ -13,12 +13,12 @@ import com.yqritc.scalablevideoview.ScalableType;
 
 import org.unimodules.core.ModuleRegistry;
 import org.unimodules.core.Promise;
-import org.unimodules.core.arguments.ReadableArguments;
 import org.unimodules.core.interfaces.services.EventEmitter;
 
 import expo.modules.av.AVManagerInterface;
-import expo.modules.av.AudioEventHandler;
-import expo.modules.av.player.PlayerControl;
+import expo.modules.av.PlayerStatus;
+import expo.modules.av.Source;
+import expo.modules.av.audio.AudioEventHandler;
 import expo.modules.av.player.PlayerManager;
 
 @SuppressLint("ViewConstructor")
@@ -35,9 +35,9 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
 
   private final PlayerManager.StatusUpdateListener mStatusUpdateListener = new PlayerManager.StatusUpdateListener() {
     @Override
-    public void onStatusUpdate(final Bundle status) {
+    public void onStatusUpdate(final PlayerStatus status) {
       post(mMediaControllerUpdater);
-      mEventEmitter.emit(getReactId(), VideoViewManager.Events.EVENT_STATUS_UPDATE.toString(), status);
+      mEventEmitter.emit(getReactId(), VideoViewManager.Events.EVENT_STATUS_UPDATE.toString(), status.toBundle());
     }
   };
 
@@ -54,7 +54,7 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
   private Pair<Integer, Integer> mVideoWidthHeight = null;
   private FullscreenVideoPlayerPresentationChangeProgressListener mFullscreenPlayerPresentationChangeProgressListener = null;
 
-  private Bundle mStatusToSet = new Bundle();
+  private PlayerStatus mStatusToSet = null;
 
   private FullscreenVideoPlayer mFullscreenPlayer = null;
   private VideoTextureView mVideoTextureView = null;
@@ -126,7 +126,7 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
 
       final Bundle map = new Bundle();
       map.putBundle("naturalSize", naturalSize);
-      map.putBundle("status", mPlayerManager.getStatus());
+      map.putBundle("status", mPlayerManager.getStatus().toBundle());
       mEventEmitter.emit(getReactId(), VideoViewManager.Events.EVENT_READY_FOR_DISPLAY.toString(), map);
     }
   }
@@ -260,27 +260,26 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
   private void callFullscreenCallbackWithUpdate(VideoViewManager.FullscreenPlayerUpdate update) {
     Bundle event = new Bundle();
     event.putInt("fullscreenUpdate", update.getValue());
-    event.putBundle("status", getStatus());
+    event.putBundle("status", getStatus().toBundle());
     mEventEmitter.emit(getReactId(), VideoViewManager.Events.EVENT_FULLSCREEN_PLAYER_UPDATE.toString(), event);
   }
 
   // Prop setting
 
-  public void setStatus(final ReadableArguments status, final Promise promise) {
-    Bundle statusBundle = status.toBundle();
-    mStatusToSet.putAll(statusBundle);
+  public void setStatus(final PlayerStatus status, final Promise promise) {
+    mStatusToSet = status;
     if (mPlayerManager != null) {
       final Bundle statusToSet = new Bundle();
-      statusToSet.putAll(mStatusToSet);
-      mStatusToSet = new Bundle();
-      mPlayerManager.setStatus(statusBundle, promise);
+      statusToSet.putAll(mStatusToSet.toBundle());
+      mStatusToSet = null;
+      mPlayerManager.setStatus(status, promise);
     } else if (promise != null) {
-      promise.resolve(PlayerManager.getUnloadedStatus());
+      promise.resolve(PlayerStatus.unloadedPlayerStatus());
     }
   }
 
-  public Bundle getStatus() {
-    return mPlayerManager == null ? PlayerManager.getUnloadedStatus() : mPlayerManager.getStatus();
+  public PlayerStatus getStatus() {
+    return mPlayerManager == null ? PlayerStatus.unloadedPlayerStatus() : mPlayerManager.getStatus();
   }
 
   private boolean shouldUseNativeControls() {
@@ -301,102 +300,95 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
     maybeUpdateMediaControllerForUseNativeControls();
   }
 
-  public void setSource(final ReadableArguments source, final ReadableArguments initialStatus, final Promise promise) {
+  public void setSource(final Source source, final PlayerStatus initialStatus, final Promise promise) {
     if (mPlayerManager != null) {
-      mStatusToSet.putAll(mPlayerManager.getStatus());
+      mStatusToSet = mPlayerManager.getStatus();
       mPlayerManager.release();
       mPlayerManager = null;
       mIsLoaded = false;
     }
 
     if (initialStatus != null) {
-      mStatusToSet.putAll(initialStatus.toBundle());
+      mStatusToSet = initialStatus;
     }
 
-    final String uriString = source != null ? source.getString(PlayerManager.STATUS_URI_KEY_PATH) : null;
+    final String uriString = source != null ? source.getUri() : null;
 
     if (uriString == null) {
       if (promise != null) {
-        promise.resolve(PlayerManager.getUnloadedStatus());
+        promise.resolve(PlayerStatus.unloadedPlayerStatus());
       }
       return;
     }
 
     mEventEmitter.emit(getReactId(), VideoViewManager.Events.EVENT_LOAD_START.toString(), new Bundle());
 
-    final Bundle statusToInitiallySet = new Bundle();
-    statusToInitiallySet.putAll(mStatusToSet);
-    mStatusToSet = new Bundle();
-
-    mPlayerManager = PlayerManager.createUnloadedPlayerData(mAVModule, getContext(), source, statusToInitiallySet);
-
-    mPlayerManager.setErrorListener(new PlayerManager.ErrorListener() {
-      @Override
-      public void onError(final String error) {
-        unloadPlayerAndMediaController();
-        callOnError(error);
-      }
-    });
-    mPlayerManager.setVideoSizeUpdateListener(new PlayerManager.VideoSizeUpdateListener() {
-      @Override
-      public void onVideoSizeUpdate(final Pair<Integer, Integer> videoWidthHeight) {
-        mVideoTextureView.scaleVideoSize(videoWidthHeight, mResizeMode);
-        mVideoWidthHeight = videoWidthHeight;
-        callOnReadyForDisplay(videoWidthHeight);
-      }
-    });
-
-    mPlayerManager.setFullscreenPresenter(this);
-
-    mPlayerManager.load(statusToInitiallySet, new PlayerManager.LoadCompletionListener() {
-      @Override
-      public void onLoadSuccess(final Bundle status) {
-        mIsLoaded = true;
-        mVideoTextureView.scaleVideoSize(mPlayerManager.getVideoWidthHeight(), mResizeMode);
-
-        if (mVideoTextureView.isAttachedToWindow()) {
-          mPlayerManager.setSurface(mVideoTextureView.getSurface());
-        }
-
-        if (promise != null) {
-          final Bundle statusCopy = new Bundle();
-          statusCopy.putAll(status);
-          promise.resolve(statusCopy);
-        }
-
-        mPlayerManager.setStatusUpdateListener(mStatusUpdateListener);
-        mMediaController.setMediaPlayer(new PlayerControl(mPlayerManager));
-        mMediaController.setAnchorView(VideoView.this);
-        maybeUpdateMediaControllerForUseNativeControls(false);
-        mEventEmitter.emit(getReactId(), VideoViewManager.Events.EVENT_LOAD.toString(), status);
-        // Execute the fullscreen player state change requested before the video loaded
-        if (mFullscreenVideoPlayerPresentationOnLoadChangeListener != null) {
-          FullscreenVideoPlayerPresentationChangeProgressListener listener = mFullscreenVideoPlayerPresentationOnLoadChangeListener;
-          mFullscreenVideoPlayerPresentationOnLoadChangeListener = null;
-          if (mShouldShowFullscreenPlayerOnLoad) {
-            ensureFullscreenPlayerIsPresented(listener);
-          } else {
-            ensureFullscreenPlayerIsDismissed(listener);
-          }
-        }
-        callOnReadyForDisplay(mVideoWidthHeight);
-      }
-
-      @Override
-      public void onLoadError(final String error) {
-        if (mFullscreenVideoPlayerPresentationOnLoadChangeListener != null) {
-          mFullscreenVideoPlayerPresentationOnLoadChangeListener.onFullscreenPlayerPresentationError(error);
-          mFullscreenVideoPlayerPresentationOnLoadChangeListener = null;
-        }
-        mShouldShowFullscreenPlayerOnLoad = false;
-
-        unloadPlayerAndMediaController();
-        if (promise != null) {
-          promise.reject("E_VIDEO_NOTCREATED", error);
-        }
-        callOnError(error);
-      }
-    });
+    // TODO: WHAT THE HECK IS THAT?!
+//    final Bundle statusToInitiallySet = new Bundle();
+//    statusToInitiallySet.putAll(mStatusToSet);
+//    mStatusToSet = new Bundle();
+//
+//    mPlayerManager = PlayerManager.createUnloadedPlayerData(mAVModule, getContext(), source, statusToInitiallySet);
+//
+//    mPlayerManager.setErrorListener(error -> {
+//      unloadPlayerAndMediaController();
+//      callOnError(error);
+//    });
+//    mPlayerManager.setVideoSizeUpdateListener(videoWidthHeight -> {
+//      mVideoTextureView.scaleVideoSize(videoWidthHeight, mResizeMode);
+//      mVideoWidthHeight = videoWidthHeight;
+//      callOnReadyForDisplay(videoWidthHeight);
+//    });
+//
+//    mPlayerManager.setFullscreenPresenter(this);
+//
+//    mPlayerManager.load(statusToInitiallySet, new PlayerManager.LoadCompletionListener() {
+//      @Override
+//      public void onLoadSuccess(final PlayerStatus status) {
+//        mIsLoaded = true;
+//        mVideoTextureView.scaleVideoSize(mPlayerManager.getVideoWidthHeight(), mResizeMode);
+//
+//        if (mVideoTextureView.isAttachedToWindow()) {
+//          mPlayerManager.setSurface(mVideoTextureView.getSurface());
+//        }
+//
+//        if (promise != null) {
+//          promise.resolve(status.toBundle());
+//        }
+//
+//        mPlayerManager.setStatusUpdateListener(mStatusUpdateListener);
+//        mMediaController.setMediaPlayer(new PlayerControl(mPlayerManager));
+//        mMediaController.setAnchorView(VideoView.this);
+//        maybeUpdateMediaControllerForUseNativeControls(false);
+//        mEventEmitter.emit(getReactId(), VideoViewManager.Events.EVENT_LOAD.toString(), status);
+//        // Execute the fullscreen player state change requested before the video loaded
+//        if (mFullscreenVideoPlayerPresentationOnLoadChangeListener != null) {
+//          FullscreenVideoPlayerPresentationChangeProgressListener listener = mFullscreenVideoPlayerPresentationOnLoadChangeListener;
+//          mFullscreenVideoPlayerPresentationOnLoadChangeListener = null;
+//          if (mShouldShowFullscreenPlayerOnLoad) {
+//            ensureFullscreenPlayerIsPresented(listener);
+//          } else {
+//            ensureFullscreenPlayerIsDismissed(listener);
+//          }
+//        }
+//        callOnReadyForDisplay(mVideoWidthHeight);
+//      }
+//
+//      @Override
+//      public void onLoadError(final String error) {
+//        if (mFullscreenVideoPlayerPresentationOnLoadChangeListener != null) {
+//          mFullscreenVideoPlayerPresentationOnLoadChangeListener.onFullscreenPlayerPresentationError(error);
+//          mFullscreenVideoPlayerPresentationOnLoadChangeListener = null;
+//        }
+//        mShouldShowFullscreenPlayerOnLoad = false;
+//
+//        unloadPlayerAndMediaController();
+//        if (promise != null) {
+//          promise.reject("E_VIDEO_NOTCREATED", error);
+//        }
+//        callOnError(error);
+//      }
+//    });
   }
 
   void setResizeMode(final ScalableType resizeMode) {

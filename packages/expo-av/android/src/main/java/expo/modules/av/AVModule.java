@@ -40,7 +40,7 @@ public class AVModule extends ExportedModule implements ModuleRegistryConsumer {
 
   @ExpoMethod
   public void loadForSound(final ReadableArguments source, final ReadableArguments status, final Promise promise) {
-    mAVManager.loadForSound(source, status, promise);
+    mAVManager.loadForSound(Source.fromReadableArguments(source), PlayerStatus.fromReadableArguments(status), promise);
   }
 
   @ExpoMethod
@@ -50,12 +50,12 @@ public class AVModule extends ExportedModule implements ModuleRegistryConsumer {
 
   @ExpoMethod
   public void setStatusForSound(final Integer key, final ReadableArguments status, final Promise promise) {
-    mAVManager.setStatusForSound(key, status, promise);
+    mAVManager.setStatusForSound(key, PlayerStatus.fromReadableArguments(status), promise);
   }
 
   @ExpoMethod
   public void replaySound(final Integer key, final ReadableArguments status, final Promise promise) {
-    mAVManager.replaySound(key, status, promise);
+    mAVManager.replaySound(key, PlayerStatus.fromReadableArguments(status), promise);
   }
 
   @ExpoMethod
@@ -65,7 +65,7 @@ public class AVModule extends ExportedModule implements ModuleRegistryConsumer {
 
   @ExpoMethod
   public void loadForVideo(final Integer tag, final ReadableArguments source, final ReadableArguments status, final Promise promise) {
-    mAVManager.loadForVideo(tag, source, status, promise);
+    mAVManager.loadForVideo(tag, Source.fromReadableArguments(source), PlayerStatus.fromReadableArguments(status), promise);
   }
 
   @ExpoMethod
@@ -75,12 +75,12 @@ public class AVModule extends ExportedModule implements ModuleRegistryConsumer {
 
   @ExpoMethod
   public void setStatusForVideo(final Integer tag, final ReadableArguments status, final Promise promise) {
-    mAVManager.setStatusForVideo(tag, status, promise);
+    mAVManager.setStatusForVideo(tag, PlayerStatus.fromReadableArguments(status), promise);
   }
 
   @ExpoMethod
   public void replayVideo(final Integer tag, final ReadableArguments status, final Promise promise) {
-    mAVManager.replayVideo(tag, status, promise);
+    mAVManager.replayVideo(tag, PlayerStatus.fromReadableArguments(status), promise);
   }
 
   @ExpoMethod

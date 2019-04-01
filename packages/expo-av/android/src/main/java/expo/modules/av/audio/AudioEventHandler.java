@@ -1,4 +1,4 @@
-package expo.modules.av;
+package expo.modules.av.audio;
 
 public interface AudioEventHandler {
 

@@ -19,10 +19,10 @@ export enum PitchCorrectionQuality {
 export type PlaybackSource =
   | number
   | {
-    uri: string;
-    overrideFileExtensionAndroid?: string;
-    headers?: { [fieldName: string]: string };
-  }
+      uri: string;
+      overrideFileExtensionAndroid?: string;
+      headers?: { [fieldName: string]: string };
+    }
   | Asset;
 
 export type PlaybackNativeSource = {
@@ -265,7 +265,7 @@ export const PlaybackMixin = {
   },
 
   async pauseAsync(): Promise<PlaybackStatus> {
-    return ((this as any) as AV).setStatusAsync({ shouldPlay: false });
+    return (this as AV).setStatusAsync({ shouldPlay: false });
   },
 
   async stopAsync(): Promise<PlaybackStatus> {

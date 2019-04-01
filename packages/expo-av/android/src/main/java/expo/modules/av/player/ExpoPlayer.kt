@@ -1,18 +1,18 @@
 package expo.modules.av.player
 
 import android.net.Uri
-import android.os.Bundle
 import android.util.Pair
 import android.view.Surface
+import expo.modules.av.PlayerStatus
 import java.net.HttpCookie
 
 interface ExpoPlayer {
 
   fun setSurface(surface: Surface?, shouldPlay: Boolean)
 
-  fun play(mute: Boolean, rate: Float, shouldCorrectPitch: Boolean)
+  fun play(mute: Boolean, rate: Double, shouldCorrectPitch: Boolean)
   fun pauseImmediately()
-  fun load(status: Bundle, uri: Uri, cookies: List<HttpCookie>,
+  fun load(status: PlayerStatus, uri: Uri, cookies: List<HttpCookie>,
            loadCompletionListener: PlayerManager.LoadCompletionListener)
 
   fun release()

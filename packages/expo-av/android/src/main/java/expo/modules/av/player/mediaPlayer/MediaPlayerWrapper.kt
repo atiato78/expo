@@ -4,10 +4,10 @@ import android.content.Context
 import android.media.PlaybackParams
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.support.annotation.RequiresApi
 import android.util.Pair
 import android.view.Surface
+import expo.modules.av.PlayerStatus
 import expo.modules.av.player.ExpoPlayer
 import expo.modules.av.player.PlayerManager
 import java.net.HttpCookie
@@ -31,7 +31,7 @@ internal class MediaPlayerWrapper(private val context: Context,
 
   // Lifecycle
 
-  override fun load(status: Bundle, uri: Uri, cookies: List<HttpCookie>,
+  override fun load(status: PlayerStatus, uri: Uri, cookies: List<HttpCookie>,
                     loadCompletionListener: PlayerManager.LoadCompletionListener) {
     if (mediaPlayer != null) {
       loadCompletionListener.onLoadError(
@@ -130,9 +130,9 @@ internal class MediaPlayerWrapper(private val context: Context,
   override val audioSessionId: Int
     get() = mediaPlayer?.audioSessionId ?: 0
 
-// Controls
+  // Controls
 
-  override fun play(mute: Boolean, rate: Float, shouldCorrectPitch: Boolean) {
+  override fun play(mute: Boolean, rate: Double, shouldCorrectPitch: Boolean) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
       if (!mediaPlayer!!.isPlaying) {
         mediaPlayer!!.start()
@@ -140,12 +140,12 @@ internal class MediaPlayerWrapper(private val context: Context,
       }
     } else {
       val params = mediaPlayer!!.playbackParams
-      val setRate = params.speed
+      val setRate = params.speed.toDouble()
       val setShouldCorrectPitch = params.pitch == 1.0f
       val rateAndPitchAreSetCorrectly =
           setRate == rate && setShouldCorrectPitch == shouldCorrectPitch
 
-      if (rate != 0f && (!mediaPlayer!!.isPlaying || !rateAndPitchAreSetCorrectly)) {
+      if (rate >= 0f && (!mediaPlayer!!.isPlaying || !rateAndPitchAreSetCorrectly)) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
           playMediaPlayerWithRateMAndHigher(rate, shouldCorrectPitch)
         } else {
@@ -153,7 +153,7 @@ internal class MediaPlayerWrapper(private val context: Context,
           // changed the rate to something other than 1f before the sound started.
           // This workaround seems to fix this issue (which is said to only be fixed in N):
           // https://code.google.com/p/android/issues/detail?id=192135
-          playMediaPlayerWithRateMAndHigher(2f, shouldCorrectPitch)
+          playMediaPlayerWithRateMAndHigher(2.0, shouldCorrectPitch)
           mediaPlayer!!.pause()
           playMediaPlayerWithRateMAndHigher(rate, shouldCorrectPitch)
         }
@@ -163,10 +163,10 @@ internal class MediaPlayerWrapper(private val context: Context,
   }
 
   @RequiresApi(api = Build.VERSION_CODES.M)
-  private fun playMediaPlayerWithRateMAndHigher(rate: Float, shouldCorrectPitch: Boolean) {
+  private fun playMediaPlayerWithRateMAndHigher(rate: Double, shouldCorrectPitch: Boolean) {
     val params = mediaPlayer!!.playbackParams
-    params.pitch = if (shouldCorrectPitch) 1.0f else rate
-    params.speed = rate
+    params.pitch = if (shouldCorrectPitch) 1.0f else rate.toFloat()
+    params.speed = rate.toFloat()
     params.audioFallbackMode = PlaybackParams.AUDIO_FALLBACK_MODE_DEFAULT
     mediaPlayer!!.playbackParams = params
     mediaPlayer!!.start()
