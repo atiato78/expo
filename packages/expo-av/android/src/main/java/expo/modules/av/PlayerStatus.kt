@@ -23,6 +23,51 @@ data class PlayerStatus(
     val isLooping: Boolean = defaultIsLooping,
     val didJustFinish: Boolean = defaultDidJustFinish
 ) {
+
+  fun merge(arguments: ReadableArguments): PlayerStatus {
+    val uri = arguments.getString(STATUS_URI_KEY_PATH, this.uriPath)
+    val isLoaded = arguments.getBoolean(STATUS_IS_LOADED_KEY_PATH, this.isLoaded)
+    val durationInMillis =
+        arguments.getInt(STATUS_DURATION_MILLIS_KEY_PATH, this.durationInMillis)
+    val positionMillis =
+        arguments.getDouble(STATUS_POSITION_MILLIS_KEY_PATH, this.positionMillis.toDouble())
+            .toInt()
+    val updateInterval = arguments.getInt(STATUS_PROGRESS_UPDATE_INTERVAL_MILLIS_KEY_PATH,
+        this.updateInterval)
+    val playableDurationMillis =
+        arguments.getInt(STATUS_PLAYABLE_DURATION_MILLIS_KEY_PATH, this.playableDurationMillis)
+    val isPlaying = arguments.getBoolean(STATUS_IS_PLAYING_KEY_PATH, this.isPlaying)
+    val isBuffering = arguments.getBoolean(STATUS_IS_BUFFERING_KEY_PATH, this.isBuffering)
+    val androidImplementation =
+        arguments.getString(STATUS_ANDROID_IMPLEMENTATION_KEY_PATH, this.implementation)
+    val shouldPlay = arguments.getBoolean(STATUS_SHOULD_PLAY_KEY_PATH, this.shouldPlay)
+    val rate = arguments.getDouble(STATUS_RATE_KEY_PATH, defaultRate)
+    val shouldCorrectPitch =
+        arguments.getBoolean(STATUS_SHOULD_CORRECT_PITCH_KEY_PATH, this.shouldCorrectPitch)
+    val volume = arguments.getDouble(STATUS_VOLUME_KEY_PATH, this.volume.toDouble()).toFloat()
+    val isMuted = arguments.getBoolean(STATUS_IS_MUTED_KEY_PATH, this.isMuted)
+    val isLooping = arguments.getBoolean(STATUS_IS_LOOPING_KEY_PATH, this.isLooping)
+    val didJustFinish =
+        arguments.getBoolean(STATUS_DID_JUST_FINISH_KEY_PATH, this.didJustFinish)
+    return PlayerStatus(
+        uri,
+        isLoaded,
+        durationInMillis,
+        positionMillis,
+        updateInterval,
+        playableDurationMillis,
+        isPlaying,
+        isBuffering,
+        androidImplementation,
+        shouldPlay,
+        rate,
+        shouldCorrectPitch,
+        volume,
+        isMuted,
+        isLooping,
+        didJustFinish)
+  }
+
   companion object {
     private const val STATUS_URI_KEY_PATH = "uri"
     private const val defaultUri = ""

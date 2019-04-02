@@ -23,9 +23,7 @@ import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.util.Util
-import expo.modules.av.PlayerStatus
 import expo.modules.av.player.ExpoPlayer
-import expo.modules.av.player.PlayerManager
 import java.io.IOException
 import java.net.HttpCookie
 
@@ -36,7 +34,7 @@ internal class ExoPlayerWrapper(private val context: Context,
     com.google.android.exoplayer2.SimpleExoPlayer.VideoListener, AdaptiveMediaSourceEventListener {
 
   private var simpleExoPlayer: com.google.android.exoplayer2.SimpleExoPlayer? = null
-  private var loadCompletionListener: PlayerManager.LoadCompletionListener? = null
+  private var loadCompletionListener: ExpoPlayer.LoadListener? = null
   private var firstFrameRendered = false
   private var lastPlaybackState: Int? = null
   private var loading = true
@@ -46,8 +44,8 @@ internal class ExoPlayerWrapper(private val context: Context,
 
   // Lifecycle
 
-  override fun load(status: PlayerStatus, uri: Uri, cookies: List<HttpCookie>,
-                    loadCompletionListener: PlayerManager.LoadCompletionListener) {
+  override fun load(uri: Uri, cookies: List<HttpCookie>,
+                    loadCompletionListener: ExpoPlayer.LoadListener) {
     // Create a default TrackSelector
     val mainHandler = Handler()
     // Measures bandwidth during playback. Can be null if not required.
@@ -66,7 +64,7 @@ internal class ExoPlayerWrapper(private val context: Context,
 
       // Prepare the player with the source.
       simpleExoPlayer!!.prepare(source)
-      loadCompletionListener.onLoadSuccess(status)
+      loadCompletionListener.onLoaded()
     } catch (e: IllegalStateException) {
       this.loadCompletionListener = loadCompletionListener
       onFatalError(e)
@@ -142,8 +140,8 @@ internal class ExoPlayerWrapper(private val context: Context,
 
   override var volume: Float
     get() = simpleExoPlayer?.volume ?: 0.0f
-    set(value) {
-      simpleExoPlayer?.volume = value
+    set(value) { // TODO: Make it actually work when you'll handle audio focus properly.
+      simpleExoPlayer?.volume = 1.0f
     }
 
   // ExoPlayer.EventListener
@@ -161,7 +159,7 @@ internal class ExoPlayerWrapper(private val context: Context,
     if (playbackState == Player.STATE_READY && loadCompletionListener != null) {
       val listener = loadCompletionListener
       loadCompletionListener = null
-      listener!!.onLoadSuccess(null)
+      listener?.onLoaded()
     }
 
     if (lastPlaybackState != null
@@ -302,6 +300,7 @@ internal class ExoPlayerWrapper(private val context: Context,
   companion object {
 
     private const val IMPLEMENTATION_NAME = "ExoPlayerWrapper"
+
   }
 
 }

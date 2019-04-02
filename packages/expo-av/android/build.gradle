@@ -77,8 +77,6 @@ dependencies {
 
   api 'com.google.android.exoplayer:extension-okhttp:2.9.2'
 
-  implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion"
-
   api 'com.yqritc:android-scalablevideoview:1.0.1'
 
   api "com.squareup.okhttp3:okhttp:3.10.0"

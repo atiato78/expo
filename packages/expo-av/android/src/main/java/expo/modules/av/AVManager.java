@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 
 import org.unimodules.core.ModuleRegistry;
 import org.unimodules.core.Promise;
@@ -328,28 +329,28 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   }
 
   @Override
-  public void loadForSound(final Source source, final PlayerStatus status, final Promise promise) {
+  public void loadForSound(final Source source, final ReadableArguments arguments, final Promise promise) {
     final int key = mSoundMapKeyCount++;
-    final PlayerManager data = mPlayerCreator.createUnloadedPlayerData(source, status);
+    final PlayerManager data = mPlayerCreator.createUnloadedPlayerData(source, PlayerStatus.fromReadableArguments(arguments));
     data.setErrorListener(error -> removeSoundForKey(key));
     mAudioEventHandlers.addAudio(key, data);
-    data.load(status, new PlayerManager.LoadCompletionListener() {
+    data.load(arguments, new PlayerManager.LoadCompletionListener() {
       @Override
-      public void onLoadSuccess(final PlayerStatus status) {
+      public void onLoadSuccess(@NonNull PlayerStatus status) {
         promise.resolve(Arrays.asList(key, status.toBundle()));
       }
 
       @Override
-      public void onLoadError(final String error) {
+      public void onLoadError(@NonNull final String error) {
         mAudioEventHandlers.removeAudio(key);
         promise.reject("E_LOAD_ERROR", error, null);
       }
     });
 
-    data.setStatusUpdateListener(status1 -> {
+    data.setStatusUpdateListener(status -> {
       Bundle payload = new Bundle();
       payload.putInt("key", key);
-      payload.putBundle("status", status1.toBundle());
+      payload.putBundle("status", status.toBundle());
       sendEvent("didUpdatePlaybackStatus", payload);
     });
   }
@@ -363,7 +364,7 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   }
 
   @Override
-  public void setStatusForSound(final Integer key, final PlayerStatus status, final Promise promise) {
+  public void setStatusForSound(final Integer key, final ReadableArguments status, final Promise promise) {
     final PlayerManager data = tryGetSoundForKey(key, promise);
     if (data != null) {
       data.setStatus(status, promise);
@@ -371,7 +372,7 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   }
 
   @Override
-  public void replaySound(final Integer key, final PlayerStatus status, final Promise promise) {
+  public void replaySound(final Integer key, final ReadableArguments status, final Promise promise) {
     final PlayerManager data = tryGetSoundForKey(key, promise);
     if (data != null) {
       data.setStatus(status, promise);
@@ -414,7 +415,7 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   }
 
   @Override
-  public void loadForVideo(final Integer tag, final Source source, final PlayerStatus status, final Promise promise) {
+  public void loadForVideo(final Integer tag, final Source source, final ReadableArguments status, final Promise promise) {
     tryRunWithVideoView(tag, videoView -> videoView.setSource(source, status, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
   }
 
@@ -424,12 +425,12 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   }
 
   @Override
-  public void setStatusForVideo(final Integer tag, final PlayerStatus status, final Promise promise) {
+  public void setStatusForVideo(final Integer tag, final ReadableArguments status, final Promise promise) {
     tryRunWithVideoView(tag, videoView -> videoView.setStatus(status, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
   }
 
   @Override
-  public void replayVideo(final Integer tag, final PlayerStatus status, final Promise promise) {
+  public void replayVideo(final Integer tag, final ReadableArguments status, final Promise promise) {
     tryRunWithVideoView(tag, videoView -> videoView.setStatus(status, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
   }
 

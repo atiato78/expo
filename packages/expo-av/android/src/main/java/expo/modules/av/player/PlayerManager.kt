@@ -8,8 +8,8 @@ import expo.modules.av.AVManagerInterface
 import expo.modules.av.AudioFocusNotAcquiredException
 import expo.modules.av.PlayerStatus
 import expo.modules.av.audio.AudioEventHandler
-import expo.modules.av.merge
 import org.unimodules.core.Promise
+import org.unimodules.core.arguments.ReadableArguments
 import java.io.IOException
 import java.lang.ref.WeakReference
 import java.net.CookieHandler
@@ -28,7 +28,7 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   private var mErrorListener: ErrorListener? = null
   private var mVideoSizeUpdateListener: VideoSizeUpdateListener? = null
 
-  private var mPlayerStatus: PlayerStatus = PlayerStatus.unloadedPlayerStatus()
+//  private var mPlayerStatus: PlayerStatus = PlayerStatus.unloadedPlayerStatus()
 
   init {
     player.setPlayerStateListener(this)
@@ -38,19 +38,20 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
     get() = player.videoWidthHeight
 
   val isPlaying: Boolean
-    get() = mPlayerStatus.isLoaded && mPlayerStatus.isPlaying
+    get() = status.isLoaded && status.isPlaying
 
-  val status: PlayerStatus?
+  private var _status: PlayerStatus = PlayerStatus.unloadedPlayerStatus()
+
+  val status: PlayerStatus
     @Synchronized get() {
       if (!player.loaded) {
         return PlayerStatus.unloadedPlayerStatus().copy(implementation = player.implementationName)
       }
 
-      return mPlayerStatus.copy(
+      return _status.copy(
           isLoaded = true,
           uriPath = uri.path,
           implementation = player.implementationName,
-          didJustFinish = false,
           durationInMillis = player.duration,
           positionMillis = player.currentPosition,
           isPlaying = player.playing,
@@ -93,11 +94,11 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
     }
 
   fun play() {
-    modifyStatus { it.copy(isPlaying = true) }
+    this._status = status.copy(isPlaying = true)
   }
 
   fun pause() {
-    modifyStatus { it.copy(shouldPlay = false) }
+    this._status = status.copy(shouldPlay = false)
   }
 
   fun seekTo(positionMillis: Int) {
@@ -113,7 +114,7 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   }
 
   interface LoadCompletionListener {
-    fun onLoadSuccess(status: PlayerStatus?)
+    fun onLoadSuccess(status: PlayerStatus)
 
     fun onLoadError(error: String)
   }
@@ -146,10 +147,10 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   }
   // Lifecycle
 
-  fun load(status: PlayerStatus, loadCompletionListener: LoadCompletionListener) {
-    this.player.load(status, uri, httpCookiesList, object : LoadCompletionListener {
-      override fun onLoadSuccess(status: PlayerStatus?) {
-        setStatusWithListener(status!!, object : SetStatusCompletionListener {
+  fun load(arguments: ReadableArguments, loadCompletionListener: LoadCompletionListener) {
+    this.player.load(uri, httpCookiesList, object : ExpoPlayer.LoadListener {
+      override fun onLoaded() {
+        setStatusWithListener(status.merge(arguments), object : SetStatusCompletionListener {
           override fun onSetStatusComplete() {
             loadCompletionListener.onLoadSuccess(status)
           }
@@ -167,7 +168,7 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   }
 
   fun setSurface(surface: Surface) {
-    this.player.setSurface(surface, mPlayerStatus.shouldPlay)
+    this.player.setSurface(surface, status.shouldPlay)
   }
 
   fun release() {
@@ -197,10 +198,10 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   }
 
   private fun progressUpdateLoop() {
-    if (!player.continueUpdatingProgress || mPlayerStatus.updateInterval <= 0) {
+    if (!player.continueUpdatingProgress || status.updateInterval <= 0) {
       stopUpdatingProgressIfNecessary()
     } else {
-      mHandler.postDelayed(mProgressUpdater, mPlayerStatus.updateInterval.toLong())
+      mHandler.postDelayed(mProgressUpdater, status.updateInterval.toLong())
     }
   }
 
@@ -224,22 +225,23 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   // Status
 
   private fun shouldPlayerPlay(): Boolean {
-    return mPlayerStatus.shouldPlay && mPlayerStatus.rate > 0.0
+    return status.shouldPlay && status.rate > 0.0
   }
 
-  fun setStatus(status: PlayerStatus?, promise: Promise?) {
+  fun setStatus(status: ReadableArguments?, promise: Promise?) {
     if (status == null) {
       promise?.reject("E_AV_SETSTATUS", "Cannot set null status.")
       return
     }
 
     try {
-      setStatusWithListener(status, object : SetStatusCompletionListener {
+      val newStatus = this.status.merge(status)
+      setStatusWithListener(newStatus, object : SetStatusCompletionListener {
         override fun onSetStatusComplete() {
           if (promise == null) {
             callStatusUpdateListener()
           } else {
-            promise.resolve(status)
+            promise.resolve(newStatus.toBundle())
           }
         }
 
@@ -257,15 +259,13 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
 
   }
 
-  fun modifyStatus(modifier: (status: PlayerStatus) -> PlayerStatus) {
-    this.mPlayerStatus = modifier(this.mPlayerStatus)
-  }
-
-  private fun setStatusWithListener(status: PlayerStatus,
+  private fun setStatusWithListener(status: PlayerStatus?,
                                     setStatusCompletionListener: SetStatusCompletionListener) {
-    this.mPlayerStatus = merge(this.mPlayerStatus, status)
+    if (status != null) {
+      this._status = status
+    }
 
-    player.looping = mPlayerStatus.isLooping
+    player.looping = this._status.isLooping
 
     if (!shouldPlayerPlay()) {
       player.pauseImmediately()
@@ -273,7 +273,7 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
       try {
         avModule.acquireAudioFocus()
         updateVolumeMuteAndDuck()
-        player.play(mPlayerStatus.isMuted, mPlayerStatus.rate, mPlayerStatus.shouldCorrectPitch)
+        player.play(this._status.isMuted, this._status.rate, this._status.shouldCorrectPitch)
 
         avModule.abandonAudioFocusIfUnused()
       } catch (ex: AudioFocusNotAcquiredException) {
@@ -303,7 +303,7 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   // AudioEventHandler
 
   override fun handleAudioFocusInterruptionBegan() {
-    if (!mPlayerStatus.isMuted) {
+    if (!this.status.isMuted) {
       pauseImmediately()
       stopUpdatingProgressIfNecessary()
     }
@@ -327,13 +327,13 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   }
 
   override fun requiresAudioFocus(): Boolean {
-    return player.playing && !mPlayerStatus.isMuted
+    return player.playing && !this.status.isMuted
   }
 
   override fun updateVolumeMuteAndDuck() {
     if (player.loaded) {
       player.volume =
-          avModule.getVolumeForDuckAndFocus(mPlayerStatus.isMuted, mPlayerStatus.volume)
+          avModule.getVolumeForDuckAndFocus(this.status.isMuted, this.status.volume)
     }
   }
 
@@ -389,13 +389,13 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
       return
     }
 
-    if (!mPlayerStatus.isMuted) {
+    if (!this.status.isMuted) {
       avModule.acquireAudioFocus()
     }
 
     updateVolumeMuteAndDuck()
 
-    player.play(mPlayerStatus.isMuted, mPlayerStatus.rate, mPlayerStatus.shouldCorrectPitch)
+    player.play(this.status.isMuted, this.status.rate, this.status.shouldCorrectPitch)
 
     beginUpdatingProgressIfNecessary()
   }

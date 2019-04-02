@@ -13,7 +13,6 @@ import org.unimodules.core.interfaces.ModuleRegistryConsumer;
 import java.util.ArrayList;
 import java.util.List;
 
-import expo.modules.av.PlayerStatus;
 import expo.modules.av.Source;
 
 public class VideoViewManager extends ViewManager<VideoViewWrapper> implements ModuleRegistryConsumer {
@@ -93,7 +92,7 @@ public class VideoViewManager extends ViewManager<VideoViewWrapper> implements M
 
   @ExpoProp(name = PROP_STATUS)
   public void setStatus(final VideoViewWrapper videoViewWrapper, final ReadableArguments status) {
-    videoViewWrapper.getVideoViewInstance().setStatus(PlayerStatus.fromReadableArguments(status), null);
+    videoViewWrapper.getVideoViewInstance().setStatus(status, null);
   }
 
   @ExpoProp(name = PROP_USE_NATIVE_CONTROLS)

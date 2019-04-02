@@ -13,6 +13,7 @@ import com.yqritc.scalablevideoview.ScalableType;
 
 import org.unimodules.core.ModuleRegistry;
 import org.unimodules.core.Promise;
+import org.unimodules.core.arguments.ReadableArguments;
 import org.unimodules.core.interfaces.services.EventEmitter;
 
 import expo.modules.av.AVManagerInterface;
@@ -266,8 +267,8 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
 
   // Prop setting
 
-  public void setStatus(final PlayerStatus status, final Promise promise) {
-    mStatusToSet = status;
+  public void setStatus(final ReadableArguments status, final Promise promise) {
+    mStatusToSet = mStatusToSet.merge(status);
     if (mPlayerManager != null) {
       final Bundle statusToSet = new Bundle();
       statusToSet.putAll(mStatusToSet.toBundle());
@@ -300,7 +301,8 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
     maybeUpdateMediaControllerForUseNativeControls();
   }
 
-  public void setSource(final Source source, final PlayerStatus initialStatus, final Promise promise) {
+  public void setSource(final Source source, final ReadableArguments initialStatus, final Promise promise) {
+    PlayerStatus newStatus = PlayerStatus.fromReadableArguments(initialStatus);
     if (mPlayerManager != null) {
       mStatusToSet = mPlayerManager.getStatus();
       mPlayerManager.release();
@@ -309,7 +311,7 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
     }
 
     if (initialStatus != null) {
-      mStatusToSet = initialStatus;
+      mStatusToSet = newStatus;
     }
 
     final String uriString = source != null ? source.getUri() : null;

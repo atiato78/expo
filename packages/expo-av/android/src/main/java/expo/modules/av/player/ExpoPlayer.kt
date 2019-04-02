@@ -3,7 +3,6 @@ package expo.modules.av.player
 import android.net.Uri
 import android.util.Pair
 import android.view.Surface
-import expo.modules.av.PlayerStatus
 import java.net.HttpCookie
 
 interface ExpoPlayer {
@@ -12,8 +11,8 @@ interface ExpoPlayer {
 
   fun play(mute: Boolean, rate: Double, shouldCorrectPitch: Boolean)
   fun pauseImmediately()
-  fun load(status: PlayerStatus, uri: Uri, cookies: List<HttpCookie>,
-           loadCompletionListener: PlayerManager.LoadCompletionListener)
+  fun load(uri: Uri, cookies: List<HttpCookie>,
+           loadCompletionListener: LoadListener)
 
   fun release()
 
@@ -35,6 +34,11 @@ interface ExpoPlayer {
   fun seekTo(newPositionMillis: Int)
 
   fun setPlayerStateListener(listener: PlayerStateListener)
+
+  interface LoadListener {
+    fun onLoaded()
+    fun onLoadError(error: String)
+  }
 
   interface PlayerStateListener {
     fun onCompleted() {}

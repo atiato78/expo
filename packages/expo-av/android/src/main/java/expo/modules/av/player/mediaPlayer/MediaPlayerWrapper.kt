@@ -7,9 +7,7 @@ import android.os.Build
 import android.support.annotation.RequiresApi
 import android.util.Pair
 import android.view.Surface
-import expo.modules.av.PlayerStatus
 import expo.modules.av.player.ExpoPlayer
-import expo.modules.av.player.PlayerManager
 import java.net.HttpCookie
 import java.util.*
 
@@ -31,8 +29,8 @@ internal class MediaPlayerWrapper(private val context: Context,
 
   // Lifecycle
 
-  override fun load(status: PlayerStatus, uri: Uri, cookies: List<HttpCookie>,
-                    loadCompletionListener: PlayerManager.LoadCompletionListener) {
+  override fun load(uri: Uri, cookies: List<HttpCookie>,
+                    loadCompletionListener: ExpoPlayer.LoadListener) {
     if (mediaPlayer != null) {
       loadCompletionListener.onLoadError(
           "Load encountered an error: MediaPlayerWrapper cannot be loaded twice.")
@@ -85,7 +83,7 @@ internal class MediaPlayerWrapper(private val context: Context,
 
       loaded = true
 
-      loadCompletionListener.onLoadSuccess(status)
+      loadCompletionListener.onLoaded()
     }
 
     try {
