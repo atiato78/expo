@@ -88,7 +88,6 @@ import abi28_0_0.host.exp.exponent.modules.api.reanimated.ReanimatedModule;
 import abi28_0_0.host.exp.exponent.modules.api.SecureStoreModule;
 import abi28_0_0.host.exp.exponent.modules.api.sensors.MagnetometerModule;
 import abi28_0_0.host.exp.exponent.modules.api.sensors.MagnetometerUncalibratedModule;
-import abi28_0_0.host.exp.exponent.modules.api.standalone.branch.RNBranchModule;
 import abi28_0_0.host.exp.exponent.modules.internal.ExponentAsyncStorageModule;
 import abi28_0_0.host.exp.exponent.modules.internal.ExponentIntentModule;
 import abi28_0_0.host.exp.exponent.modules.internal.ExponentUnsignedAsyncStorageModule;
@@ -185,7 +184,6 @@ public class ExponentPackage implements ReactPackage {
         nativeModules.add(new SQLiteModule(reactContext, scopedContext));
         nativeModules.add(new DocumentPickerModule(reactContext, scopedContext));
         nativeModules.add(new PedometerModule(reactContext));
-        nativeModules.add(new RNBranchModule(reactContext));
         nativeModules.add(new ErrorRecoveryModule(reactContext, experienceId));
         nativeModules.add(new IntentLauncherModule(reactContext));
         nativeModules.add(new ScreenOrientationModule(reactContext));
