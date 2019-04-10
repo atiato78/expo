@@ -347,3 +347,6 @@ cmake-build-*/
 
 
 # End of https://www.gitignore.io/api/java,android,eclipse,intellij,androidstudio
+
+
+app/src/main/java/host/exp/exponent/generated/BasePackageList.java
