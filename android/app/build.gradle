@@ -168,7 +168,7 @@ dependencies {
   implementation 'com.facebook.soloader:soloader:0.5.1'
 
   implementation 'com.google.android.exoplayer:exoplayer:2.6.1'
-  implementation 'expolib_v1.com.google.android.exoplayer:expolib_v1-extension-okhttp:2.6.1@aar'
+  implementation 'com.google.android.exoplayer:extension-okhttp:2.6.1'
 
   // expo-file-system
   implementation 'com.squareup.okhttp3:okhttp:3.10.0'
