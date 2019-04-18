@@ -1,6 +1,5 @@
 import './LegacyReact';
 
-import Expo from 'expo';
 import React from 'react';
 import { NativeModules } from 'react-native';
 import { ApolloProvider } from 'react-apollo';

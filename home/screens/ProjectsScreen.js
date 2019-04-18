@@ -14,8 +14,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ScrollView,
 } from 'react-native';
-import { ScrollView, withNavigationFocus, withNavigation } from 'react-navigation';
+import { withNavigationFocus, withNavigation } from 'react-navigation';
 import { Constants } from 'expo';
 import { connect } from 'react-redux';
 import _ from 'lodash';

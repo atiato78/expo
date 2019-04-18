@@ -1,25 +1,19 @@
-import { AppLoading, Asset, Constants, Font } from 'expo';
-import React from 'react';
-import { ActivityIndicator, Linking, Platform, StatusBar, StyleSheet, View } from 'react-native';
-import url from 'url';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { AppLoading, Asset, Constants, Font } from 'expo';
+import React from 'react';
+import { Linking, Platform, StatusBar, StyleSheet, View } from 'react-native';
 import { Assets as StackAssets } from 'react-navigation-stack';
+import url from 'url';
 
-import jwtDecode from 'jwt-decode';
+// import HistoryActions from './redux/HistoryActions';
+// import SessionActions from './redux/SessionActions';
+// import SettingsActions from './redux/SettingsActions';
+// import Store from './redux/Store';
+// import LocalStorage from './storage/LocalStorage';
+
 import Navigation from './navigation/Navigation';
-import HistoryActions from './redux/HistoryActions';
-import SessionActions from './redux/SessionActions';
-import SettingsActions from './redux/SettingsActions';
-import LocalStorage from './storage/LocalStorage';
-import MenuView from './menu/MenuView';
-import Store from './redux/Store';
-
-import addListenerWithNativeCallback from './utils/addListenerWithNativeCallback';
-
-function cacheImages(images) {
-  return images.map(image => Asset.fromModule(image).downloadAsync());
-}
+// const Navigation = () => null;
 
 // Download and cache stack assets, don't block loading on this though
 Asset.loadAsync(StackAssets);
@@ -60,14 +54,14 @@ export default class App extends React.Component {
 
   _initializeStateAsync = async () => {
     try {
-      Store.dispatch(SettingsActions.loadSettings());
-      Store.dispatch(HistoryActions.loadHistory());
-      await LocalStorage.migrateNuxStateToNativeAsync();
-      const storedSession = await LocalStorage.getSessionAsync();
+      // Store.dispatch(SettingsActions.loadSettings());
+      // Store.dispatch(HistoryActions.loadHistory());
+      // await LocalStorage.migrateNuxStateToNativeAsync();
+      // const storedSession = await LocalStorage.getSessionAsync();
 
-      if (storedSession) {
-        Store.dispatch(SessionActions.setSession(storedSession));
-      }
+      // if (storedSession) {
+      //   Store.dispatch(SessionActions.setSession(storedSession));
+      // }
 
       if (Platform.OS === 'ios') {
         await Promise.all([Font.loadAsync(Ionicons.font)]);
