@@ -17,6 +17,6 @@ export default function renderIcon(
 
 const styles = StyleSheet.create({
   icon: {
-    marginBottom: Platform.OS === 'ios' ? -3 : 0,
+    marginBottom: Platform.OS === 'android' ? 0 : -3,
   },
 });

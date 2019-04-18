@@ -51,9 +51,7 @@ export default createStackNavigator(
           defaultHandler();
           return;
         }
-
         navigation.popToTop();
-
         if (navigation.state.routes[0].index > 0) {
           navigation.navigate('Explore');
         } else {

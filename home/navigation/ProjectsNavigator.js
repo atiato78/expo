@@ -9,8 +9,6 @@ import ProjectsScreen from '../screens/ProjectsScreen';
 import defaultNavigationOptions from './defaultNavigationOptions';
 import renderIcon from './renderIcon';
 
-// import {  } from 'react-navigation-stack';
-// import { createBottomTabNavigator } from 'react-navigation-tabs';
 export default createStackNavigator(
   {
     Projects: ProjectsScreen,

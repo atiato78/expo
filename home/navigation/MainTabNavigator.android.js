@@ -1,13 +1,13 @@
 /* @flow */
 import React from 'react';
-import { createBottomTabNavigator } from 'react-navigation';
+import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs';
 
 import Colors from '../constants/Colors';
 import ExploreStack from './ExploreNavigator';
 import ProfileStack from './ProfileNavigator';
 import ProjectsStack from './ProjectsNavigator';
 
-export default createBottomTabNavigator(
+export default createMaterialBottomTabNavigator(
   {
     ProjectsStack,
     ExploreStack,
@@ -18,12 +18,10 @@ export default createBottomTabNavigator(
       header: null,
     },
     initialRouteName: 'ProjectsStack',
-    tabBarOptions: {
-      style: {
-        backgroundColor: Colors.tabBar,
-        borderTopColor: '#f2f2f2',
-        paddingBottom: 4,
-      },
+    activeTintColor: Colors.tabIconSelected,
+    inactiveTintColor: Colors.tabIconDefault,
+    barStyle: {
+      backgroundColor: '#fff',
     },
   }
 );
