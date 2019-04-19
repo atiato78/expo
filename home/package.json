@@ -6,7 +6,8 @@
   "description": "The Expo client app",
   "scripts": {
     "postinstall": "expo-yarn-workspaces postinstall",
-    "test": "jest"
+    "test": "jest",
+    "serve": "serve ./web-build"
   },
   "author": "650 Industries",
   "license": "MIT",

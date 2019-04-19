@@ -1,7 +1,8 @@
 import { AsyncStorage, NativeModules } from 'react-native';
 import mapValues from 'lodash/mapValues';
 import addListenerWithNativeCallback from '../utils/addListenerWithNativeCallback';
-const { ExponentKernel } = NativeModules;
+import { Platform } from '@unimodules/core';
+const { ExponentKernel = { getSessionAsync() {} } } = NativeModules;
 
 const Keys = mapValues(
   {
@@ -71,6 +72,9 @@ async function getSessionAsync() {
 }
 
 async function saveSessionAsync(session) {
+  if (Platform.OS === 'web') {
+    return AsyncStorage.setItem(Keys.Session, JSON.stringify(session));
+  }
   return ExponentKernel.setSessionAsync(session);
 }
 
@@ -99,6 +103,9 @@ async function removeAuthTokensAsync() {
 }
 
 async function removeSessionAsync() {
+  if (Platform.OS === 'web') {
+    return AsyncStorage.removeItem(Keys.Session);
+  }
   return ExponentKernel.removeSessionAsync();
 }
 

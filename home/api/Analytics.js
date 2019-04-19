@@ -5,6 +5,7 @@
 import { Amplitude, Constants } from 'expo';
 import Environment from '../utils/Environment';
 import { normalizeTrackingOptions } from './AnalyticsUtils';
+import { Platform } from 'react-native';
 
 const events = {
   USER_LOGGED_IN: 'USER_LOGGED_IN',
@@ -22,10 +23,13 @@ const events = {
   USER_UPDATED_SETTINGS: 'USER_UPDATED_SETTINGS',
 };
 
+const isWeb = Platform.OS === 'web';
 let isInitialized = false;
 const { manifest } = Constants;
 const apiKey = manifest.extra && manifest.extra.amplitudeApiKey;
 const initialize = () => {
+  if (isWeb) return;
+
   if (!Environment.isProduction || !apiKey) {
     return;
   }
@@ -41,6 +45,7 @@ const maybeInitialize = () => {
 };
 
 const identify = (id: ?string, options?: ?Object = null) => {
+  if (isWeb) return;
   maybeInitialize();
   options = normalizeTrackingOptions(options);
 
@@ -55,6 +60,8 @@ const identify = (id: ?string, options?: ?Object = null) => {
 };
 
 const track = (event: string, options: any = null) => {
+  if (isWeb) return;
+
   maybeInitialize();
   options = normalizeTrackingOptions(options);
 
