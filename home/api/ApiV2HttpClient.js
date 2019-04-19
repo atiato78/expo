@@ -5,11 +5,11 @@
 
 import { NativeModules, Platform } from 'react-native';
 import querystring from 'querystring';
-
+import { Constants } from 'expo';
 import ApiV2Error from './ApiV2Error';
 import Config from './Config';
 
-const { ExponentKernel } = NativeModules;
+const { ExponentKernel = { sdkVersions: Constants.expoVersion } } = NativeModules;
 
 type RequestOptions = {
   httpMethod: 'get' | 'post',

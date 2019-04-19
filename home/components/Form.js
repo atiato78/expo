@@ -48,7 +48,7 @@ export class FormInput extends React.Component {
           {...props}
           placeholder={this.props.label}
           placeholderTextColor="rgba(36, 44, 58, 0.4)"
-          style={[styles.textInput, style]}
+          style={[styles.textInput, { outline: 'none' }, style]}
         />
         <Animated.View style={[styles.floatingLabel, this._getAnimatedLabelStyles()]}>
           <Text style={styles.floatingLabelText}>{this.props.label}</Text>

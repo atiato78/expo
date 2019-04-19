@@ -101,16 +101,9 @@ export default class SearchScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        {Platform.OS === 'ios' ? (
-          <View style={styles.iosSearchBarContainer}>
-            <SearchBar emitter={this.state.emitter} />
-          </View>
-        ) : (
-          <View style={styles.androidSearchBarContainer}>
-            <SearchBar emitter={this.state.emitter} />
-          </View>
-        )}
-
+        <View style={styles.searchBar}>
+          <SearchBar emitter={this.state.emitter} />
+        </View>
         <SearchResults query={this.props.data.variables.query} data={this.props.data} />
       </View>
     );
@@ -124,16 +117,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  iosSearchBarContainer: {
-    height: 70 + NOTCH_HEIGHT,
-    paddingTop: 20 + NOTCH_HEIGHT,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(46, 59, 76, 0.10)',
-  },
-  androidSearchBarContainer: {
-    height: 56 + Constants.statusBarHeight,
-    paddingTop: Constants.statusBarHeight,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(46, 59, 76, 0.10)',
-  },
+  searchBar: Platform.select({
+    ios: {
+      height: 70 + NOTCH_HEIGHT,
+      paddingTop: 20 + NOTCH_HEIGHT,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: 'rgba(46, 59, 76, 0.10)',
+    },
+    web: {
+      boxShadow: `0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12)`,
+      height: 64,
+      borderBottomColor: 'rgba(46, 59, 76, 0.1)',
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      zIndex: 1,
+    },
+    default: {
+      height: 56 + Constants.statusBarHeight,
+      paddingTop: Constants.statusBarHeight,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: 'rgba(46, 59, 76, 0.10)',
+    },
+  }),
 });

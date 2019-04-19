@@ -93,7 +93,7 @@ export default class SearchBar extends React.Component {
             returnKeyType="search"
             placeholder="Find a project or enter a URL..."
             onSubmitEditing={this._handleSubmit}
-            style={styles.searchInput}
+            style={[styles.searchInput, { outline: 'none' }]}
           />
 
           <SearchIcon />
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f2f2f2',
     borderRadius: 6,
     marginHorizontal: SearchContainerHorizontalMargin,
-    marginTop: 10,
+    marginTop: 18,
     paddingLeft: 27,
   },
   searchIconContainer: {

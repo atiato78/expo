@@ -78,9 +78,9 @@ export default class ExploreScreen extends React.Component {
   }
 
   _renderSearchBar() {
-    if (Platform.OS === 'android') {
+    if (Platform.OS !== 'ios') {
       return (
-        <View style={styles.titleBarAndroid}>
+        <View style={[styles.titleBarAndroid, styles.platformHeader]}>
           <View style={styles.titleAndroid}>
             <Text numberOfLines={1} style={styles.titleTextAndroid}>
               {FeatureFlags.HIDE_EXPLORE_TABS ? 'Featured Projects' : 'Explore'}
@@ -125,6 +125,21 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderRightColor: '#f6f6f6',
   },
+  platformHeader: Platform.select({
+    web: {
+      // https://github.com/necolas/react-native-web/issues/44
+      // Material Design
+      boxShadow: `0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12)`,
+      height: 64,
+      borderBottomColor: 'rgba(46, 59, 76, 0.1)',
+      borderBottomWidth: StyleSheet.hairlineWidth,
+    },
+    android: {
+      paddingTop: 26,
+      height: 79,
+    },
+    default: {},
+  }),
   tabBarAndroid: {
     paddingTop: 5,
     paddingBottom: 5,
@@ -141,9 +156,7 @@ const styles = StyleSheet.create({
     ...navBarBorder,
   },
   titleBarAndroid: {
-    height: 79,
     backgroundColor: '#fff',
-    paddingTop: 26,
     marginBottom: 0,
     ...navBarBorder,
   },
@@ -162,7 +175,7 @@ const styles = StyleSheet.create({
   rightButtonAndroid: {
     position: 'absolute',
     right: 0,
-    top: 24,
+    top: Platform.select({ android: 24, default: 0 }),
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
