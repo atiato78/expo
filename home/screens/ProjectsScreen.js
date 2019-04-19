@@ -159,7 +159,7 @@ export default class ProjectsScreen extends React.Component {
           </Section>
 
           {this._renderRecentHistory()}
-          {this._renderConstants()}
+          <ConstantsView />
         </ScrollView>
 
         <StatusBar barStyle="default" />
@@ -322,31 +322,6 @@ export default class ProjectsScreen extends React.Component {
     ));
   };
 
-  _renderConstants = () => {
-    return (
-      <View style={styles.constantsContainer}>
-        <Text style={styles.deviceIdText} onPress={this._copySnackIdToClipboard}>
-          Device ID: {getSnackId()}
-        </Text>
-        <Text style={styles.expoVersionText} onPress={this._copyClientVersionToClipboard}>
-          Client version: {Constants.expoVersion}
-        </Text>
-      </View>
-    );
-  };
-
-  _copySnackIdToClipboard = () => {
-    Clipboard.setString(getSnackId());
-
-    // Should have some integrated alert banner
-    alert('The device ID has been copied to your clipboard');
-  };
-
-  _copyClientVersionToClipboard = () => {
-    Clipboard.setString(Constants.expoVersion);
-    alert('The client version has been copied to your clipboard');
-  };
-
   _renderProjects = () => {
     let { projects } = this.state;
 
@@ -376,6 +351,35 @@ export default class ProjectsScreen extends React.Component {
       return <NoProjectsOpen isAuthenticated={this.props.isAuthenticated} />;
     }
   };
+}
+
+class ConstantsView extends React.Component {
+  render() {
+    const { onPressId, onPressVersion } = this.props;
+
+    return (
+      <View style={styles.constantsContainer}>
+        <Text
+          style={styles.deviceIdText}
+          onPress={() => {
+            Clipboard.setString(getSnackId());
+
+            // Should have some integrated alert banner
+            alert('The device ID has been copied to your clipboard');
+          }}>
+          Device ID: {getSnackId()}
+        </Text>
+        <Text
+          style={styles.expoVersionText}
+          onPress={() => {
+            Clipboard.setString(Constants.expoVersion);
+            alert('The client version has been copied to your clipboard');
+          }}>
+          Client version: {Constants.expoVersion}
+        </Text>
+      </View>
+    );
+  }
 }
 
 const ClearButton = ({ children, ...props }) => (
@@ -420,11 +424,14 @@ const styles = StyleSheet.create({
   },
   constantsContainer: {
     paddingHorizontal: 20,
-    paddingTop: 15,
-    paddingBottom: 20,
+    marginTop: 15,
+    marginBottom: 20,
     justifyContent: 'flex-end',
     alignItems: 'center',
-    flex: 1,
+    // To wrap the text elements
+    flexGrow: 1,
+    flexShrink: 0,
+    flexBasis: 'auto',
   },
   deviceIdText: {
     color: 'rgba(0,0,0,0.3)',
