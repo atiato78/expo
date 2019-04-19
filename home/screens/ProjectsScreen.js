@@ -64,6 +64,9 @@ export default class ProjectsScreen extends React.Component {
       ios: {
         headerRight: Constants.isDevice ? null : <OpenProjectByURLButton />,
       },
+      web: {
+        headerRight: <OpenProjectByURLButton />,
+      },
     }),
   };
 
@@ -128,16 +131,16 @@ export default class ProjectsScreen extends React.Component {
           stickyHeaderIndices={Platform.OS === 'ios' ? [0, 2, 4] : []}
           style={styles.container}
           contentContainerStyle={styles.contentContainer}>
-          <View style={SharedStyles.sectionLabelContainer}>
+          <Section>
             <Text style={SharedStyles.sectionLabelText}>
               {Platform.OS === 'ios' && Environment.IOSClientReleaseType === 'SIMULATOR'
                 ? 'CLIPBOARD'
                 : 'TOOLS'}
             </Text>
-          </View>
+          </Section>
           {this._renderProjectTools()}
 
-          <View style={SharedStyles.sectionLabelContainer}>
+          <Section>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <DevIndicator
                 style={{ marginRight: 7 }}
@@ -146,18 +149,14 @@ export default class ProjectsScreen extends React.Component {
               />
               <Text style={SharedStyles.sectionLabelText}>RECENTLY IN DEVELOPMENT</Text>
             </View>
-            <TouchableOpacity onPress={this._handlePressHelpProjects} style={styles.clearButton}>
-              <Text style={styles.clearButtonText}>HELP</Text>
-            </TouchableOpacity>
-          </View>
+            <ClearButton onPress={this._handlePressHelpProjects}>HELP</ClearButton>
+          </Section>
           {this._renderProjects()}
 
-          <View style={SharedStyles.sectionLabelContainer}>
+          <Section>
             <Text style={SharedStyles.sectionLabelText}>RECENTLY OPENED</Text>
-            <TouchableOpacity onPress={this._handlePressClearHistory} style={styles.clearButton}>
-              <Text style={styles.clearButtonText}>CLEAR</Text>
-            </TouchableOpacity>
-          </View>
+            <ClearButton onPress={this._handlePressClearHistory}>CLEAR</ClearButton>
+          </Section>
 
           {this._renderRecentHistory()}
           {this._renderConstants()}
@@ -379,6 +378,14 @@ export default class ProjectsScreen extends React.Component {
   };
 }
 
+const ClearButton = ({ children, ...props }) => (
+  <TouchableOpacity {...props} style={styles.clearButton}>
+    <Text style={styles.clearButtonText}>{children}</Text>
+  </TouchableOpacity>
+);
+
+const Section = ({ ...props }) => <View style={SharedStyles.sectionLabelContainer} {...props} />;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -398,8 +405,8 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     position: 'absolute',
-    right: Platform.OS === 'android' ? 15 : 0,
-    top: Platform.OS === 'android' ? 12 : 0,
+    right: Platform.OS !== 'ios' ? 15 : 0,
+    top: Platform.OS !== 'ios' ? 12 : 0,
   },
   clearButtonText: {
     color: Colors.greyText,

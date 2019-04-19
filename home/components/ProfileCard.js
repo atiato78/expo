@@ -131,7 +131,8 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 3,
     ...Platform.select({
-      android: {
+      ios: {},
+      default: {
         marginTop: 3,
       },
     }),
@@ -151,7 +152,7 @@ const styles = StyleSheet.create({
       ios: {
         fontWeight: '500',
       },
-      android: {
+      default: {
         fontWeight: '400',
         marginTop: 1,
       },
