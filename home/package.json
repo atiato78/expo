@@ -17,6 +17,7 @@
     "group": "client"
   },
   "dependencies": {
+    "@babel/runtime": "^7.4.3",
     "@expo/react-native-action-sheet": "^2.1.0",
     "@expo/react-native-fade-in-image": "^1.1.1",
     "@expo/react-native-touchable-native-feedback-safe": "^1.1.1",
@@ -52,6 +53,7 @@
     "uuid": "^3.0.1"
   },
   "devDependencies": {
+    "@babel/plugin-transform-runtime": "^7.4.3",
     "babel-preset-expo": "^5.1.0",
     "expo-yarn-workspaces": "^1.0.0",
     "hashids": "^1.1.1",
