@@ -8,7 +8,19 @@ import SnackEmbed from '~/components/plugins/SnackEmbed';
 > Augmented Reality with ARKit for iOS
 > This library is generally used with [expo-three](https://github.com/expo/expo-three) to generate a camera, and manage a 3D scene.
 
+## Warning
+
+This API can only be used in ejected projects and is considered experimental.
+
+## Installation
+
+This API is pre-installed in [managed](../../introduction/managed-vs-bare/#managed-workflow) apps. It is not available for [bare](../../introduction/managed-vs-bare/#bare-workflow) React Native apps.
+
 ## API
+
+```js
+import { AR } from 'expo';
+```
 
 > [Examples can be found here](https://github.com/expo/expo-three/tree/master/example/screens/AR)
 
@@ -662,4 +674,3 @@ The internal ID used to render the camera texture.
 }
 ```
 
-#### [Github Issues](https://github.com/expo/expo/labels/AR)

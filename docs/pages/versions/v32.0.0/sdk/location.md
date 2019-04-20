@@ -2,13 +2,31 @@
 title: Location
 ---
 
+This module allows reading geolocation information from the device. Your app can poll for the current location or subscribe to location update events.
+
+## Installation
+
+This API is pre-installed in [managed](../../introduction/managed-vs-bare/#managed-workflow) apps. To use it in a [bare](../../introduction/managed-vs-bare/#bare-workflow) React Native app, follow its [installation instructions](https://github.com/expo/expo/tree/master/packages/expo-location).
+
+## Usage
+
 import SnackEmbed from '~/components/plugins/SnackEmbed';
 
-This module allows reading geolocation information from the device. Your app can poll for the current location or subscribe to location update events.
+If you're using the iOS or Android Emulators, ensure that [Location is enabled](#Enabling-Emulator-Location).
 
 You must request permission to access the user's location before attempting to get it. To do this, you will want to use the [Permissions](../permissions/) API. You can see this in practice in the following example.
 
 <SnackEmbed snackId="H14SNiW3g" />
+
+## API
+
+```js
+// in managed apps:
+import { Location } from 'expo';
+
+// in bare apps:
+import * as Location from 'expo-location';
+```
 
 ### `Location.hasServicesEnabledAsync()`
 
@@ -47,9 +65,10 @@ Subscribe to location updates from the device. Please note that updates will onl
 #### Arguments
 
 -   **options (_object_)** -- A map of options:
-    -   **accuracy (_[Location.Accuracy](#locationaccuracy)_)** -- Location manager accuracy. Pass one of [Location.Accuracy](#locationaccuracy) enum values. For low accuracy the implementation can avoid geolocation providers that consume a significant amount of power (such as GPS).
+    -   **accuracy : [Location.Accuracy](#locationaccuracy)** -- Location manager accuracy. Pass one of [Location.Accuracy](#locationaccuracy) enum values. For low accuracy the implementation can avoid geolocation providers that consume a significant amount of power (such as GPS).
     -   **timeInterval (_number_)** -- Minimum time to wait between each update in milliseconds.
     -   **distanceInterval (_number_)** -- Receive updates only when the location has changed by at least this distance in meters.
+    -   **mayShowUserSettingsDialog (_boolean_)** -- Specifies whether to ask the user to turn on improved accuracy location mode which uses Wi-Fi, cell networks and GPS sensor. The dialog can be shown only when the location mode is set to **Device only**. Defaults to `true`. (**Android only**)
 
 -   **callback (_function_)** --
 
@@ -362,4 +381,13 @@ Object of type `Region` includes following fields:
 | `GeofencingRegionState.Inside`  |   1   | Indicates that the device is inside the region. |
 | `GeofencingRegionState.Outside` |   2   | Inverse of inside state.                        |
 
-#### [Github Issues](https://github.com/expo/expo/labels/Location)
+## Enabling Emulator Location 
+### iOS Simulator
+With Simulator open, go to Debug > Location and choose any option besides "None" (obviously).
+
+![iOS Simulator location](/static/images/ios-simulator-location.png)
+
+### Android Emulator
+Open Android Studio, and launch your AVD in the emulator. Then, on the options bar for your device, click the icon for "More" and navigate to the "Location" tab.
+
+![Android Simulator location](/static/images/android-emulator-location.png)

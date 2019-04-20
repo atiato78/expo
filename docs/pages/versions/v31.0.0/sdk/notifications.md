@@ -4,6 +4,8 @@ title: Notifications
 
 Provides access to remote notifications (also known as push notifications) and local notifications (scheduling and immediate) related functions.
 
+Want to see it in action? Check out [this Snack](https://snack.expo.io/@documentation/pushnotifications)!
+
 ## Subscribing to Notifications
 
 ### `Expo.Notifications.addListener(listener)`
@@ -180,4 +182,3 @@ A Promise that resolves to an object with the following fields:
 -   **type (_string_)** -- Either "apns", "fcm", or "gcm".
 -   **data (_string_)** -- The push token as a string.
 
-#### [Github Issues](https://github.com/expo/expo/labels/Notifications)

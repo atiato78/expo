@@ -4,6 +4,18 @@ title: Notifications
 
 Provides access to remote notifications (also known as push notifications) and local notifications (scheduling and immediate) related functions.
 
+Want to see it in action? Check out [this Snack](https://snack.expo.io/@documentation/pushnotifications)!
+
+## Installation
+
+This API is pre-installed in [managed](../../introduction/managed-vs-bare/#managed-workflow) apps. It is not available for [bare](../../introduction/managed-vs-bare/#bare-workflow) React Native apps, although there are some comparable libraries that you may use instead.
+
+## API
+
+```js
+import { Notifications } from 'expo';
+```
+
 ## Subscribing to Notifications
 
 ### `Notifications.addListener(listener)`
@@ -101,7 +113,9 @@ Cancel all scheduled notifications.
 
 ## Notification categories
 
-A notification category defines a set of actions with which a user may respond to the incoming notification. You can read more about it [here (for iOS)](https://developer.apple.com/documentation/usernotifications/unnotificationcategory) and [here (for Android)](https://developer.android.com/guide/topics/ui/notifiers/notifications#Actions).
+A notification category defines a set of actions with which a user may interact with and respond to the incoming notification. You can read more about categories [here (for iOS)](https://developer.apple.com/documentation/usernotifications/unnotificationcategory) and [here (for Android)](https://developer.android.com/guide/topics/ui/notifiers/notifications#Actions).
+
+Check out how to implement interactive Notifications in your app by taking a look at the code behind [this Snack](https://snack.expo.io/@documentation/interactivenotificationexample)
 
 ### `Notifications.createCategoryAsync(name: string, actions: ActionType[])`
 
@@ -205,4 +219,3 @@ A Promise that resolves to an object with the following fields:
 -   **type (_string_)** -- Either "apns", "fcm", or "gcm".
 -   **data (_string_)** -- The push token as a string.
 
-#### [Github Issues](https://github.com/expo/expo/labels/Notifications)

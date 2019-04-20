@@ -6,7 +6,23 @@ import SnackEmbed from '~/components/plugins/SnackEmbed';
 
 Use Core Motion (iOS) or Google Fit (Android) to get the user's step count.
 
+## Installation
+
+This API is pre-installed in [managed](../../introduction/managed-vs-bare/#managed-workflow) apps. To use it in a [bare](../../introduction/managed-vs-bare/#bare-workflow) React Native app, follow its [installation instructions](https://github.com/expo/expo/tree/master/packages/expo-sensors).
+
+## Usage
+
 <SnackEmbed snackId="S1gdfOb4Z" />
+
+## API
+
+```js
+// in managed apps:
+import { Pedometer } from 'expo';
+
+// in bare apps:
+import { Pedometer } from 'expo-sensors';
+```
 
 ### `Pedometer.isAvailableAsync()`
 
@@ -29,6 +45,12 @@ Get the step count between two dates.
 
 - Returns a promise that resolves to an `Object` with a `steps` key, which is a `Number` indicating the number of steps taken between the given dates.
 
+##### Note: iOS returns only last 7 days worth of data
+
+As [Apple documentation states](https://developer.apple.com/documentation/coremotion/cmpedometer/1613946-querypedometerdatafromdate?language=objc):
+
+> Only the past seven days worth of data is stored and available for you to retrieve. Specifying a start date that is more than seven days in the past returns only the available data.
+
 ### `Pedometer.watchStepCount(callback)`
 
 Subscribe to pedometer updates.
@@ -44,4 +66,3 @@ Subscribe to pedometer updates.
 ## Standalone Applications
 You'll need to configure an Android OAuth client for your app on the Google Play console for it to work as a standalone application on the Android platform. See https://developers.google.com/fit/android/get-api-key
 
-#### [Github Issues](https://github.com/expo/expo/labels/Pedometer)

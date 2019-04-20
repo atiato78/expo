@@ -16,9 +16,6 @@ export default class BlurViewScreen extends React.Component {
     this._animate();
   }
 
-  _imageRef = imageRef =>
-    this.setState({ imageRef: imageRef ? findNodeHandle(imageRef) : undefined });
-
   _animate = () => {
     let { intensity } = this.state;
     let animateInConfig = {
@@ -44,16 +41,23 @@ export default class BlurViewScreen extends React.Component {
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-        <Image style={{ width: 180, height: 180 }} source={{ uri }} ref={this._imageRef} />
+        {['default', 'light', 'dark'].map(tint => (
+          <View
+            key={tint}
+            style={{
+              padding: 6,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <Image style={{ width: 180, height: 180 }} source={{ uri }} />
 
-        {this.state.imageRef ? (
-          <AnimatedBlurView
-            blurType="light"
-            blurAmount={this.state.intensity}
-            style={StyleSheet.absoluteFill}
-            viewRef={this.state.imageRef}
-          />
-        ) : null}
+            <AnimatedBlurView
+              tint={tint}
+              intensity={this.state.intensity}
+              style={StyleSheet.absoluteFill}
+            />
+          </View>
+        ))}
       </View>
     );
   }

@@ -1,52 +1,43 @@
 # expo-sensors
 
-A Universal Module for acessing a hardware device's accelerometer, gyroscope, magnetometer, and pedometer.
+Provides access to a hardware device's accelerometer, gyroscope, magnetometer, and pedometer.
+
+# API documentation
+
+- [Documentation for the master branch](https://github.com/expo/expo/blob/master/docs/pages/versions/unversioned/sdk/sensors.md)
+- [Documentation for the latest stable release](https://docs.expo.io/versions/latest/sdk/sensors/)
+
+# Installation
+
+This package is pre-installed in [managed](https://docs.expo.io/versions/latest/introduction/managed-vs-bare/) Expo projects. You may skip the rest of the installation guide if this applies to you.
+
+For bare React Native projects, you must ensure that you have [installed and configured the `react-native-unimodules` package](https://github.com/unimodules/react-native-unimodules) before continuing.
+
+### Add the package to your npm dependencies
+
+```
+npm install expo-sensors
+```
+
+### Configure for iOS
+
+Run `pod install` in the ios directory after installing the npm package.
 
 **Note:** to access DeviceMotion stats on iOS, the NSMotionUsageDescription key must be present in your Info.plist.
 
-## Installation
+### Configure for Android
 
-*If your app is running in [Expo](https://expo.io), then everything is already set up for you. Just `import { Accelerometer, Gyroscope, Magnetometer, Pedometer } from 'expo';`*
-
-Otherwise, you need to install the package from `npm` registry.
-
-`yarn add expo-sensors` or `npm install expo-sensors`
-
-Also, make sure that you have [expo-core](https://github.com/expo/expo-core) installed, as it is required by `expo-sensors` to work properly.
-
-### iOS
-
-Add these dependencies to your `Podfile`:
-
-```ruby
-pod 'EXSensors', path: '../node_modules/expo-sensors/ios'
-pod 'EXSensorsInterface', path: '../node_modules/expo-sensors-interface/ios'
+In `MainApplication.java`, import the package and add it to the `ReactModuleRegistryProvider` list:
+```java
+import expo.modules.sensors.SensorsPackage;
+```
+```java
+private final ReactModuleRegistryProvider mModuleRegistryProvider = new ReactModuleRegistryProvider(Arrays.<Package>asList(
+  // Your other packages will be here
+  new SensorsPackage()
+), Arrays.<SingletonModule>asList());
 ```
 
-and run `pod install` under the parent directory of your `Podfile`.
+# Contributing
 
-### Android
-
-1. Append the following lines to `android/settings.gradle`:
-   ```gradle
-   include ':expo-sensors'
-   project(':expo-sensors').projectDir = new File(rootProject.projectDir, '../node_modules/expo-sensors/android')
-   ```
-   and if not already included
-   ```gradle
-   include ':expo-sensors-interface'
-   project(':expo-sensors-interface').projectDir = new File(rootProject.projectDir, '../node_modules/expo-sensors-interface/android')
-   ```
-2. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
-   ```gradle
-   compile project(':expo-sensors')
-   ```
-   and if not already included
-   ```gradle
-   compile project(':expo-sensors-interface')
-   ```
-3.  Add `new SensorsPackage()` to your module registry provider in `MainApplication.java`. If consuming the Flutter plugin for this module, this is already done for you.
-
-## Usage
-
-See [Expo Docs](https://docs.expo.io) for documentation on usage for your specified sensor module.
+Contributions are very welcome! Please refer to guidelines described in the [contributing guide]( https://github.com/expo/expo#contributing).

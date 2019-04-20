@@ -1,5 +1,41 @@
 # expo-mail-composer
 
-`expo-mail-composer` provides an API to compose mails using OS specific UI.
+Provides an API to compose mails using OS specific UI
 
-See [MailComposer docs](https://docs.expo.io/versions/latest/sdk/mail-composer) for documentation of this universal module's API.
+# API documentation
+
+- [Documentation for the master branch](https://github.com/expo/expo/blob/master/docs/pages/versions/unversioned/sdk/mail-composer.md)
+- [Documentation for the latest stable release](https://docs.expo.io/versions/latest/sdk/mail-composer/)
+
+# Installation
+
+This package is pre-installed in [managed](https://docs.expo.io/versions/latest/introduction/managed-vs-bare/) Expo projects. You may skip the rest of the installation guide if this applies to you.
+
+For bare React Native projects, you must ensure that you have [installed and configured the `react-native-unimodules` package](https://github.com/unimodules/react-native-unimodules) before continuing.
+
+### Add the package to your npm dependencies
+
+```
+npm install expo-mail-composer
+```
+
+### Configure for iOS
+
+Run `pod install` in the ios directory after installing the npm package.
+
+### Configure for Android
+
+In `MainApplication.java`, import the package and add it to the `ReactModuleRegistryProvider` list:
+```java
+import expo.modules.mailcomposer.MailComposerPackage;
+```
+```java
+private final ReactModuleRegistryProvider mModuleRegistryProvider = new ReactModuleRegistryProvider(Arrays.<Package>asList(
+  // Your other packages will be here
+  new MailComposerPackage()
+), Arrays.<SingletonModule>asList());
+```
+
+# Contributing
+
+Contributions are very welcome! Please refer to guidelines described in the [contributing guide]( https://github.com/expo/expo#contributing).

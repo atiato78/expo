@@ -184,8 +184,9 @@ exports.updateExpoViewAsync = async function updateExpoViewAsync(sdkVersion) {
   );
 
   // getDetachableModulesForPlatform was breaking on face detector
-  const detachableUniversalModules = Modules.getAllNativeForExpoClientOnPlatform('android');
+  const detachableUniversalModules = Modules.getAllNativeForExpoClientOnPlatform('android', sdkVersion);
 
+  await stashFileAsync(appBuildGradle);
   await stashFileAsync(expoViewBuildGradle);
   await stashFileAsync(multipleVersionReactNativeActivity);
   await stashFileAsync(constantsJava);
@@ -238,11 +239,29 @@ exports.updateExpoViewAsync = async function updateExpoViewAsync(sdkVersion) {
     '-rf',
     path.join(process.env.HOME, '/.m2/repository/com/facebook/react'),
   ]);
+  // expokit-npm-package too
+  await spawnAsyncPrintCommand('rm', [
+    '-rf',
+    path.join(androidRoot, 'maven/host/exp/exponent'),
+  ]);
+  await spawnAsyncPrintCommand('rm', [
+    '-rf',
+    path.join(androidRoot, 'maven/com/facebook/react'),
+  ]);
+
+  const detachableUniversalModulesNames = await Promise.all(
+    detachableUniversalModules.map(async ({ libName }) => {
+      const unimoduleJsonFileName = `../packages/${libName}/unimodule.json`;
+      const unimoduleJson = await fs.readFile(unimoduleJsonFileName);
+      const unimoduleConfiguration = JSON.parse(unimoduleJson);
+      return unimoduleConfiguration.name;
+    })
+  );
 
   // Build RN and exponent view
   const archivesToUpload = [
     'ReactAndroid',
-    ...detachableUniversalModules.map(({ libName }) => libName),
+    ...detachableUniversalModulesNames,
     'expoview',
   ];
 
@@ -253,6 +272,7 @@ exports.updateExpoViewAsync = async function updateExpoViewAsync(sdkVersion) {
   }
 
   await restoreFileAsync(constantsJava);
+  await restoreFileAsync(appBuildGradle);
   await restoreFileAsync(expoViewBuildGradle);
   await restoreFileAsync(multipleVersionReactNativeActivity);
 
@@ -262,6 +282,10 @@ exports.updateExpoViewAsync = async function updateExpoViewAsync(sdkVersion) {
     ...detachableUniversalModules.map(({ libName }) =>
       path.join(androidRoot, `maven/host/exp/exponent/${libName}`)
     ),
+  ]);
+  await spawnAsyncPrintCommand('mkdir', [
+    '-p',
+    path.join(androidRoot, 'maven/host/exp/exponent'),
   ]);
   await spawnAsyncPrintCommand('cp', [
     '-r',

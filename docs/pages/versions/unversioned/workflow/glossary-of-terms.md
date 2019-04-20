@@ -8,7 +8,7 @@ title: Glossary of terms
 
 ### create-react-native-app
 
-The React Native equivalent of [create-react-app](https://github.com/facebookincubator/create-react-app). Gets you set up and creating a React Native app with no build configuration required, and it uses Expo to accomplish this. [Read more in "Expo & Create React Native App"](../create-react-native-app/).
+Formerly the React Native equivalent of [create-react-app](https://github.com/facebookincubator/create-react-app). This has since been replaced with `expo-cli`.
 
 ### detach
 
@@ -31,7 +31,7 @@ A synonym for app that usually implies something more single-use and smaller in 
 
 ### Expo CLI
 
-The command-line tool for working with Expo. [Read more](../exp-cli/).
+The command-line tool for working with Expo. [Read more](../expo-cli/).
 
 ### Expo Client
 
@@ -43,7 +43,7 @@ Expo Developer Tools is a web browser based UI included in [Expo CLI](#expo-cli)
 
 ### Expo SDK
 
-The Expo SDK provides access to device/system functionality such as camera, push notification, contacts, file system, and more. Scroll to the SDK API reference in the documentation navigation to see a full list of APIs and to explore them. [Read more about the Expo SDK](../../sdk/). [Find it on Github](https://github.com/expo/expo-sdk).
+The Expo SDK provides access to device/system functionality such as camera, push notification, contacts, file system, and more. Scroll to the SDK API reference in the documentation navigation to see a full list of APIs and to explore them. [Read more about the Expo SDK](../../sdk/overview/). [Find it on Github](https://github.com/expo/expo-sdk).
 
 ### ExpoKit
 

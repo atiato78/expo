@@ -1,5 +1,41 @@
 # expo-facebook
 
-`expo-facebook` provides Facebook integration for Expo apps. Expo exposes a minimal native API since you can access Facebook's [Graph API](https://developers.facebook.com/docs/graph-api) directly through HTTP (using [fetch](https://facebook.github.io/react-native/docs/network.html#fetch), for example).
+Expo universal module for Facebook SDK
 
-See [Facebook docs](https://docs.expo.io/versions/latest/sdk/facebook) for documentation of this universal module's API.
+# API documentation
+
+- [Documentation for the master branch](https://github.com/expo/expo/blob/master/docs/pages/versions/unversioned/sdk/facebook.md)
+- [Documentation for the latest stable release](https://docs.expo.io/versions/latest/sdk/facebook/)
+
+# Installation
+
+This package is pre-installed in [managed](https://docs.expo.io/versions/latest/introduction/managed-vs-bare/) Expo projects. You may skip the rest of the installation guide if this applies to you.
+
+For bare React Native projects, you must ensure that you have [installed and configured the `react-native-unimodules` package](https://github.com/unimodules/react-native-unimodules) before continuing.
+
+### Add the package to your npm dependencies
+
+```
+npm install expo-facebook
+```
+
+### Configure for iOS
+
+Run `pod install` in the ios directory after installing the npm package.
+
+### Configure for Android
+
+In `MainApplication.java`, import the package and add it to the `ReactModuleRegistryProvider` list:
+```java
+import expo.modules.facebook.FacebookPackage;
+```
+```java
+private final ReactModuleRegistryProvider mModuleRegistryProvider = new ReactModuleRegistryProvider(Arrays.<Package>asList(
+  // Your other packages will be here
+  new FacebookPackage()
+), Arrays.<SingletonModule>asList());
+```
+
+# Contributing
+
+Contributions are very welcome! Please refer to guidelines described in the [contributing guide]( https://github.com/expo/expo#contributing).

@@ -1,9 +1,10 @@
 {
   "name": "expo-intent-launcher",
-  "version": "1.0.0",
-  "description": "ExpoIntentLauncher standalone module",
+  "version": "4.0.0",
+  "description": "Provides a way to launch Android intents, e.g. opening a specific activity.",
   "main": "build/IntentLauncher.js",
   "types": "build/IntentLauncher.d.ts",
+  "sideEffects": false,
   "scripts": {
     "build": "expo-module build",
     "clean": "expo-module clean",
@@ -28,12 +29,12 @@
   },
   "author": "650 Industries, Inc.",
   "license": "MIT",
-  "homepage": "https://github.com/expo/expo/tree/master/packages/expo-intent-launcher",
-  "peerDependencies": {
-    "expo-core": "~2.0.0",
-    "expo-errors": "^1.0.0"
+  "homepage": "https://docs.expo.io/versions/latest/sdk/intent-launcher/",
+  "unimodulePeerDependencies": {
+    "@unimodules/core": "*"
   },
   "devDependencies": {
     "expo-module-scripts": "^1.0.0"
-  }
+  },
+  "gitHead": "8413e821076a2eca36b302e68dd628ce2e1f591a"
 }
