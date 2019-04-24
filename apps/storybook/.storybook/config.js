@@ -1,9 +1,16 @@
-import { configure, addParameters, addDecorator } from '@storybook/react-native';
+import { configure, addParameters, addDecorator } from '@storybook/react';
 import { create } from '@storybook/theming';
+import { withTests } from '@storybook/addon-jest';
 
 import { withA11y } from '@storybook/addon-a11y';
+import results from '../.jest-test-results.json';
 
 addDecorator(withA11y);
+addDecorator(
+  withTests({
+    results,
+  })
+);
 addParameters({
   options: {
     isFullscreen: false,
