@@ -1,6 +1,11 @@
 const path = require('path');
-const withUnimodules = require('@expo/webpack-config/withUnimodules');
+const webpackConfig = require('./webpack.config.expo');
+const merge = require('webpack-merge');
 
-const projectRoot = path.resolve(__dirname, '..');
-
-module.exports = ({ mode, config }, argv) => withUnimodules(config, { projectRoot }, argv);
+module.exports = function({ mode, config }, argv) {
+  const expoConfig = webpackConfig(
+    { [config.mode]: true, projectRoot: path.resolve(__dirname, '../') },
+    argv
+  );
+  return merge(expoConfig, config);
+};
