@@ -4,9 +4,11 @@ import { View } from 'react-native';
 import { storiesOf } from '@storybook/react-native';
 import UIExplorer, { AppText, Description, DocItem, Section } from '../ui-explorer';
 
-const Screen = () => (
+const TITLE = 'Linear Gradient';
+
+const DemoScreen = () => (
   <View>
-    <UIExplorer title="Linear Gradient">
+    <UIExplorer title={TITLE}>
       <Description>
         <AppText>A React component that renders a gradient view.</AppText>
       </Description>
