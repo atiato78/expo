@@ -1,7 +1,7 @@
 import { BlurView } from 'expo-blur';
 import React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
-
+import BlurViewNotes from './BlurView.notes.md';
 import { storiesOf } from '@storybook/react';
 import UIExplorer, { AppText, Code, Description, DocItem, Section } from '../ui-explorer';
 
@@ -10,22 +10,7 @@ import image from '../../assets/roadster.jpg';
 const Screen = () => (
   <View>
     <UIExplorer title="Blur View">
-      <Description>
-        <AppText>
-          A React component that renders a native blur view on iOS and falls back to a
-          semi-transparent view on Android. A common usage of this is for navigation bars, tab bars,
-          and modals.
-        </AppText>
-      </Description>
-      <DocItem
-        name="Importing the module"
-        example={{
-          code: `import { BlurView } from 'expo-blur';`,
-        }}
-      />
-      <Section title="Props">
-        <DocItem name="...View props" />
-
+      <Section>
         <DocItem
           name="tint"
           label="Safari"
@@ -86,4 +71,4 @@ const Screen = () => (
   </View>
 );
 
-storiesOf('Components', module).add('BlurView', Screen);
+storiesOf('Components', module).add('BlurView', Screen, { notes: BlurViewNotes });
