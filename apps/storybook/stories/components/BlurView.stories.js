@@ -1,7 +1,7 @@
 import { BlurView } from 'expo-blur';
 import React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
-import BlurViewNotes from './BlurView.notes.md';
+import notes from './BlurView.notes.md';
 import { storiesOf } from '@storybook/react';
 import UIExplorer, { AppText, Code, Description, DocItem, Section } from '../ui-explorer';
 
@@ -71,4 +71,4 @@ const Screen = () => (
   </View>
 );
 
-storiesOf('Components', module).add('BlurView', Screen, { notes: BlurViewNotes });
+storiesOf('Components', module).add('BlurView', Screen, { notes });

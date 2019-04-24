@@ -76,4 +76,6 @@ const Screen = () => (
   </View>
 );
 
-storiesOf('Components', module).add('Linear Gradient', Screen);
+import notes from './LinearGradient.notes.md';
+
+storiesOf('Components', module).add(TITLE, () => <DemoScreen />, { notes });

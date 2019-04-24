@@ -83,4 +83,6 @@ const ConstantsScreen = () => (
   </UIExplorer>
 );
 
-storiesOf('APIs', module).add('Constants', ConstantsScreen);
+import notes from './Constants.notes.md';
+
+storiesOf('APIs', module).add('Constants', ConstantsScreen, { notes });
