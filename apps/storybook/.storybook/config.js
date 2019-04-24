@@ -24,6 +24,7 @@ addParameters({
 });
 
 function loadStories() {
+  require('../stories/get-started/Introduction.stories');
   // automatically import all story js files that end with *.stories.js
   const req = require.context('../stories', true, /\.stories\.js$/);
   req.keys().forEach(filename => req(filename));
