@@ -2,6 +2,7 @@ node_modules/*
 .expo
 
 /web-build/
+/web-report/
 /web-stats.json
 
 # storybook

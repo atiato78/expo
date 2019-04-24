@@ -1,24 +1,32 @@
-// import 'loki/configure-react';
-import { setOptions } from '@storybook/addon-options';
-import centered from './decorator-centered';
-import { configure, addDecorator } from '@storybook/react';
+import { configure, addParameters, addDecorator } from '@storybook/react';
+import { create } from '@storybook/theming';
 
-const context = require.context('../stories', true, /Screen\.js$/);
+import { withA11y } from '@storybook/addon-a11y';
 
-addDecorator(centered);
-
-setOptions({
-  name: 'Expo',
-  url: 'https://',
-  goFullScreen: false,
-  addonPanelInRight: false,
-  showSearchBox: false,
-  showAddonPanel: false,
-  showStoriesPanel: true,
+addDecorator(withA11y);
+addParameters({
+  options: {
+    isFullscreen: false,
+    showAddonsPanel: true,
+    showSearchBox: false,
+    panelPosition: 'right',
+    sortStoriesByKind: false,
+    hierarchySeparator: /\./,
+    hierarchyRootSeparator: /\|/,
+    enableShortcuts: true,
+    theme: create({
+      base: 'light',
+      brandTitle: 'Expo',
+      brandUrl: 'https://github.com/storybooks/storybook/tree/master/examples/cra-kitchen-sink',
+      gridCellSize: 12,
+    }),
+  },
 });
 
 function loadStories() {
-  context.keys().forEach(context);
+  // automatically import all story js files that end with *.stories.js
+  const req = require.context('../stories', true, /\.stories\.js$/);
+  req.keys().forEach(filename => req(filename));
 }
 
 configure(loadStories, module);

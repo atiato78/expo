@@ -1,6 +1,7 @@
 import React from 'react';
+import { storiesOf } from '@storybook/react';
 
-import UIExplorer, { AppText, Description, DocItem, Section, storiesOf } from '../ui-explorer';
+import UIExplorer, { AppText, Description, DocItem, Section } from '../ui-explorer';
 
 const api = [
   {
