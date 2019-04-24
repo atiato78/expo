@@ -1,7 +1,7 @@
 import React from 'react';
 
 import UIExplorer, { AppText, Description, Section } from '../ui-explorer';
-import { storiesOf } from '../utils/storybook';
+import { storiesOf } from '@storybook/react-native';
 
 const TITLE = 'ART';
 

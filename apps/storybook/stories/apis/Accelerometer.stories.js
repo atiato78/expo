@@ -3,7 +3,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import UIExplorer, { AppText, Code, Description, DocItem, Section } from '../ui-explorer';
-import { storiesOf } from '../utils/storybook';
+import { storiesOf } from '@storybook/react-native';
 
 const TITLE = 'Accelerometer';
 
