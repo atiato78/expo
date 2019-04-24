@@ -2,7 +2,7 @@ import { BlurView } from 'expo-blur';
 import React from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import notes from './BlurView.notes.md';
-import { storiesOf } from '@storybook/react';
+import { storiesOf } from '@storybook/react-native';
 import UIExplorer, { AppText, Code, Description, DocItem, Section } from '../ui-explorer';
 
 import image from '../../assets/roadster.jpg';

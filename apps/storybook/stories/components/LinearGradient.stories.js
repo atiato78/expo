@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { View } from 'react-native';
-import { storiesOf } from '@storybook/react';
+import { storiesOf } from '@storybook/react-native';
 import UIExplorer, { AppText, Description, DocItem, Section } from '../ui-explorer';
 
 const Screen = () => (

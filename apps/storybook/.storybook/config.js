@@ -1,4 +1,4 @@
-import { configure, addParameters, addDecorator } from '@storybook/react';
+import { configure, addParameters, addDecorator } from '@storybook/react-native';
 import { create } from '@storybook/theming';
 
 import { withA11y } from '@storybook/addon-a11y';

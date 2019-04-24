@@ -1,7 +1,9 @@
+import { storiesOf } from '@storybook/react-native';
 import React from 'react';
 import { Linking, StyleSheet, Text, View } from 'react-native';
 
-import UIExplorer, { Description, DocItem, Section, storiesOf } from '../ui-explorer';
+import UIExplorer, { Description, DocItem, Section } from '../ui-explorer';
+import notes from './Linking.notes.md';
 
 const url = 'https://mathiasbynens.github.io/rel-noopener/malicious.html';
 const TITLE = 'Linking';
@@ -59,7 +61,5 @@ const LinkingScreen = () => (
     </Section>
   </UIExplorer>
 );
-
-import notes from './Linking.notes.md';
 
 storiesOf('APIs', module).add(TITLE, () => <LinkingScreen />, { notes });
