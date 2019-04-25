@@ -6,14 +6,14 @@ import notes from './SplashScreen.notes.md';
 
 const TITLE = 'SplashScreen';
 
-class DemoScreen extends React.Component {
-  render() {
-    return (
-      <UIExplorer title={TITLE}>
-        <Description>Description</Description>
-      </UIExplorer>
-    );
-  }
-}
-
-storiesOf('Components', module).add(TITLE, () => <DemoScreen />, { notes });
+storiesOf('Components', module).add(
+  TITLE,
+  () => (
+    <UIExplorer title={TITLE}>
+      <Description>
+        A module that tells Expo to keep the splash screen visible until you make it hide.
+      </Description>
+    </UIExplorer>
+  ),
+  { notes }
+);

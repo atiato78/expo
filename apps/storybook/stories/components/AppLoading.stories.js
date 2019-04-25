@@ -1,7 +1,8 @@
+import { storiesOf } from '@storybook/react-native';
 import React from 'react';
 
-import UIExplorer, { AppText, Description, Section } from '../ui-explorer';
-import { storiesOf } from '@storybook/react-native';
+import UIExplorer, { Description } from '../ui-explorer';
+import notes from './AppLoading.notes.md';
 
 const TITLE = 'AppLoading';
 
@@ -9,14 +10,10 @@ class DemoScreen extends React.Component {
   render() {
     return (
       <UIExplorer title={TITLE}>
-        <Description>
-          <AppText>Desc</AppText>
-        </Description>
+        <Description>Desc</Description>
       </UIExplorer>
     );
   }
 }
-
-import notes from './AppLoading.notes.md';
 
 storiesOf('Components', module).add(TITLE, () => <DemoScreen />, { notes });

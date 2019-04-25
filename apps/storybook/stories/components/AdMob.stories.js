@@ -9,9 +9,7 @@ class DemoScreen extends React.Component {
   render() {
     return (
       <UIExplorer title={TITLE}>
-        <Description>
-          <AppText>Desc</AppText>
-        </Description>
+        <Description>Desc</Description>
       </UIExplorer>
     );
   }
