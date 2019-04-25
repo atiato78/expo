@@ -9,9 +9,10 @@
     "build": "expo build:web",
     "test:generate-output": "jest --json --outputFile=.jest-test-results.json || true",
     "test": "jest",
-    "prebuild:storybook": "npm run test:generate-output",
-    "build:storybook": "build-storybook -c .storybook -o build/",
-    "predeploy": "npm run build:storybook"
+    "build:storybook": "build-storybook -c .storybook -o web-build/",
+    "predeploy": "npm run build:storybook",
+    "deploy:prod": "netlify deploy --prod",
+    "serve:web": "serve ./web-build"
   },
   "author": "Expo",
   "license": "MIT",
@@ -54,6 +55,7 @@
     "expo-yarn-workspaces": "^1.1.0",
     "jest-emotion": "^10.0.10",
     "node-fetch": "^2.0.0",
+    "serve": "^11.0.0",
     "webpack": "^4.30.0",
     "webpack-cli": "^3.3.1"
   },
