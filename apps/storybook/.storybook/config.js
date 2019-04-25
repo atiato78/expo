@@ -1,6 +1,7 @@
 import { configure, addParameters, addDecorator } from '@storybook/react';
 import { create } from '@storybook/theming';
 import { withTests } from '@storybook/addon-jest';
+import { withKnobs } from '@storybook/addon-knobs/react';
 
 import { withA11y } from '@storybook/addon-a11y';
 import results from '../.jest-test-results.json';
@@ -11,6 +12,7 @@ addDecorator(
     results,
   })
 );
+addDecorator(withKnobs({ escapeHTML: false }));
 addParameters({
   options: {
     isFullscreen: false,

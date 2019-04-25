@@ -1,7 +1,8 @@
+import { storiesOf } from '@storybook/react-native';
 import React from 'react';
 
-import UIExplorer, { AppText, Description, Section } from '../ui-explorer';
-import { storiesOf } from '@storybook/react-native';
+import UIExplorer, { AppText, Description } from '../ui-explorer';
+import notes from './Font.notes.md';
 
 const TITLE = 'Font';
 
@@ -16,7 +17,5 @@ class DemoScreen extends React.Component {
     );
   }
 }
-
-import notes from './Font.notes.md';
 
 storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
