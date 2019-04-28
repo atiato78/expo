@@ -1,7 +1,6 @@
 import React from 'react';
 
-import UIExplorer, { AppText, Description, Section } from '../ui-explorer';
-import { storiesOf } from '@storybook/react-native';
+import UIExplorer, { AppText, Description } from '../ui-explorer';
 
 const TITLE = 'Notifications';
 
@@ -17,6 +16,4 @@ class DemoScreen extends React.Component {
   }
 }
 
-import notes from './Notifications.notes.md';
-
-storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
+// storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });

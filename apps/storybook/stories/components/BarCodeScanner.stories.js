@@ -6,12 +6,12 @@ import notes from './BarCodeScanner.notes.md';
 
 const TITLE = 'BarCodeScanner';
 
-storiesOf('Components', module).add(
-  TITLE,
-  () => (
-    <UIExplorer title={TITLE}>
-      <Description>Desc</Description>
-    </UIExplorer>
-  ),
-  { notes }
-);
+// storiesOf('Components', module).add(
+//   TITLE,
+//   () => (
+//     <UIExplorer title={TITLE}>
+//       <Description>Desc</Description>
+//     </UIExplorer>
+//   ),
+//   { notes }
+// );

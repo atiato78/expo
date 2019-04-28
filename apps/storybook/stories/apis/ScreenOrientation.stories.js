@@ -1,7 +1,6 @@
 import React from 'react';
 
-import UIExplorer, { AppText, Description, Section } from '../ui-explorer';
-import { storiesOf } from '@storybook/react-native';
+import UIExplorer, { AppText, Description } from '../ui-explorer';
 
 const TITLE = 'ScreenOrientation';
 
@@ -16,6 +15,4 @@ class DemoScreen extends React.Component {
     );
   }
 }
-import notes from './ScreenOrientation.notes.md';
-
-storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
+// storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });

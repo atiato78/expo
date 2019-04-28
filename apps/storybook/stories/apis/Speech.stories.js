@@ -1,22 +1,17 @@
+import { storiesOf } from '@storybook/react-native';
 import React from 'react';
 
-import UIExplorer, { AppText, Description, Section } from '../ui-explorer';
-import { storiesOf } from '@storybook/react-native';
+import UIExplorer, { Description } from '../ui-explorer';
+import notes from './Speech.notes.md';
 
 const TITLE = 'Speech';
 
-class DemoScreen extends React.Component {
-  render() {
-    return (
-      <UIExplorer title={TITLE}>
-        <Description>
-          <AppText>Desc</AppText>
-        </Description>
-      </UIExplorer>
-    );
-  }
-}
-
-import notes from './Speech.notes.md';
-
-storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
+// storiesOf('APIs', module).add(
+//   TITLE,
+//   () => (
+//     <UIExplorer title={TITLE}>
+//       <Description>Desc</Description>
+//     </UIExplorer>
+//   ),
+//   { notes }
+// );

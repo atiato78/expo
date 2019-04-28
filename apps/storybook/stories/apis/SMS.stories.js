@@ -1,7 +1,6 @@
 import React from 'react';
 
-import UIExplorer, { AppText, Description, Section } from '../ui-explorer';
-import { storiesOf } from '@storybook/react-native';
+import UIExplorer, { Description } from '../ui-explorer';
 
 const TITLE = 'SMS';
 
@@ -9,14 +8,10 @@ class DemoScreen extends React.Component {
   render() {
     return (
       <UIExplorer title={TITLE}>
-        <Description>
-          <AppText>Desc</AppText>
-        </Description>
+        <Description>Desc</Description>
       </UIExplorer>
     );
   }
 }
 
-import notes from './SMS.notes.md';
-
-storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
+// storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });

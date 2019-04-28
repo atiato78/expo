@@ -8,7 +8,7 @@ const TITLE = 'AdMob';
 class DemoScreen extends React.Component {
   render() {
     return (
-      <UIExplorer title={TITLE}>
+      <UIExplorer title={TITLE} url="components/AdMob">
         <Description>Desc</Description>
       </UIExplorer>
     );
@@ -17,4 +17,4 @@ class DemoScreen extends React.Component {
 
 import notes from './AdMob.notes.md';
 
-storiesOf('Components', module).add(TITLE, () => <DemoScreen />, { notes });
+// storiesOf('Components', module).add(TITLE, () => <DemoScreen />, { notes });

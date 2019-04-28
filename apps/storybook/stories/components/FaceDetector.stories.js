@@ -9,9 +9,7 @@ class DemoScreen extends React.Component {
   render() {
     return (
       <UIExplorer title={TITLE}>
-        <Description>
-          <AppText>Desc</AppText>
-        </Description>
+        <Description>Desc</Description>
       </UIExplorer>
     );
   }
@@ -19,4 +17,4 @@ class DemoScreen extends React.Component {
 
 import notes from './FaceDetector.notes.md';
 
-storiesOf('Components', module).add(TITLE, () => <DemoScreen />, { notes });
+// storiesOf('Components', module).add(TITLE, () => <DemoScreen />, { notes });

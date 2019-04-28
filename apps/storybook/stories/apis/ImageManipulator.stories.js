@@ -19,4 +19,4 @@ class DemoScreen extends React.Component {
 
 import notes from './ImageManipulator.notes.md';
 
-storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
+// storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });

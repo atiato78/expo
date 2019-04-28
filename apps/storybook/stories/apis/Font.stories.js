@@ -18,4 +18,4 @@ class DemoScreen extends React.Component {
   }
 }
 
-storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
+// storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
