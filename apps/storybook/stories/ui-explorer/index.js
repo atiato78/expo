@@ -1,6 +1,6 @@
 import AppText from './AppText';
 import Code from './Code';
-import DocItem from './DocItem';
+import DocItem, { DocFunctionItem } from './DocItem';
 import ExternalLink from './ExternalLink';
 import Section from './Section';
 import StyleList from './StyleList';
@@ -19,4 +19,5 @@ export {
   StyleList,
   TextList,
   ListButton,
+  DocFunctionItem,
 };
