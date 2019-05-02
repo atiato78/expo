@@ -1,3 +1,4 @@
+import './environment/variables.fx';
 import './environment/validate.fx';
 import './environment/muteWarnings.fx';
 
