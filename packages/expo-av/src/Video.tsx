@@ -2,7 +2,14 @@ import omit from 'lodash.omit';
 import nullthrows from 'nullthrows';
 import PropTypes from 'prop-types';
 import * as React from 'react';
-import { findNodeHandle, Image, NativeComponent, StyleSheet, View, ViewPropTypes } from 'react-native';
+import {
+  findNodeHandle,
+  Image,
+  NativeComponent,
+  StyleSheet,
+  View,
+  ViewPropTypes,
+} from 'react-native';
 
 import {
   assertStatusValuesInBounds,
@@ -38,7 +45,7 @@ export {
   ReadyForDisplayEvent,
   ResizeMode,
   VideoPlaybackState,
-}
+};
 
 export const FULLSCREEN_UPDATE_PLAYER_WILL_PRESENT = 0;
 export const FULLSCREEN_UPDATE_PLAYER_DID_PRESENT = 1;
@@ -76,7 +83,8 @@ const _STYLES = StyleSheet.create({
 const ExpoVideoManagerConstants = ExpoVideoManager;
 const ExpoVideoViewManager = ExpoVideoManager;
 
-export class VideoPlayback extends React.Component<VideoPlaybackProps, VideoPlaybackState> implements Playback {
+export class VideoPlayback extends React.Component<VideoPlaybackProps, VideoPlaybackState>
+  implements Playback {
   static propTypes = {
     // Source stuff
     source: PropTypes.oneOfType([
