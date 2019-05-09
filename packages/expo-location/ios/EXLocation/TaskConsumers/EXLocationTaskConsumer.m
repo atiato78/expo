@@ -2,11 +2,14 @@
 
 #import <CoreLocation/CLLocationManager.h>
 #import <CoreLocation/CLErrorDomain.h>
+#import <CoreLocation/CLCircularRegion.h>
 
 #import <UMCore/UMUtilities.h>
 #import <EXLocation/EXLocation.h>
 #import <EXLocation/EXLocationTaskConsumer.h>
 #import <UMTaskManagerInterface/UMTaskInterface.h>
+
+NSString *const EXLocationAwakeningRegionIdentifier = @"<LocationAwakeningRegionIdentifier>";
 
 @interface EXLocationTaskConsumer ()
 
@@ -24,6 +27,11 @@
   if (self = [super init]) {
     _deferredLocations = [NSMutableArray new];
     _deferredDistance = 0.0;
+
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(applicationWillTerminate:)
+                                                 name:UIApplicationWillTerminateNotification
+                                               object:nil];
   }
   return self;
 }
@@ -52,6 +60,9 @@
     locationManager.allowsBackgroundLocationUpdates = YES;
     locationManager.pausesLocationUpdatesAutomatically = NO;
 
+    // Stop monitoring a region that was intended to wake up the application.
+    [self stopMonitoringAwakeningRegion];
+
     // Set options-specific things in location manager.
     [self setOptions:task.options];
   }];
@@ -78,6 +89,13 @@
     [locationManager startUpdatingLocation];
     [locationManager startMonitoringSignificantLocationChanges];
   }];
+}
+
+- (void)applicationWillTerminate:(NSNotification *)notification
+{
+  // Once the application is about to terminate, we set up as small as possible geofencing region around
+  // the last known location to make the app be woken up faster than normally (when using significant location change).
+  [self startMonitoringAwakeningRegion];
 }
 
 # pragma mark - CLLocationManagerDelegate
@@ -115,6 +133,10 @@
     self->_deferredDistance = 0.0;
     self->_locationManager = nil;
     self->_task = nil;
+
+    [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                    name:UIApplicationWillTerminateNotification
+                                                  object:nil];
   }];
 }
 
@@ -169,6 +191,30 @@
   NSTimeInterval interval = [self numberToDouble:options[@"deferredUpdatesInterval"] defaultValue:0];
 
   return [newestLocation.timestamp timeIntervalSinceDate:oldestLocation.timestamp] >= interval / 1000.0 && _deferredDistance >= distance;
+}
+
+- (void)startMonitoringAwakeningRegion
+{
+  CLLocation *lastLocation = _locationManager.location;
+
+  if (lastLocation != nil) {
+    CLCircularRegion *region = [[CLCircularRegion alloc] initWithCenter:lastLocation.coordinate
+                                                                 radius:100
+                                                             identifier:EXLocationAwakeningRegionIdentifier];
+    region.notifyOnEntry = YES;
+    region.notifyOnExit = YES;
+    [_locationManager startMonitoringForRegion:region];
+  }
+}
+
+- (void)stopMonitoringAwakeningRegion
+{
+  [_locationManager.monitoredRegions enumerateObjectsUsingBlock:^(CLRegion * _Nonnull region, BOOL * _Nonnull stop) {
+    if ([region.identifier isEqualToString:EXLocationAwakeningRegionIdentifier]) {
+      [self->_locationManager stopMonitoringForRegion:region];
+      *stop = YES;
+    }
+  }];
 }
 
 - (double)numberToDouble:(NSNumber *)number defaultValue:(double)defaultValue

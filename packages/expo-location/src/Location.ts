@@ -57,12 +57,17 @@ export interface Address {
 
 interface LocationTaskOptions {
   accuracy?: LocationAccuracy;
-  timeInterval?: number; // Android only
   distanceInterval?: number;
-  showsBackgroundLocationIndicator?: boolean; // iOS only
   deferredUpdatesDistance?: number;
-  deferredUpdatesTimeout?: number;
   deferredUpdatesInterval?: number;
+  
+  // iOS only
+  activityType?: LocationActivityType;
+  showsBackgroundLocationIndicator?: boolean;
+  pausesUpdatesAutomatically?: boolean;
+  
+  // Android only
+  timeInterval?: number;
   foregroundService?: {
     notificationTitle: string;
     notificationBody: string;
