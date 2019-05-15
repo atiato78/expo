@@ -29,6 +29,8 @@
 		2596F06B22201A9500DEEFF9 /* EXScopedFileSystemModule.m in Sources */ = {isa = PBXBuildFile; fileRef = 2596F06A22201A9400DEEFF9 /* EXScopedFileSystemModule.m */; };
 		3100D315228C033100ACFEBB /* EXAAEventEmitter.m in Sources */ = {isa = PBXBuildFile; fileRef = 3100D314228C033100ACFEBB /* EXAAEventEmitter.m */; };
 		3100D318228C073A00ACFEBB /* EXAAEventProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 3100D317228C073900ACFEBB /* EXAAEventProxy.m */; };
+		3100D31B228C1F8A00ACFEBB /* EXAASlotView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3100D31A228C1F8A00ACFEBB /* EXAASlotView.m */; };
+		3100D31E228C1F9600ACFEBB /* EXAASlotViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3100D31D228C1F9600ACFEBB /* EXAASlotViewManager.m */; };
 		31361A5A2260B2F600662769 /* EXScopedSecureStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 31361A592260B2F600662769 /* EXScopedSecureStore.m */; };
 		31361A5D2260B9A400662769 /* EXScopedAmplitude.m in Sources */ = {isa = PBXBuildFile; fileRef = 31361A5C2260B9A400662769 /* EXScopedAmplitude.m */; };
 		31361A612261C65A00662769 /* EXPermissionsManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 31361A602261C65A00662769 /* EXPermissionsManager.m */; };
@@ -380,6 +382,10 @@
 		3100D314228C033100ACFEBB /* EXAAEventEmitter.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EXAAEventEmitter.m; sourceTree = "<group>"; };
 		3100D316228C073900ACFEBB /* EXAAEventProxy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EXAAEventProxy.h; sourceTree = "<group>"; };
 		3100D317228C073900ACFEBB /* EXAAEventProxy.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EXAAEventProxy.m; sourceTree = "<group>"; };
+		3100D319228C1F8A00ACFEBB /* EXAASlotView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EXAASlotView.h; sourceTree = "<group>"; };
+		3100D31A228C1F8A00ACFEBB /* EXAASlotView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EXAASlotView.m; sourceTree = "<group>"; };
+		3100D31C228C1F9600ACFEBB /* EXAASlotViewManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EXAASlotViewManager.h; sourceTree = "<group>"; };
+		3100D31D228C1F9600ACFEBB /* EXAASlotViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EXAASlotViewManager.m; sourceTree = "<group>"; };
 		31361A582260B2F600662769 /* EXScopedSecureStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EXScopedSecureStore.h; sourceTree = "<group>"; };
 		31361A592260B2F600662769 /* EXScopedSecureStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EXScopedSecureStore.m; sourceTree = "<group>"; };
 		31361A5B2260B9A400662769 /* EXScopedAmplitude.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EXScopedAmplitude.h; sourceTree = "<group>"; };
@@ -1021,6 +1027,10 @@
 			children = (
 				3100D313228C033100ACFEBB /* EXAAEventEmitter.h */,
 				3100D314228C033100ACFEBB /* EXAAEventEmitter.m */,
+				3100D319228C1F8A00ACFEBB /* EXAASlotView.h */,
+				3100D31A228C1F8A00ACFEBB /* EXAASlotView.m */,
+				3100D31C228C1F9600ACFEBB /* EXAASlotViewManager.h */,
+				3100D31D228C1F9600ACFEBB /* EXAASlotViewManager.m */,
 			);
 			path = NewStore;
 			sourceTree = "<group>";
@@ -2686,6 +2696,7 @@
 				7043DFA12283303800272D74 /* RNSVGDefs.m in Sources */,
 				31AD9A412285B53100F19090 /* AIRMapMarkerManager.m in Sources */,
 				B5ADEE951F7DB4E000C88D2F /* EXBuildConstants.m in Sources */,
+				3100D31E228C1F9600ACFEBB /* EXAASlotViewManager.m in Sources */,
 				31AD9A4D2285B53100F19090 /* RCTConvert+AirMap.m in Sources */,
 				7043DF872283303800272D74 /* RNSVGLinearGradientManager.m in Sources */,
 				B5A473DC204A66F70035C61C /* EXErrorView.m in Sources */,
@@ -2695,6 +2706,7 @@
 				31AD99DD2285B51100F19090 /* AIRGoogleMapOverlayManager.m in Sources */,
 				31AD9A482285B53100F19090 /* AIRMapUrlTileManager.m in Sources */,
 				0726F05C2007E446004992E7 /* EXKernelAppRegistry.m in Sources */,
+				3100D31B228C1F8A00ACFEBB /* EXAASlotView.m in Sources */,
 				B5AC39D61E95B17300540AA7 /* EXErrorRecoveryManager.m in Sources */,
 				7043DF892283303800272D74 /* RNSVGImageManager.m in Sources */,
 				7043DFA02283303800272D74 /* RNSVGUse.m in Sources */,

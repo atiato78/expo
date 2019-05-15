@@ -24,7 +24,7 @@
 {
   if (self = [super initWithExperienceId:experienceId kernelServiceDelegate:kernelServiceInstance params:params]) {
     _eventProxy = kernelServiceInstance;
-    [_eventProxy registerEventEmitter:self];
+//    [_eventProxy registerEventEmitter:self];
   }
   return self;
 }
