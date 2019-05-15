@@ -1,0 +1,11 @@
+framework module NewStoreScanKit {
+  umbrella header "NewStoreScanKit.h"
+
+  export *
+  module * { export * }
+}
+
+module NewStoreScanKit.Swift {
+    header "NewStoreScanKit-Swift.h"
+    requires objc
+}

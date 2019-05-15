@@ -9,6 +9,7 @@
 #import "EXAAEventEmitter.h"
 #import "EXScopedModuleRegistry.h"
 #import "EXAAEventProxy.h"
+@import NewStoreScanKit;
 
 @interface EXAAEventEmitter ()
 

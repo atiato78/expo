@@ -31,6 +31,11 @@
 		3100D318228C073A00ACFEBB /* EXAAEventProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 3100D317228C073900ACFEBB /* EXAAEventProxy.m */; };
 		3100D31B228C1F8A00ACFEBB /* EXAASlotView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3100D31A228C1F8A00ACFEBB /* EXAASlotView.m */; };
 		3100D31E228C1F9600ACFEBB /* EXAASlotViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3100D31D228C1F9600ACFEBB /* EXAASlotViewManager.m */; };
+		3100D322228C43CC00ACFEBB /* NewStoreScanKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3100D31F228C42A200ACFEBB /* NewStoreScanKit.framework */; };
+		3100D323228C43CC00ACFEBB /* NewStoreScanKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3100D31F228C42A200ACFEBB /* NewStoreScanKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		3100D540228C452200ACFEBB /* NSTScanKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 3100D536228C452100ACFEBB /* NSTScanKit.m */; };
+		3100D541228C452200ACFEBB /* NSTScanningView.m in Sources */ = {isa = PBXBuildFile; fileRef = 3100D539228C452100ACFEBB /* NSTScanningView.m */; };
+		3100D544228C452200ACFEBB /* NSTScannerViewManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3100D53D228C452100ACFEBB /* NSTScannerViewManager.m */; };
 		31361A5A2260B2F600662769 /* EXScopedSecureStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 31361A592260B2F600662769 /* EXScopedSecureStore.m */; };
 		31361A5D2260B9A400662769 /* EXScopedAmplitude.m in Sources */ = {isa = PBXBuildFile; fileRef = 31361A5C2260B9A400662769 /* EXScopedAmplitude.m */; };
 		31361A612261C65A00662769 /* EXPermissionsManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 31361A602261C65A00662769 /* EXPermissionsManager.m */; };
@@ -338,6 +343,20 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		3100D324228C43CD00ACFEBB /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				3100D323228C43CC00ACFEBB /* NewStoreScanKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		0726F0572007E438004992E7 /* EXKernelAppRecord.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EXKernelAppRecord.h; sourceTree = "<group>"; };
 		0726F0582007E438004992E7 /* EXKernelAppRecord.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EXKernelAppRecord.m; sourceTree = "<group>"; };
@@ -386,6 +405,13 @@
 		3100D31A228C1F8A00ACFEBB /* EXAASlotView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EXAASlotView.m; sourceTree = "<group>"; };
 		3100D31C228C1F9600ACFEBB /* EXAASlotViewManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EXAASlotViewManager.h; sourceTree = "<group>"; };
 		3100D31D228C1F9600ACFEBB /* EXAASlotViewManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EXAASlotViewManager.m; sourceTree = "<group>"; };
+		3100D31F228C42A200ACFEBB /* NewStoreScanKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = NewStoreScanKit.framework; sourceTree = "<group>"; };
+		3100D536228C452100ACFEBB /* NSTScanKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSTScanKit.m; sourceTree = "<group>"; };
+		3100D537228C452100ACFEBB /* NSTScannerViewManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSTScannerViewManager.h; sourceTree = "<group>"; };
+		3100D539228C452100ACFEBB /* NSTScanningView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSTScanningView.m; sourceTree = "<group>"; };
+		3100D53D228C452100ACFEBB /* NSTScannerViewManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NSTScannerViewManager.m; sourceTree = "<group>"; };
+		3100D53E228C452100ACFEBB /* NSTScanKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSTScanKit.h; sourceTree = "<group>"; };
+		3100D53F228C452100ACFEBB /* NSTScanningView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NSTScanningView.h; sourceTree = "<group>"; };
 		31361A582260B2F600662769 /* EXScopedSecureStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EXScopedSecureStore.h; sourceTree = "<group>"; };
 		31361A592260B2F600662769 /* EXScopedSecureStore.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EXScopedSecureStore.m; sourceTree = "<group>"; };
 		31361A5B2260B9A400662769 /* EXScopedAmplitude.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EXScopedAmplitude.h; sourceTree = "<group>"; };
@@ -976,6 +1002,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3100D322228C43CC00ACFEBB /* NewStoreScanKit.framework in Frameworks */,
 				F77DDB931E04AC1100624CA2 /* SafariServices.framework in Frameworks */,
 				C7AB1A74D650FCF755E54086 /* libPods-Exponent.a in Frameworks */,
 			);
@@ -1017,6 +1044,7 @@
 				F77DDB921E04AC1100624CA2 /* SafariServices.framework */,
 				4A9955E33AC4A6A878EF5A17 /* libPods-Exponent.a */,
 				BEBABA2BA15649492989E40A /* libPods-ExponentIntegrationTests.a */,
+				3100D31F228C42A200ACFEBB /* NewStoreScanKit.framework */,
 				FDC01B7874B93745E639DFA6 /* libPods-Tests.a */,
 			);
 			name = Frameworks;
@@ -1025,6 +1053,7 @@
 		3100D312228C030800ACFEBB /* NewStore */ = {
 			isa = PBXGroup;
 			children = (
+				3100D535228C452100ACFEBB /* NewStoreSDKScanKit */,
 				3100D313228C033100ACFEBB /* EXAAEventEmitter.h */,
 				3100D314228C033100ACFEBB /* EXAAEventEmitter.m */,
 				3100D319228C1F8A00ACFEBB /* EXAASlotView.h */,
@@ -1033,6 +1062,19 @@
 				3100D31D228C1F9600ACFEBB /* EXAASlotViewManager.m */,
 			);
 			path = NewStore;
+			sourceTree = "<group>";
+		};
+		3100D535228C452100ACFEBB /* NewStoreSDKScanKit */ = {
+			isa = PBXGroup;
+			children = (
+				3100D536228C452100ACFEBB /* NSTScanKit.m */,
+				3100D537228C452100ACFEBB /* NSTScannerViewManager.h */,
+				3100D539228C452100ACFEBB /* NSTScanningView.m */,
+				3100D53D228C452100ACFEBB /* NSTScannerViewManager.m */,
+				3100D53E228C452100ACFEBB /* NSTScanKit.h */,
+				3100D53F228C452100ACFEBB /* NSTScanningView.h */,
+			);
+			path = NewStoreSDKScanKit;
 			sourceTree = "<group>";
 		};
 		31361A5E2261C64100662769 /* Permissions */ = {
@@ -2191,6 +2233,7 @@
 				B575EEC61D5AA56100DCABBC /* Clean Up Dynamic Macros */,
 				78F81D401B70746F000E5595 /* Fabric */,
 				9F407D89B3F72F916C80DD38 /* [CP] Copy Pods Resources */,
+				3100D324228C43CD00ACFEBB /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -2513,6 +2556,8 @@
 				B5D0D65C204F152D00DDFC99 /* EXViewController.m in Sources */,
 				31AD9A4A2285B53100F19090 /* AIRWeakTimerReference.m in Sources */,
 				31AD9A342285B53100F19090 /* AIRMap.m in Sources */,
+				3100D540228C452200ACFEBB /* NSTScanKit.m in Sources */,
+				3100D541228C452200ACFEBB /* NSTScanningView.m in Sources */,
 				BB557F122138C81B00053523 /* REAConcatNode.m in Sources */,
 				31AD99E02285B51100F19090 /* AIRGoogleMapURLTileManager.m in Sources */,
 				7043DF852283303800272D74 /* RNSVGTextManager.m in Sources */,
@@ -2552,6 +2597,7 @@
 				19B2EF751FB25A1A003F2E1B /* EXCachedResourceManager.m in Sources */,
 				BB50E89020B9C0D3003C752D /* RNLongPressHandler.m in Sources */,
 				314410DD223BF73B00310599 /* RNCWKWebView.m in Sources */,
+				3100D544228C452200ACFEBB /* NSTScannerViewManager.m in Sources */,
 				31AD9A332285B53100F19090 /* AIRMapOverlayManager.m in Sources */,
 				F11E531221601059007ACF56 /* EXHeadlessAppLoader.m in Sources */,
 				B5FB74DF1FF6DADC001C764B /* EXDevSettings.m in Sources */,
@@ -2941,6 +2987,12 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = C8D8QTF339;
 				EX_BUNDLE_NAME = Expo;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/Exponent/Versioned/Core/Api/NewStore/ScanKit/ios/Carthage/Build/iOS",
+					"$(PROJECT_DIR)/Exponent/Versioned/Core/Api/NewStore/ScanKit/ios/export",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Exponent/Supporting/Exponent-Prefix.pch";
 				INFOPLIST_FILE = Exponent/Supporting/Info.plist;
@@ -3010,6 +3062,12 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				DEVELOPMENT_TEAM = C8D8QTF339;
 				EX_BUNDLE_NAME = Expo;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/Exponent/Versioned/Core/Api/NewStore/ScanKit/ios/Carthage/Build/iOS",
+					"$(PROJECT_DIR)/Exponent/Versioned/Core/Api/NewStore/ScanKit/ios/export",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Exponent/Supporting/Exponent-Prefix.pch";
 				INFOPLIST_FILE = Exponent/Supporting/Info.plist;
