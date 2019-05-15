@@ -1,6 +1,6 @@
 import { AppLoading, Asset, Constants, Font } from 'expo';
 import React from 'react';
-import { Linking, Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { Linking, Platform, StatusBar, StyleSheet, View, NativeModules, NativeEventEmitter } from 'react-native';
 import { Assets as StackAssets } from 'react-navigation-stack';
 import url from 'url';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
@@ -17,6 +17,15 @@ import LocalStorage from './storage/LocalStorage';
 
 // Download and cache stack assets, don't block loading on this though
 Asset.loadAsync(StackAssets);
+
+const listener = (result) => {
+  console.warn('Received!', result);
+  if (result.text) {
+    NativeModules.AAEventEmitter.dispatchEvent({ "home responds": "hello" });
+  }
+};
+const eventEmitter = new NativeEventEmitter(NativeModules.AAEventEmitter);
+eventEmitter.addListener('newStoreEvent', listener);
 
 export default class App extends React.Component {
   state = {

@@ -16,6 +16,7 @@
 #import "EXUpdatesManager.h"
 #import "EXUserNotificationManager.h"
 #import "EXUserNotificationCenter.h"
+#import "EXAAEventProxy.h"
 
 #import <UMCore/UMModuleRegistryProvider.h>
 
@@ -34,6 +35,7 @@
 @property (nonatomic, strong) EXUpdatesManager *updatesManager;
 @property (nonatomic, strong) EXUserNotificationManager *notificationsManager;
 @property (nonatomic, strong) EXUserNotificationCenter *notificationCenter;
+@property (nonatomic, strong) EXAAEventProxy *eventProxy;
 @property (nonatomic, strong) NSDictionary<NSString *, id> *allServices;
 
 @end
@@ -57,6 +59,7 @@
     [self updatesManager];
     [self notificationsManager];
     [self notificationCenter];
+    [self eventProxy];
   }
   return self;
 }
@@ -67,6 +70,14 @@
     _branchManager = [[EXBranchManager alloc] init];
   }
   return _branchManager;
+}
+
+- (EXAAEventProxy *)eventProxy
+{
+  if (!_eventProxy) {
+    _eventProxy = [[EXAAEventProxy alloc] init];
+  }
+  return _eventProxy;
 }
 
 - (EXCachedResourceManager *)cachedResourceManager
@@ -188,7 +199,8 @@
                                   self.sensorManager,
                                   self.updatesManager,
                                   self.notificationsManager,
-                                  self.notificationCenter
+                                  self.notificationCenter,
+                                  self.eventProxy
                                   ];
     NSArray *allServices = [registryServices arrayByAddingObjectsFromArray:[[UMModuleRegistryProvider singletonModules] allObjects]];
     for (id service in allServices) {

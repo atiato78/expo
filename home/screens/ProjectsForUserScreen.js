@@ -6,7 +6,7 @@ import OtherUserProjectListContainer from '../containers/OtherUserProjectListCon
 
 export default class ProjectsForUserScreen extends React.Component {
   static navigationOptions = {
-    title: 'Projects',
+    title: 'New Store Projects',
   };
 
   render() {

@@ -58,7 +58,7 @@ export default class ProjectsScreen extends React.Component {
   };
 
   static navigationOptions = {
-    title: 'Projects',
+    title: 'New Store Projects',
     ...Platform.select({
       ios: {
         headerRight: Constants.isDevice ? null : <OpenProjectByURLButton />,
