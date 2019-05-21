@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleProp, ViewStyle } from 'react-native';
-import { Audio, Asset } from 'expo';
+import { Asset } from 'expo-asset';
+import { Audio } from 'expo-av';
 
 import Player from './Player';
 
@@ -56,7 +57,6 @@ export default class AudioPlayer extends React.Component<Props, State> {
 
   _loadSoundAsync = async (source: PlaybackSource) => {
     const soundObject = new Audio.Sound();
-    console.log('Load sound: ', soundObject);
     try {
       await soundObject.loadAsync(source, { progressUpdateIntervalMillis: 100 });
       soundObject.setOnPlaybackStatusUpdate(this._updateStateToStatus);

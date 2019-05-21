@@ -39,7 +39,7 @@
       <option name="WRAP_EXPRESSION_BODY_FUNCTIONS" value="1" />
     </JetCodeStyleSettings>
     <Objective-C-extensions>
-      <file>
+        <file>
         <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Import" />
         <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Macro" />
         <option name="com.jetbrains.cidr.lang.util.OCDeclarationKind" value="Typedef" />
