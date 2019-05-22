@@ -19,6 +19,17 @@ self: super:
 
   yarn2nix = import self.yarn2nix-src { pkgs = self; };
 
+  fastlane = super.fastlane.overrideAttrs (oldAttrs: rec {
+    name = "fastlane-${version}";
+    version = "2.123.0";
+    src = super.fetchFromGitHub {
+      owner = "fastlane";
+      repo = "fastlane";
+      rev = "${version}";
+      sha256 = "1f11sivzyhv8k24fvcp0r862ikrkfcrjw230dyx0rp8ngdnac6j0";
+    };
+  });
+
   expotools = self.yarn2nix.mkYarnPackage {
     src = self.lib.sourceByExcludingRegex ../tools/expotools ["build" "node_modules"];
 
