@@ -18,55 +18,43 @@ export declare type PlaybackNativeSource = {
         [fieldName: string]: string;
     };
 };
-export declare type PlaybackStatus = {
-    isLoaded: false;
-    androidImplementation?: string;
-    error?: string;
-} | {
-    isLoaded: true;
-    androidImplementation?: string;
-    uri: string;
-    progressUpdateIntervalMillis: number;
-    durationMillis?: number;
-    positionMillis: number;
-    playableDurationMillis?: number;
-    seekMillisToleranceBefore?: number;
-    seekMillisToleranceAfter?: number;
-    shouldPlay: boolean;
-    isPlaying: boolean;
-    isBuffering: boolean;
-    rate: number;
-    shouldCorrectPitch: boolean;
-    volume: number;
-    isMuted: boolean;
-    isLooping: boolean;
-    didJustFinish: boolean;
-};
-export declare type PlaybackStatusToSet = {
+export declare type PlaybackParams = {
+    uri?: string;
+    initialPosition?: number;
     androidImplementation?: string;
     progressUpdateIntervalMillis?: number;
-    positionMillis?: number;
-    seekMillisToleranceBefore?: number;
-    seekMillisToleranceAfter?: number;
-    shouldPlay?: boolean;
     rate?: number;
     shouldCorrectPitch?: boolean;
     volume?: number;
     isMuted?: boolean;
     isLooping?: boolean;
+    shouldPlay?: boolean;
+    seekMillisToleranceBefore?: number;
+    seekMillisToleranceAfter?: number;
     pitchCorrectionQuality?: PitchCorrectionQuality;
 };
+export declare type PlaybackStatus = {
+    isLoaded: boolean;
+    error?: string;
+    durationMillis?: number;
+    positionMillis?: number;
+    playableDurationMillis?: number;
+    isPlaying: boolean;
+    isLoading: boolean;
+    isBuffering: boolean;
+    didJustFinish: boolean;
+};
 export declare const _DEFAULT_PROGRESS_UPDATE_INTERVAL_MILLIS: number;
-export declare const _DEFAULT_INITIAL_PLAYBACK_STATUS: PlaybackStatusToSet;
+export declare const _DEFAULT_INITIAL_PLAYBACK_PARAMS: PlaybackParams;
 export declare function getNativeSourceFromSource(source: PlaybackSource | null): PlaybackNativeSource | null;
-export declare function assertStatusValuesInBounds(status: PlaybackStatusToSet): void;
-export declare function getNativeSourceAndFullInitialStatusForLoadAsync(source: PlaybackSource | null, initialStatus: PlaybackStatusToSet | null, downloadFirst: boolean): Promise<{
+export declare function assertStatusValuesInBounds(status: PlaybackParams): void;
+export declare function getNativeSourceAndFullInitialStatusForLoadAsync(source: PlaybackSource | null, initialParams: PlaybackParams | null, downloadFirst: boolean): Promise<{
     nativeSource: PlaybackNativeSource;
-    fullInitialStatus: PlaybackStatusToSet;
+    fullInitialStatus: PlaybackParams;
 }>;
 export declare function getUnloadedStatus(error?: string | null): PlaybackStatus;
 export interface AV {
-    setStatusAsync(status: PlaybackStatusToSet): Promise<PlaybackStatus>;
+    setParamsAsync(status: PlaybackParams): Promise<PlaybackStatus>;
 }
 export interface Playback extends AV {
     playAsync(): Promise<PlaybackStatus>;

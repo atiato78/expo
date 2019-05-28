@@ -1,5 +1,5 @@
 import { Subscription } from '@unimodules/core';
-import { PlaybackStatus, PlaybackStatusToSet } from '../AV';
+import { PlaybackStatus, PlaybackParams } from '../AV';
 import { Sound } from './Sound';
 export declare type RecordingOptions = {
     android: {
@@ -116,11 +116,11 @@ export declare class Recording {
     pauseAsync(): Promise<RecordingStatus>;
     stopAndUnloadAsync(): Promise<RecordingStatus>;
     getURI(): string | null;
-    createNewLoadedSound(initialStatus?: PlaybackStatusToSet, onPlaybackStatusUpdate?: ((status: PlaybackStatus) => void) | null): Promise<{
+    createNewLoadedSound(initialStatus?: PlaybackParams, onPlaybackStatusUpdate?: ((status: PlaybackStatus) => void) | null): Promise<{
         sound: Sound;
         status: PlaybackStatus;
     }>;
-    createNewLoadedSoundAsync(initialStatus?: PlaybackStatusToSet, onPlaybackStatusUpdate?: ((status: PlaybackStatus) => void) | null): Promise<{
+    createNewLoadedSoundAsync(initialStatus?: PlaybackParams, onPlaybackStatusUpdate?: ((status: PlaybackStatus) => void) | null): Promise<{
         sound: Sound;
         status: PlaybackStatus;
     }>;

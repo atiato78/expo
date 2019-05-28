@@ -31,56 +31,36 @@ export type PlaybackNativeSource = {
   headers?: { [fieldName: string]: string };
 };
 
-export type PlaybackStatus =
-  | {
-      isLoaded: false;
-      androidImplementation?: string;
-      error?: string; // populated exactly once when an error forces the object to unload
-    }
-  | {
-      isLoaded: true;
-      androidImplementation?: string;
-
-      uri: string;
-
-      progressUpdateIntervalMillis: number;
-      durationMillis?: number;
-      positionMillis: number;
-      playableDurationMillis?: number;
-      seekMillisToleranceBefore?: number;
-      seekMillisToleranceAfter?: number;
-
-      shouldPlay: boolean;
-      isPlaying: boolean;
-      isBuffering: boolean;
-
-      rate: number;
-      shouldCorrectPitch: boolean;
-      volume: number;
-      isMuted: boolean;
-      isLooping: boolean;
-
-      didJustFinish: boolean; // true exactly once when the track plays to finish
-    };
-
-export type PlaybackStatusToSet = {
+export type PlaybackParams = {
+  uri?: string;
+  initialPosition?: number;
   androidImplementation?: string;
   progressUpdateIntervalMillis?: number;
-  positionMillis?: number;
-  seekMillisToleranceBefore?: number;
-  seekMillisToleranceAfter?: number;
-  shouldPlay?: boolean;
   rate?: number;
   shouldCorrectPitch?: boolean;
   volume?: number;
   isMuted?: boolean;
   isLooping?: boolean;
+  shouldPlay?: boolean;
+  seekMillisToleranceBefore?: number;
+  seekMillisToleranceAfter?: number;
   pitchCorrectionQuality?: PitchCorrectionQuality;
 };
 
+export type PlaybackStatus = {
+  isLoaded: boolean;
+  error?: string;
+  durationMillis?: number;
+  positionMillis?: number;
+  playableDurationMillis?: number;
+  isPlaying: boolean;
+  isLoading: boolean;
+  isBuffering: boolean;
+  didJustFinish: boolean;
+};
+
 export const _DEFAULT_PROGRESS_UPDATE_INTERVAL_MILLIS: number = 500;
-export const _DEFAULT_INITIAL_PLAYBACK_STATUS: PlaybackStatusToSet = {
-  positionMillis: 0,
+export const _DEFAULT_INITIAL_PLAYBACK_PARAMS: PlaybackParams = {
   progressUpdateIntervalMillis: _DEFAULT_PROGRESS_UPDATE_INTERVAL_MILLIS,
   shouldPlay: false,
   rate: 1.0,
@@ -155,7 +135,7 @@ function _getAssetFromPlaybackSource(source: PlaybackSource | null): Asset | nul
   return asset;
 }
 
-export function assertStatusValuesInBounds(status: PlaybackStatusToSet): void {
+export function assertStatusValuesInBounds(status: PlaybackParams): void {
   if (typeof status.rate === 'number' && (status.rate < 0 || status.rate > 32)) {
     throw new RangeError('Rate value must be between 0.0 and 32.0');
   }
@@ -166,19 +146,19 @@ export function assertStatusValuesInBounds(status: PlaybackStatusToSet): void {
 
 export async function getNativeSourceAndFullInitialStatusForLoadAsync(
   source: PlaybackSource | null,
-  initialStatus: PlaybackStatusToSet | null,
+  initialParams: PlaybackParams | null,
   downloadFirst: boolean
 ): Promise<{
   nativeSource: PlaybackNativeSource;
-  fullInitialStatus: PlaybackStatusToSet;
+  fullInitialStatus: PlaybackParams;
 }> {
   // Get the full initial status
-  const fullInitialStatus: PlaybackStatusToSet =
-    initialStatus == null
-      ? _DEFAULT_INITIAL_PLAYBACK_STATUS
+  const fullInitialStatus: PlaybackParams =
+    initialParams == null
+      ? _DEFAULT_INITIAL_PLAYBACK_PARAMS
       : {
-          ..._DEFAULT_INITIAL_PLAYBACK_STATUS,
-          ...initialStatus,
+          ..._DEFAULT_INITIAL_PLAYBACK_PARAMS,
+          ...initialParams,
         };
   assertStatusValuesInBounds(fullInitialStatus);
 
@@ -212,12 +192,15 @@ export async function getNativeSourceAndFullInitialStatusForLoadAsync(
 export function getUnloadedStatus(error: string | null = null): PlaybackStatus {
   return {
     isLoaded: false,
-    ...(error ? { error } : null),
+    isPlaying: false,
+    isLoading: false,
+    isBuffering: false,
+    didJustFinish: false,
   };
 }
 
 export interface AV {
-  setStatusAsync(status: PlaybackStatusToSet): Promise<PlaybackStatus>;
+  setParamsAsync(status: PlaybackParams): Promise<PlaybackStatus>;
 }
 
 export interface Playback extends AV {
@@ -249,15 +232,15 @@ export interface Playback extends AV {
  */
 export const PlaybackMixin = {
   async playAsync(): Promise<PlaybackStatus> {
-    return ((this as any) as AV).setStatusAsync({ shouldPlay: true });
+    return ((this as any) as AV).setParamsAsync({ shouldPlay: true });
   },
 
   async playFromPositionAsync(
     positionMillis: number,
     tolerances: { toleranceMillisBefore?: number; toleranceMillisAfter?: number } = {}
   ): Promise<PlaybackStatus> {
-    return ((this as any) as AV).setStatusAsync({
-      positionMillis,
+    return ((this as any) as AV).setParamsAsync({
+      initialPosition: positionMillis,
       shouldPlay: true,
       seekMillisToleranceAfter: tolerances.toleranceMillisAfter,
       seekMillisToleranceBefore: tolerances.toleranceMillisBefore,
@@ -265,19 +248,19 @@ export const PlaybackMixin = {
   },
 
   async pauseAsync(): Promise<PlaybackStatus> {
-    return (this as AV).setStatusAsync({ shouldPlay: false });
+    return ((this as any) as AV).setParamsAsync({ shouldPlay: false });
   },
 
   async stopAsync(): Promise<PlaybackStatus> {
-    return ((this as any) as AV).setStatusAsync({ positionMillis: 0, shouldPlay: false });
+    return ((this as any) as AV).setParamsAsync({ initialPosition: 0, shouldPlay: false });
   },
 
   async setPositionAsync(
     positionMillis: number,
     tolerances: { toleranceMillisBefore?: number; toleranceMillisAfter?: number } = {}
   ): Promise<PlaybackStatus> {
-    return ((this as any) as AV).setStatusAsync({
-      positionMillis,
+    return ((this as any) as AV).setParamsAsync({
+      initialPosition: positionMillis,
       seekMillisToleranceAfter: tolerances.toleranceMillisAfter,
       seekMillisToleranceBefore: tolerances.toleranceMillisBefore,
     });
@@ -288,7 +271,7 @@ export const PlaybackMixin = {
     shouldCorrectPitch: boolean = false,
     pitchCorrectionQuality: PitchCorrectionQuality = PitchCorrectionQuality.Low
   ): Promise<PlaybackStatus> {
-    return ((this as any) as AV).setStatusAsync({
+    return ((this as any) as AV).setParamsAsync({
       rate,
       shouldCorrectPitch,
       pitchCorrectionQuality,
@@ -296,20 +279,20 @@ export const PlaybackMixin = {
   },
 
   async setVolumeAsync(volume: number): Promise<PlaybackStatus> {
-    return ((this as any) as AV).setStatusAsync({ volume });
+    return ((this as any) as AV).setParamsAsync({ volume });
   },
 
   async setIsMutedAsync(isMuted: boolean): Promise<PlaybackStatus> {
-    return ((this as any) as AV).setStatusAsync({ isMuted });
+    return ((this as any) as AV).setParamsAsync({ isMuted });
   },
 
   async setIsLoopingAsync(isLooping: boolean): Promise<PlaybackStatus> {
-    return ((this as any) as AV).setStatusAsync({ isLooping });
+    return ((this as any) as AV).setParamsAsync({ isLooping });
   },
 
   async setProgressUpdateIntervalAsync(
     progressUpdateIntervalMillis: number
   ): Promise<PlaybackStatus> {
-    return ((this as any) as AV).setStatusAsync({ progressUpdateIntervalMillis });
+    return ((this as any) as AV).setParamsAsync({ progressUpdateIntervalMillis });
   },
 };

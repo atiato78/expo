@@ -1,15 +1,14 @@
 import { SyntheticPlatformEmitter } from '@unimodules/core';
+import { getUnloadedStatus } from './AV';
 function getStatusFromMedia(media) {
     if (!media) {
-        return {
-            isLoaded: false,
-            error: undefined,
-        };
+        return getUnloadedStatus();
     }
     const isPlaying = !!(media.currentTime > 0 &&
         !media.paused &&
         !media.ended &&
         media.readyState > 2);
+    // TODO: Distinguish status and params, merging it makes no sense.
     const status = {
         isLoaded: true,
         uri: media.src,
@@ -32,9 +31,9 @@ function getStatusFromMedia(media) {
     };
     return status;
 }
-function setStatusForMedia(media, status) {
-    if (status.positionMillis !== undefined) {
-        media.currentTime = status.positionMillis / 1000;
+function setStatusForMedia(media, params) {
+    if (params.initialPosition !== undefined) {
+        media.currentTime = params.initialPosition / 1000;
     }
     // if (status.progressUpdateIntervalMillis !== undefined) {
     //   media.progressUpdateIntervalMillis = status.progressUpdateIntervalMillis;
@@ -48,25 +47,25 @@ function setStatusForMedia(media, status) {
     // if (status.shouldCorrectPitch !== undefined) {
     //   media.shouldCorrectPitch = status.shouldCorrectPitch;
     // }
-    if (status.shouldPlay !== undefined) {
-        if (status.shouldPlay) {
+    if (params.shouldPlay !== undefined) {
+        if (params.shouldPlay) {
             media.play();
         }
         else {
             media.pause();
         }
     }
-    if (status.rate !== undefined) {
-        media.playbackRate = status.rate;
+    if (params.rate !== undefined) {
+        media.playbackRate = params.rate;
     }
-    if (status.volume !== undefined) {
-        media.volume = status.volume;
+    if (params.volume !== undefined) {
+        media.volume = params.volume;
     }
-    if (status.isMuted !== undefined) {
-        media.muted = status.isMuted;
+    if (params.isMuted !== undefined) {
+        media.muted = params.isMuted;
     }
-    if (status.isLooping !== undefined) {
-        media.loop = status.isLooping;
+    if (params.isLooping !== undefined) {
+        media.loop = params.isLooping;
     }
     return getStatusFromMedia(media);
 }
@@ -77,17 +76,17 @@ export default {
     async getStatusForVideo(element) {
         return getStatusFromMedia(element);
     },
-    async loadForVideo(element, nativeSource, fullInitialStatus) {
+    async loadForVideo(element, nativeSource, fullParams) {
         return getStatusFromMedia(element);
     },
     async unloadForVideo(element) {
         return getStatusFromMedia(element);
     },
-    async setStatusForVideo(element, status) {
-        return setStatusForMedia(element, status);
+    async setStatusForVideo(element, params) {
+        return setStatusForMedia(element, params);
     },
-    async replayVideo(element, status) {
-        return setStatusForMedia(element, status);
+    async replayVideo(element, params) {
+        return setStatusForMedia(element, params);
     },
     /* Audio */
     async setAudioMode() { },

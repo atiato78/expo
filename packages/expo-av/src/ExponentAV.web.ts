@@ -1,13 +1,10 @@
 import { SyntheticPlatformEmitter } from '@unimodules/core';
 
-import { PlaybackNativeSource, PlaybackStatus, PlaybackStatusToSet } from './AV';
+import { PlaybackNativeSource, PlaybackStatus, PlaybackParams, getUnloadedStatus } from './AV';
 
 function getStatusFromMedia(media?: HTMLMediaElement): PlaybackStatus {
   if (!media) {
-    return {
-      isLoaded: false,
-      error: undefined,
-    };
+    return getUnloadedStatus();
   }
 
   const isPlaying = !!(
@@ -17,6 +14,7 @@ function getStatusFromMedia(media?: HTMLMediaElement): PlaybackStatus {
     media.readyState > 2
   );
 
+  // TODO: Distinguish status and params, merging it makes no sense.
   const status: PlaybackStatus = {
     isLoaded: true,
     uri: media.src,
@@ -41,9 +39,9 @@ function getStatusFromMedia(media?: HTMLMediaElement): PlaybackStatus {
   return status;
 }
 
-function setStatusForMedia(media: HTMLMediaElement, status: PlaybackStatusToSet): PlaybackStatus {
-  if (status.positionMillis !== undefined) {
-    media.currentTime = status.positionMillis / 1000;
+function setStatusForMedia(media: HTMLMediaElement, params: PlaybackParams): PlaybackStatus {
+  if (params.initialPosition !== undefined) {
+    media.currentTime = params.initialPosition / 1000;
   }
   // if (status.progressUpdateIntervalMillis !== undefined) {
   //   media.progressUpdateIntervalMillis = status.progressUpdateIntervalMillis;
@@ -57,24 +55,24 @@ function setStatusForMedia(media: HTMLMediaElement, status: PlaybackStatusToSet)
   // if (status.shouldCorrectPitch !== undefined) {
   //   media.shouldCorrectPitch = status.shouldCorrectPitch;
   // }
-  if (status.shouldPlay !== undefined) {
-    if (status.shouldPlay) {
+  if (params.shouldPlay !== undefined) {
+    if (params.shouldPlay) {
       media.play();
     } else {
       media.pause();
     }
   }
-  if (status.rate !== undefined) {
-    media.playbackRate = status.rate;
+  if (params.rate !== undefined) {
+    media.playbackRate = params.rate;
   }
-  if (status.volume !== undefined) {
-    media.volume = status.volume;
+  if (params.volume !== undefined) {
+    media.volume = params.volume;
   }
-  if (status.isMuted !== undefined) {
-    media.muted = status.isMuted;
+  if (params.isMuted !== undefined) {
+    media.muted = params.isMuted;
   }
-  if (status.isLooping !== undefined) {
-    media.loop = status.isLooping;
+  if (params.isLooping !== undefined) {
+    media.loop = params.isLooping;
   }
 
   return getStatusFromMedia(media);
@@ -90,7 +88,7 @@ export default {
   async loadForVideo(
     element: HTMLMediaElement,
     nativeSource: PlaybackNativeSource,
-    fullInitialStatus: PlaybackStatusToSet
+    fullParams: PlaybackParams
   ): Promise<PlaybackStatus> {
     return getStatusFromMedia(element);
   },
@@ -99,15 +97,12 @@ export default {
   },
   async setStatusForVideo(
     element: HTMLMediaElement,
-    status: PlaybackStatusToSet
+    params: PlaybackParams
   ): Promise<PlaybackStatus> {
-    return setStatusForMedia(element, status);
+    return setStatusForMedia(element, params);
   },
-  async replayVideo(
-    element: HTMLMediaElement,
-    status: PlaybackStatusToSet
-  ): Promise<PlaybackStatus> {
-    return setStatusForMedia(element, status);
+  async replayVideo(element: HTMLMediaElement, params: PlaybackParams): Promise<PlaybackStatus> {
+    return setStatusForMedia(element, params);
   },
   /* Audio */
   async setAudioMode() {},
@@ -117,7 +112,7 @@ export default {
   },
   async loadForSound(
     nativeSource: string | { uri: string; [key: string]: any },
-    fullInitialStatus: PlaybackStatusToSet
+    fullInitialStatus: PlaybackParams
   ): Promise<[HTMLMediaElement, PlaybackStatus]> {
     const source = typeof nativeSource === 'string' ? nativeSource : nativeSource.uri;
     const media = new Audio(source);
@@ -143,14 +138,11 @@ export default {
   async unloadForSound(element: HTMLMediaElement) {},
   async setStatusForSound(
     element: HTMLMediaElement,
-    status: PlaybackStatusToSet
+    status: PlaybackParams
   ): Promise<PlaybackStatus> {
     return setStatusForMedia(element, status);
   },
-  async replaySound(
-    element: HTMLMediaElement,
-    status: PlaybackStatusToSet
-  ): Promise<PlaybackStatus> {
+  async replaySound(element: HTMLMediaElement, status: PlaybackParams): Promise<PlaybackStatus> {
     return setStatusForMedia(element, status);
   },
 

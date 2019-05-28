@@ -5,7 +5,7 @@ import {
   PlaybackMixin,
   PlaybackSource,
   PlaybackStatus,
-  PlaybackStatusToSet,
+  PlaybackParams,
   assertStatusValuesInBounds,
   getNativeSourceAndFullInitialStatusForLoadAsync,
   getUnloadedStatus,
@@ -27,7 +27,7 @@ export class Sound implements Playback {
 
   static create = async (
     source: PlaybackSource,
-    initialStatus: PlaybackStatusToSet = {},
+    initialStatus: PlaybackParams = {},
     onPlaybackStatusUpdate: ((status: PlaybackStatus) => void) | null = null,
     downloadFirst: boolean = true
   ): Promise<{ sound: Sound; status: PlaybackStatus }> => {
@@ -39,7 +39,7 @@ export class Sound implements Playback {
 
   static createAsync = async (
     source: PlaybackSource,
-    initialStatus: PlaybackStatusToSet = {},
+    initialStatus: PlaybackParams = {},
     onPlaybackStatusUpdate: ((status: PlaybackStatus) => void) | null = null,
     downloadFirst: boolean = true
   ): Promise<{ sound: Sound; status: PlaybackStatus }> => {
@@ -148,7 +148,7 @@ export class Sound implements Playback {
 
   async loadAsync(
     source: PlaybackSource,
-    initialStatus: PlaybackStatusToSet = {},
+    initialStatus: PlaybackParams = {},
     downloadFirst: boolean = true
   ): Promise<PlaybackStatus> {
     throwIfAudioIsDisabled();
@@ -209,22 +209,22 @@ export class Sound implements Playback {
 
   // Set status API (only available while isLoaded = true)
 
-  async setStatusAsync(status: PlaybackStatusToSet): Promise<PlaybackStatus> {
-    assertStatusValuesInBounds(status);
+  async setParamsAsync(params: PlaybackParams): Promise<PlaybackStatus> {
+    assertStatusValuesInBounds(params);
     return this._performOperationAndHandleStatusAsync(() =>
-      ExponentAV.setStatusForSound(this._key, status)
+      ExponentAV.setParamsForSound(this._key, params)
     );
   }
 
-  async replayAsync(status: PlaybackStatusToSet = {}): Promise<PlaybackStatus> {
-    if (status.positionMillis && status.positionMillis !== 0) {
+  async replayAsync(params: PlaybackParams = {}): Promise<PlaybackStatus> {
+    if (params.initialPosition && params.initialPosition !== 0) {
       throw new Error('Requested position after replay has to be 0.');
     }
 
     return this._performOperationAndHandleStatusAsync(() =>
       ExponentAV.replaySound(this._key, {
-        ...status,
-        positionMillis: 0,
+        ...params,
+        initialPosition: 0,
         shouldPlay: true,
       })
     );

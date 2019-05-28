@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { View } from 'react-native';
-import { PlaybackNativeSource, PlaybackStatus, PlaybackStatusToSet } from './AV';
+import { PlaybackNativeSource, PlaybackStatus, PlaybackParams } from './AV';
 declare type ExponentVideoProps = {
     source: PlaybackNativeSource | null;
     resizeMode?: Object;
-    status?: PlaybackStatusToSet;
+    status?: PlaybackParams;
     useNativeControls?: boolean;
     onStatusUpdate?: (event: {
         nativeEvent: PlaybackStatus;

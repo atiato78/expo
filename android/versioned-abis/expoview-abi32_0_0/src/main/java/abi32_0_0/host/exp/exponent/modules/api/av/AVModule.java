@@ -9,9 +9,17 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Build;
 import android.view.View;
-import android.net.Uri;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 import abi32_0_0.com.facebook.react.bridge.Arguments;
 import abi32_0_0.com.facebook.react.bridge.Callback;
@@ -26,23 +34,14 @@ import abi32_0_0.com.facebook.react.modules.core.DeviceEventManagerModule;
 import abi32_0_0.com.facebook.react.uimanager.NativeViewHierarchyManager;
 import abi32_0_0.com.facebook.react.uimanager.UIBlock;
 import abi32_0_0.com.facebook.react.uimanager.UIManagerModule;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
-import host.exp.exponent.kernel.ExperienceId;
-import host.exp.exponent.utils.ExpFileUtils;
-import host.exp.exponent.utils.ScopedContext;
-import host.exp.expoview.Exponent;
 import abi32_0_0.host.exp.exponent.modules.ExpoKernelServiceConsumerBaseModule;
 import abi32_0_0.host.exp.exponent.modules.api.av.player.PlayerData;
 import abi32_0_0.host.exp.exponent.modules.api.av.video.VideoView;
 import abi32_0_0.host.exp.exponent.modules.api.av.video.VideoViewWrapper;
+import host.exp.exponent.kernel.ExperienceId;
+import host.exp.exponent.utils.ExpFileUtils;
+import host.exp.exponent.utils.ScopedContext;
+import host.exp.expoview.Exponent;
 
 import static android.media.MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED;
 
@@ -494,7 +493,7 @@ public class AVModule extends ExpoKernelServiceConsumerBaseModule
     }, promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
   }
 
-  // Note that setStatusUpdateCallback happens in the JS for video via onStatusUpdate
+  // Note that setStatusUpdateCallback happens in the JS for video via onParamsUpdate
 
   // Recording API
 

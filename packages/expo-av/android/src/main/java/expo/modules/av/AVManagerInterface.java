@@ -29,7 +29,7 @@ public interface AVManagerInterface {
 
   void unloadForSound(final Integer key, final Promise promise);
 
-  void setStatusForSound(final Integer key, final ReadableArguments status, final Promise promise);
+  void setParamsForSound(final Integer key, final ReadableArguments status, final Promise promise);
 
   void replaySound(final Integer key, final ReadableArguments status, final Promise promise);
 

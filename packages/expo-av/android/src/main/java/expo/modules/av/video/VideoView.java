@@ -17,8 +17,9 @@ import org.unimodules.core.arguments.ReadableArguments;
 import org.unimodules.core.interfaces.services.EventEmitter;
 
 import expo.modules.av.AVManagerInterface;
-import expo.modules.av.PlayerStatus;
+import expo.modules.av.Params;
 import expo.modules.av.Source;
+import expo.modules.av.Status;
 import expo.modules.av.audio.AudioEventHandler;
 import expo.modules.av.player.PlayerManager;
 
@@ -34,9 +35,8 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
     }
   };
 
-  private final PlayerManager.StatusUpdateListener mStatusUpdateListener = new PlayerManager.StatusUpdateListener() {
-    @Override
-    public void onStatusUpdate(final PlayerStatus status) {
+  private final PlayerManager.ParamsUpdatedListener mStatusUpdateListener = new PlayerManager.ParamsUpdatedListener() {
+    public void onParamsUpdate(final Params status) {
       post(mMediaControllerUpdater);
       mEventEmitter.emit(getReactId(), VideoViewManager.Events.EVENT_STATUS_UPDATE.toString(), status.toBundle());
     }
@@ -55,7 +55,7 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
   private Pair<Integer, Integer> mVideoWidthHeight = null;
   private FullscreenVideoPlayerPresentationChangeProgressListener mFullscreenPlayerPresentationChangeProgressListener = null;
 
-  private PlayerStatus mStatusToSet = null;
+  private Params mParamsToSet = null;
 
   private FullscreenVideoPlayer mFullscreenPlayer = null;
   private VideoTextureView mVideoTextureView = null;
@@ -267,20 +267,17 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
 
   // Prop setting
 
-  public void setStatus(final ReadableArguments status, final Promise promise) {
-    mStatusToSet = mStatusToSet.merge(status);
+  public void setParams(final ReadableArguments params, final Promise promise) {
+    mParamsToSet = mParamsToSet.update(params);
     if (mPlayerManager != null) {
-      final Bundle statusToSet = new Bundle();
-      statusToSet.putAll(mStatusToSet.toBundle());
-      mStatusToSet = null;
-      mPlayerManager.setStatus(status, promise);
+      mPlayerManager.setParams(params, promise);
     } else if (promise != null) {
-      promise.resolve(PlayerStatus.unloadedPlayerStatus());
+      promise.resolve(new Params());
     }
   }
 
-  public PlayerStatus getStatus() {
-    return mPlayerManager == null ? PlayerStatus.unloadedPlayerStatus() : mPlayerManager.getStatus();
+  public Status getStatus() {
+    return mPlayerManager == null ? new Status() : mPlayerManager.getStatus();
   }
 
   private boolean shouldUseNativeControls() {
@@ -301,24 +298,23 @@ public class VideoView extends FrameLayout implements AudioEventHandler, Fullscr
     maybeUpdateMediaControllerForUseNativeControls();
   }
 
-  public void setSource(final Source source, final ReadableArguments initialStatus, final Promise promise) {
-    PlayerStatus newStatus = PlayerStatus.fromReadableArguments(initialStatus);
+  public void setSource(final Source source, final ReadableArguments initialParams, final Promise promise) {
     if (mPlayerManager != null) {
-      mStatusToSet = mPlayerManager.getStatus();
+      mParamsToSet = mPlayerManager.getParams();
       mPlayerManager.release();
       mPlayerManager = null;
       mIsLoaded = false;
     }
 
-    if (initialStatus != null) {
-      mStatusToSet = newStatus;
+    if (initialParams != null) {
+      mParamsToSet = new Params().update(initialParams);
     }
 
     final String uriString = source != null ? source.getUri() : null;
 
     if (uriString == null) {
       if (promise != null) {
-        promise.resolve(PlayerStatus.unloadedPlayerStatus());
+        promise.resolve(new Params());
       }
       return;
     }

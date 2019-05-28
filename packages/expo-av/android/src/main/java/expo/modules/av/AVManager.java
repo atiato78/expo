@@ -336,12 +336,12 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   @Override
   public void loadForSound(final Source source, final ReadableArguments arguments, final Promise promise) {
     final int key = mSoundMapKeyCount++;
-    final PlayerManager data = mPlayerCreator.createUnloadedPlayerData(source, PlayerStatus.fromReadableArguments(arguments));
+    final PlayerManager data = mPlayerCreator.createUnloadedPlayerData(source, new Params().update(arguments));
     data.setErrorListener(error -> removeSoundForKey(key));
     mAudioEventHandlers.addAudio(key, data);
     data.load(arguments, new PlayerManager.LoadCompletionListener() {
       @Override
-      public void onLoadSuccess(@NonNull PlayerStatus status) {
+      public void onLoadSuccess(@NonNull Status status) {
         promise.resolve(Arrays.asList(key, status.toBundle()));
       }
 
@@ -364,15 +364,15 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   public void unloadForSound(final Integer key, final Promise promise) {
     if (tryGetSoundForKey(key, promise) != null) {
       removeSoundForKey(key);
-      promise.resolve(PlayerStatus.unloadedPlayerStatus());
+      promise.resolve(new Status().toBundle());
     } // Otherwise, tryGetSoundForKey has already rejected the promise.
   }
 
   @Override
-  public void setStatusForSound(final Integer key, final ReadableArguments status, final Promise promise) {
+  public void setParamsForSound(final Integer key, final ReadableArguments status, final Promise promise) {
     final PlayerManager data = tryGetSoundForKey(key, promise);
     if (data != null) {
-      data.setStatus(status, promise);
+      data.setParams(status, promise);
     } // Otherwise, tryGetSoundForKey has already rejected the promise.
   }
 
@@ -380,7 +380,7 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   public void replaySound(final Integer key, final ReadableArguments status, final Promise promise) {
     final PlayerManager data = tryGetSoundForKey(key, promise);
     if (data != null) {
-      data.setStatus(status, promise);
+      data.setParams(status, promise);
     } // Otherwise, tryGetSoundForKey has already rejected the promise.
   }
 
@@ -430,13 +430,14 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   }
 
   @Override
-  public void setStatusForVideo(final Integer tag, final ReadableArguments status, final Promise promise) {
-    tryRunWithVideoView(tag, videoView -> videoView.setStatus(status, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
+  public void setStatusForVideo(final Integer tag, final ReadableArguments params, final Promise promise) {
+    tryRunWithVideoView(tag, videoView -> videoView.setParams(params, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
   }
 
   @Override
-  public void replayVideo(final Integer tag, final ReadableArguments status, final Promise promise) {
-    tryRunWithVideoView(tag, videoView -> videoView.setStatus(status, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
+  public void replayVideo(final Integer tag, final ReadableArguments params, final Promise promise) {
+    // TODO: consider whether should be status (unlikely) or params
+    tryRunWithVideoView(tag, videoView -> videoView.setParams(params, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
   }
 
   @Override
@@ -444,7 +445,7 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
     tryRunWithVideoView(tag, videoView -> promise.resolve(videoView.getStatus()), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
   }
 
-  // Note that setStatusUpdateCallback happens in the JS for video via onStatusUpdate
+  // Note that setStatusUpdateCallback happens in the JS for video via onParamsUpdate
 
   // Recording API
 

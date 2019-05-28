@@ -21,11 +21,11 @@ class PlayerControl(private val mPlayerManager: PlayerManager) :
   }
 
   override fun getDuration(): Int {
-    return mPlayerManager.status?.durationInMillis ?: 0
+    return mPlayerManager.status.durationInMillis
   }
 
   override fun getCurrentPosition(): Int {
-    return mPlayerManager.status?.positionMillis ?: 0
+    return mPlayerManager.status.positionMillis
   }
 
   override fun isPlaying(): Boolean {
@@ -34,7 +34,7 @@ class PlayerControl(private val mPlayerManager: PlayerManager) :
 
   override fun getBufferPercentage(): Int {
     val status = mPlayerManager.status
-    return if (status!!.isLoaded && status.durationInMillis > 0 && status.playableDurationMillis > 0) {
+    return if (status.isLoaded && status.durationInMillis > 0 && status.playableDurationMillis > 0) {
       (status.playableDurationMillis / status.durationInMillis * 100.0).toInt()
     } else {
       0

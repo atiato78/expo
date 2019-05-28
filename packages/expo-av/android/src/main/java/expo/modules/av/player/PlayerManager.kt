@@ -6,7 +6,8 @@ import android.util.Pair
 import android.view.Surface
 import expo.modules.av.AVManagerInterface
 import expo.modules.av.AudioFocusNotAcquiredException
-import expo.modules.av.PlayerStatus
+import expo.modules.av.Params
+import expo.modules.av.Status
 import expo.modules.av.audio.AudioEventHandler
 import org.unimodules.core.Promise
 import org.unimodules.core.arguments.ReadableArguments
@@ -24,6 +25,7 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   private val mProgressUpdater = ProgressUpdater(this)
 
   private var mFullscreenPresenter: FullscreenPresenter? = null
+  private var mParamsUpdatedListener: ParamsUpdatedListener? = null
   private var mStatusUpdateListener: StatusUpdateListener? = null
   private var mErrorListener: ErrorListener? = null
   private var mVideoSizeUpdateListener: VideoSizeUpdateListener? = null
@@ -37,26 +39,22 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   val videoWidthHeight: Pair<Int, Int>
     get() = player.videoWidthHeight
 
+  //TODO: Uncomment when done with params
+
   val isPlaying: Boolean
     get() = status.isLoaded && status.isPlaying
 
-  private var _status: PlayerStatus = PlayerStatus.unloadedPlayerStatus()
+  var params: Params = Params()
+    private set
 
-  val status: PlayerStatus
+  val status: Status
     @Synchronized get() {
-      if (!player.loaded) {
-        return PlayerStatus.unloadedPlayerStatus().copy(implementation = player.implementationName)
-      }
-
-      return _status.copy(
-          isLoaded = true,
-          uriPath = uri.path,
-          implementation = player.implementationName,
+      return Status(
+          isLoaded = player.loaded,
           durationInMillis = player.duration,
           positionMillis = player.currentPosition,
           isPlaying = player.playing,
           isBuffering = player.buffering,
-          isLooping = player.looping,
           playableDurationMillis = player.playableDuration ?: 0
       )
     }
@@ -86,6 +84,7 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
               emptyList()
             }
           } catch (e: IOException) {
+            // TODO: This look nasty
           }
 
         }
@@ -94,11 +93,11 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
     }
 
   fun play() {
-    this._status = status.copy(isPlaying = true)
+    this.params = params.copy(shouldPlay = true)
   }
 
   fun pause() {
-    this._status = status.copy(shouldPlay = false)
+    this.params = params.copy(shouldPlay = false)
   }
 
   fun seekTo(positionMillis: Int) {
@@ -114,16 +113,20 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   }
 
   interface LoadCompletionListener {
-    fun onLoadSuccess(status: PlayerStatus)
+    fun onLoadSuccess(status: Status)
 
     fun onLoadError(error: String)
   }
 
-  interface StatusUpdateListener {
-    fun onStatusUpdate(status: PlayerStatus?)
+  interface ParamsUpdatedListener {
+    fun onParamsUpdate(params: Params?)
   }
 
-  internal interface SetStatusCompletionListener {
+  interface StatusUpdateListener {
+    fun onStatusUpdate(status: Status?)
+  }
+
+  internal interface SetParamsCompletionListener {
     fun onSetStatusComplete()
 
     fun onSetStatusError(error: String)
@@ -150,7 +153,7 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   fun load(arguments: ReadableArguments, loadCompletionListener: LoadCompletionListener) {
     this.player.load(uri, httpCookiesList, object : ExpoPlayer.LoadListener {
       override fun onLoaded() {
-        setStatusWithListener(status.merge(arguments), object : SetStatusCompletionListener {
+        setParams(params.update(arguments), object : SetParamsCompletionListener {
           override fun onSetStatusComplete() {
             loadCompletionListener.onLoadSuccess(status)
           }
@@ -168,7 +171,7 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   }
 
   fun setSurface(surface: Surface) {
-    this.player.setSurface(surface, status.shouldPlay)
+    this.player.setSurface(surface, params.shouldPlay)
   }
 
   fun release() {
@@ -178,7 +181,7 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
 
   // Status update listener
 
-  private fun callStatusUpdateListenerWithStatus(status: PlayerStatus?) {
+  private fun callStatusUpdateListenerWithStatus(status: Status?) {
     mStatusUpdateListener?.onStatusUpdate(status)
   }
 
@@ -198,10 +201,10 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   }
 
   private fun progressUpdateLoop() {
-    if (!player.continueUpdatingProgress || status.updateInterval <= 0) {
+    if (!player.continueUpdatingProgress || params.updateInterval <= 0) {
       stopUpdatingProgressIfNecessary()
     } else {
-      mHandler.postDelayed(mProgressUpdater, status.updateInterval.toLong())
+      mHandler.postDelayed(mProgressUpdater, params.updateInterval.toLong())
     }
   }
 
@@ -209,9 +212,9 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
     mHandler.post(mProgressUpdater)
   }
 
-  fun setStatusUpdateListener(listener: StatusUpdateListener) {
-    mStatusUpdateListener = listener
-    if (mStatusUpdateListener != null) {
+  fun setStatusUpdateListener(listener: ParamsUpdatedListener) {
+    mParamsUpdatedListener = listener
+    if (mParamsUpdatedListener != null) {
       beginUpdatingProgressIfNecessary()
     }
   }
@@ -225,23 +228,18 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   // Status
 
   private fun shouldPlayerPlay(): Boolean {
-    return status.shouldPlay && status.rate > 0.0
+    return params.shouldPlay && params.rate > 0.0
   }
 
-  fun setStatus(status: ReadableArguments?, promise: Promise?) {
-    if (status == null) {
-      promise?.reject("E_AV_SETSTATUS", "Cannot set null status.")
-      return
-    }
-
+  fun setParams(status: ReadableArguments, promise: Promise?) {
     try {
-      val newStatus = this.status.merge(status)
-      setStatusWithListener(newStatus, object : SetStatusCompletionListener {
+      val newParams = this.params.update(status)
+      setParams(newParams, object : SetParamsCompletionListener {
         override fun onSetStatusComplete() {
           if (promise == null) {
             callStatusUpdateListener()
           } else {
-            promise.resolve(newStatus.toBundle())
+            promise.resolve(newParams.toBundle())
           }
         }
 
@@ -259,13 +257,11 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
 
   }
 
-  private fun setStatusWithListener(status: PlayerStatus?,
-                                    setStatusCompletionListener: SetStatusCompletionListener) {
-    if (status != null) {
-      this._status = status
-    }
+  private fun setParams(params: Params,
+                        setParamsCompletionListener: SetParamsCompletionListener) {
+    this.params = params
 
-    player.looping = this._status.isLooping
+    player.looping = this.params.isLooping
 
     if (!shouldPlayerPlay()) {
       player.pauseImmediately()
@@ -273,16 +269,16 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
       try {
         avModule.acquireAudioFocus()
         updateVolumeMuteAndDuck()
-        player.play(this._status.isMuted, this._status.rate, this._status.shouldCorrectPitch)
+        player.play(this.params.isMuted, this.params.rate, this.params.shouldCorrectPitch)
 
         avModule.abandonAudioFocusIfUnused()
       } catch (ex: AudioFocusNotAcquiredException) {
         avModule.abandonAudioFocusIfUnused()
-        setStatusCompletionListener.onSetStatusError(ex.toString())
+        setParamsCompletionListener.onSetStatusError(ex.toString())
       }
 
     }
-    setStatusCompletionListener.onSetStatusComplete()
+    setParamsCompletionListener.onSetStatusComplete()
 
   }
 
@@ -303,7 +299,7 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   // AudioEventHandler
 
   override fun handleAudioFocusInterruptionBegan() {
-    if (!this.status.isMuted) {
+    if (!this.params.isMuted) {
       pauseImmediately()
       stopUpdatingProgressIfNecessary()
     }
@@ -327,13 +323,13 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   }
 
   override fun requiresAudioFocus(): Boolean {
-    return player.playing && !this.status.isMuted
+    return player.playing && !this.params.isMuted
   }
 
   override fun updateVolumeMuteAndDuck() {
     if (player.loaded) {
       player.volume =
-          avModule.getVolumeForDuckAndFocus(this.status.isMuted, this.status.volume)
+          avModule.getVolumeForDuckAndFocus(this.params.isMuted, this.params.volume)
     }
   }
 
@@ -389,13 +385,13 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
       return
     }
 
-    if (!this.status.isMuted) {
+    if (!this.params.isMuted) {
       avModule.acquireAudioFocus()
     }
 
     updateVolumeMuteAndDuck()
 
-    player.play(this.status.isMuted, this.status.rate, this.status.shouldCorrectPitch)
+    player.play(this.params.isMuted, this.params.rate, this.params.shouldCorrectPitch)
 
     beginUpdatingProgressIfNecessary()
   }

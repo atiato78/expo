@@ -2,7 +2,7 @@ import omit from 'lodash.omit';
 import nullthrows from 'nullthrows';
 import PropTypes from 'prop-types';
 import * as React from 'react';
-import { findNodeHandle, Image, StyleSheet, View, ViewPropTypes } from 'react-native';
+import { findNodeHandle, Image, StyleSheet, View, ViewPropTypes, } from 'react-native';
 import { assertStatusValuesInBounds, getNativeSourceAndFullInitialStatusForLoadAsync, getNativeSourceFromSource, getUnloadedStatus, PlaybackMixin, } from './AV';
 import ExponentAV from './ExponentAV';
 import ExponentVideo from './ExponentVideo';
@@ -104,12 +104,12 @@ export default class Video extends React.Component {
             return this._performOperationAndHandleStatusAsync((tag) => ExponentAV.unloadForVideo(tag));
         };
         // Set status API (only available while isLoaded = true)
-        this.setStatusAsync = async (status) => {
+        this.setParamsAsync = async (status) => {
             assertStatusValuesInBounds(status);
             return this._performOperationAndHandleStatusAsync((tag) => ExponentAV.setStatusForVideo(tag, status));
         };
         this.replayAsync = async (status = {}) => {
-            if (status.positionMillis && status.positionMillis !== 0) {
+            if (status.initialPosition && status.initialPosition !== 0) {
                 throw new Error('Requested position after replay has to be 0.');
             }
             return this._performOperationAndHandleStatusAsync((tag) => ExponentAV.replayVideo(tag, {
@@ -187,7 +187,7 @@ export default class Video extends React.Component {
             }
         }
         // Set status via individual props
-        const status = { ...this.props.status };
+        const status = { ...this.props.params };
         [
             'progressUpdateIntervalMillis',
             'positionMillis',

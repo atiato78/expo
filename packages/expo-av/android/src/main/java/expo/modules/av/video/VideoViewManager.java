@@ -48,7 +48,7 @@ public class VideoViewManager extends ViewManager<VideoViewWrapper> implements M
   }
 
   enum Events {
-    EVENT_STATUS_UPDATE("onStatusUpdate"),
+    EVENT_STATUS_UPDATE("onParamsUpdate"),
     EVENT_LOAD_START("onLoadStart"),
     EVENT_LOAD("onLoad"),
     EVENT_ERROR("onError"),
@@ -92,7 +92,7 @@ public class VideoViewManager extends ViewManager<VideoViewWrapper> implements M
 
   @ExpoProp(name = PROP_STATUS)
   public void setStatus(final VideoViewWrapper videoViewWrapper, final ReadableArguments status) {
-    videoViewWrapper.getVideoViewInstance().setStatus(status, null);
+    videoViewWrapper.getVideoViewInstance().setParams(status, null);
   }
 
   @ExpoProp(name = PROP_USE_NATIVE_CONTROLS)

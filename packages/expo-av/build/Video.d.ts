@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import * as React from 'react';
-import { Playback, PlaybackSource, PlaybackStatus, PlaybackStatusToSet } from './AV';
+import { Playback, PlaybackSource, PlaybackStatus, PlaybackParams } from './AV';
 import { ExponentVideoComponent, FullscreenUpdateEvent, NativeProps, NaturalSize, VideoProps, ReadyForDisplayEvent, ResizeMode, VideoState } from './Video.types';
 export { ExponentVideoComponent, FullscreenUpdateEvent, NativeProps, NaturalSize, VideoProps, ReadyForDisplayEvent, ResizeMode, VideoState, };
 export declare const FULLSCREEN_UPDATE_PLAYER_WILL_PRESENT = 0;
@@ -26,7 +26,7 @@ export default class Video extends React.Component<VideoProps, VideoState> imple
     static propTypes: {
         hitSlop?: PropTypes.Validator<import("react-native").Insets | undefined> | undefined;
         onLayout?: PropTypes.Validator<((event: import("react-native").LayoutChangeEvent) => void) | undefined> | undefined;
-        pointerEvents?: PropTypes.Validator<"none" | "box-none" | "box-only" | "auto" | undefined> | undefined;
+        pointerEvents?: PropTypes.Validator<"box-none" | "none" | "box-only" | "auto" | undefined> | undefined;
         removeClippedSubviews?: PropTypes.Validator<boolean | undefined> | undefined;
         style?: PropTypes.Validator<import("react-native").StyleProp<import("react-native").ViewStyle>> | undefined;
         testID?: PropTypes.Validator<string | undefined> | undefined;
@@ -64,14 +64,14 @@ export default class Video extends React.Component<VideoProps, VideoState> imple
         onTouchEndCapture?: PropTypes.Validator<((event: import("react-native").GestureResponderEvent) => void) | undefined> | undefined;
         accessible?: PropTypes.Validator<boolean | undefined> | undefined;
         accessibilityLabel?: PropTypes.Validator<string | undefined> | undefined;
-        accessibilityRole?: PropTypes.Validator<"none" | "button" | "header" | "link" | "summary" | "image" | "text" | "search" | "keyboardkey" | "adjustable" | "imagebutton" | undefined> | undefined;
+        accessibilityRole?: PropTypes.Validator<"button" | "header" | "link" | "summary" | "image" | "text" | "none" | "search" | "keyboardkey" | "adjustable" | "imagebutton" | undefined> | undefined;
         accessibilityStates?: PropTypes.Validator<import("react-native").AccessibilityState[] | undefined> | undefined;
         accessibilityHint?: PropTypes.Validator<string | undefined> | undefined;
-        accessibilityComponentType?: PropTypes.Validator<"none" | "button" | "radiobutton_checked" | "radiobutton_unchecked" | undefined> | undefined;
+        accessibilityComponentType?: PropTypes.Validator<"button" | "none" | "radiobutton_checked" | "radiobutton_unchecked" | undefined> | undefined;
         accessibilityLiveRegion?: PropTypes.Validator<"none" | "polite" | "assertive" | undefined> | undefined;
         importantForAccessibility?: PropTypes.Validator<"auto" | "yes" | "no" | "no-hide-descendants" | undefined> | undefined;
         accessibilityElementsHidden?: PropTypes.Validator<boolean | undefined> | undefined;
-        accessibilityTraits?: PropTypes.Validator<"key" | "none" | "button" | "header" | "link" | "summary" | "image" | "text" | "search" | "adjustable" | "selected" | "disabled" | "plays" | "frequentUpdates" | "startsMedia" | "allowsDirectInteraction" | "pageTurn" | import("react-native").AccessibilityTrait[] | undefined> | undefined;
+        accessibilityTraits?: PropTypes.Validator<"button" | "header" | "link" | "summary" | "image" | "text" | "none" | "search" | "adjustable" | "selected" | "disabled" | "plays" | "key" | "frequentUpdates" | "startsMedia" | "allowsDirectInteraction" | "pageTurn" | import("react-native").AccessibilityTrait[] | undefined> | undefined;
         onAccessibilityTap?: PropTypes.Validator<(() => void) | undefined> | undefined;
         onMagicTap?: PropTypes.Validator<(() => void) | undefined> | undefined;
         accessibilityIgnoresInvertColors?: PropTypes.Validator<boolean | undefined> | undefined;
@@ -129,10 +129,10 @@ export default class Video extends React.Component<VideoProps, VideoState> imple
     dismissFullscreenPlayer: () => Promise<PlaybackStatus>;
     dismissIOSFullscreenPlayer: () => void;
     getStatusAsync: () => Promise<PlaybackStatus>;
-    loadAsync: (source: PlaybackSource, initialStatus?: PlaybackStatusToSet, downloadFirst?: boolean) => Promise<PlaybackStatus>;
+    loadAsync: (source: PlaybackSource, initialStatus?: PlaybackParams, downloadFirst?: boolean) => Promise<PlaybackStatus>;
     unloadAsync: () => Promise<PlaybackStatus>;
-    setStatusAsync: (status: PlaybackStatusToSet) => Promise<PlaybackStatus>;
-    replayAsync: (status?: PlaybackStatusToSet) => Promise<PlaybackStatus>;
+    setParamsAsync: (status: PlaybackParams) => Promise<PlaybackStatus>;
+    replayAsync: (status?: PlaybackParams) => Promise<PlaybackStatus>;
     playAsync: () => Promise<PlaybackStatus>;
     playFromPositionAsync: (positionMillis: number, tolerances?: {
         toleranceMillisBefore?: number;

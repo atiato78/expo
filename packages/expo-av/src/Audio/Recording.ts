@@ -1,10 +1,6 @@
 import { NativeModulesProxy, EventEmitter, Subscription, Platform } from '@unimodules/core';
 
-import {
-  _DEFAULT_PROGRESS_UPDATE_INTERVAL_MILLIS,
-  PlaybackStatus,
-  PlaybackStatusToSet,
-} from '../AV';
+import { _DEFAULT_PROGRESS_UPDATE_INTERVAL_MILLIS, PlaybackStatus, PlaybackParams } from '../AV';
 
 import ExponentAV from '../ExponentAV';
 import { isAudioEnabled, throwIfAudioIsDisabled } from './AudioAvailability';
@@ -186,9 +182,8 @@ export class Recording {
 
   _pollingLoop = async () => {
     if (isAudioEnabled() && this._canRecord && this._onRecordingStatusUpdate != null) {
-      this._progressUpdateTimeoutVariable = <any>setTimeout(
-        this._pollingLoop,
-        this._progressUpdateIntervalMillis
+      this._progressUpdateTimeoutVariable = <any>(
+        setTimeout(this._pollingLoop, this._progressUpdateIntervalMillis)
       );
       try {
         await this.getStatusAsync();
@@ -357,7 +352,7 @@ export class Recording {
   }
 
   async createNewLoadedSound(
-    initialStatus: PlaybackStatusToSet = {},
+    initialStatus: PlaybackParams = {},
     onPlaybackStatusUpdate: ((status: PlaybackStatus) => void) | null = null
   ): Promise<{ sound: Sound; status: PlaybackStatus }> {
     console.warn(
@@ -367,7 +362,7 @@ export class Recording {
   }
 
   async createNewLoadedSoundAsync(
-    initialStatus: PlaybackStatusToSet = {},
+    initialStatus: PlaybackParams = {},
     onPlaybackStatusUpdate: ((status: PlaybackStatus) => void) | null = null
   ): Promise<{ sound: Sound; status: PlaybackStatus }> {
     if (this._uri == null || !this._isDoneRecording) {

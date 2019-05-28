@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { View, StyleProp, ViewStyle } from 'react-native';
-import { PlaybackNativeSource, PlaybackSource, PlaybackStatus, PlaybackStatusToSet } from './AV';
+import { PlaybackNativeSource, PlaybackSource, PlaybackStatus, PlaybackParams } from './AV';
 export declare type NaturalSize = {
     width: number;
     height: number;
@@ -35,7 +35,7 @@ export declare type VideoProps = {
     useNativeControls?: boolean;
     resizeMode?: ResizeMode | 'stretch' | 'cover' | 'contain';
     usePoster?: boolean;
-    status?: PlaybackStatusToSet;
+    params?: PlaybackParams;
     progressUpdateIntervalMillis?: number;
     positionMillis?: number;
     shouldPlay?: boolean;
@@ -53,7 +53,7 @@ export declare type VideoProps = {
 export declare type NativeProps = {
     source: PlaybackNativeSource | null;
     resizeMode?: unknown;
-    status?: PlaybackStatusToSet;
+    params?: PlaybackParams;
     onLoadStart?: () => void;
     onLoad?: (event: {
         nativeEvent: PlaybackStatus;

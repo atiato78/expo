@@ -20,7 +20,7 @@ import {
   PlaybackMixin,
   PlaybackSource,
   PlaybackStatus,
-  PlaybackStatusToSet,
+  PlaybackParams,
 } from './AV';
 import ExponentAV from './ExponentAV';
 import ExponentVideo from './ExponentVideo';
@@ -253,7 +253,7 @@ export default class Video extends React.Component<VideoProps, VideoState> imple
 
   loadAsync = async (
     source: PlaybackSource,
-    initialStatus: PlaybackStatusToSet = {},
+    initialStatus: PlaybackParams = {},
     downloadFirst: boolean = true
   ): Promise<PlaybackStatus> => {
     const {
@@ -274,15 +274,15 @@ export default class Video extends React.Component<VideoProps, VideoState> imple
 
   // Set status API (only available while isLoaded = true)
 
-  setStatusAsync = async (status: PlaybackStatusToSet): Promise<PlaybackStatus> => {
+  setParamsAsync = async (status: PlaybackParams): Promise<PlaybackStatus> => {
     assertStatusValuesInBounds(status);
     return this._performOperationAndHandleStatusAsync((tag: number) =>
       ExponentAV.setStatusForVideo(tag, status)
     );
   };
 
-  replayAsync = async (status: PlaybackStatusToSet = {}): Promise<PlaybackStatus> => {
-    if (status.positionMillis && status.positionMillis !== 0) {
+  replayAsync = async (status: PlaybackParams = {}): Promise<PlaybackStatus> => {
+    if (status.initialPosition && status.initialPosition !== 0) {
       throw new Error('Requested position after replay has to be 0.');
     }
 
@@ -391,7 +391,7 @@ export default class Video extends React.Component<VideoProps, VideoState> imple
     }
 
     // Set status via individual props
-    const status: PlaybackStatusToSet = { ...this.props.status };
+    const status: PlaybackParams = { ...this.props.params };
     [
       'progressUpdateIntervalMillis',
       'positionMillis',

@@ -126,17 +126,17 @@ export class Sound {
         }
     }
     // Set status API (only available while isLoaded = true)
-    async setStatusAsync(status) {
-        assertStatusValuesInBounds(status);
-        return this._performOperationAndHandleStatusAsync(() => ExponentAV.setStatusForSound(this._key, status));
+    async setParamsAsync(params) {
+        assertStatusValuesInBounds(params);
+        return this._performOperationAndHandleStatusAsync(() => ExponentAV.setParamsForSound(this._key, params));
     }
-    async replayAsync(status = {}) {
-        if (status.positionMillis && status.positionMillis !== 0) {
+    async replayAsync(params = {}) {
+        if (params.initialPosition && params.initialPosition !== 0) {
             throw new Error('Requested position after replay has to be 0.');
         }
         return this._performOperationAndHandleStatusAsync(() => ExponentAV.replaySound(this._key, {
-            ...status,
-            positionMillis: 0,
+            ...params,
+            initialPosition: 0,
             shouldPlay: true,
         }));
     }

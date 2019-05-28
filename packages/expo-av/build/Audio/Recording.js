@@ -1,5 +1,5 @@
 import { EventEmitter, Platform } from '@unimodules/core';
-import { _DEFAULT_PROGRESS_UPDATE_INTERVAL_MILLIS, } from '../AV';
+import { _DEFAULT_PROGRESS_UPDATE_INTERVAL_MILLIS } from '../AV';
 import ExponentAV from '../ExponentAV';
 import { isAudioEnabled, throwIfAudioIsDisabled } from './AudioAvailability';
 import { Sound } from './Sound';
@@ -133,7 +133,7 @@ export class Recording {
         };
         this._pollingLoop = async () => {
             if (isAudioEnabled() && this._canRecord && this._onRecordingStatusUpdate != null) {
-                this._progressUpdateTimeoutVariable = setTimeout(this._pollingLoop, this._progressUpdateIntervalMillis);
+                this._progressUpdateTimeoutVariable = (setTimeout(this._pollingLoop, this._progressUpdateIntervalMillis));
                 try {
                     await this.getStatusAsync();
                 }

@@ -49,8 +49,8 @@ public class AVModule extends ExportedModule implements ModuleRegistryConsumer {
   }
 
   @ExpoMethod
-  public void setStatusForSound(final Integer key, final ReadableArguments status, final Promise promise) {
-    mAVManager.setStatusForSound(key, status, promise);
+  public void setParamsForSound(final Integer key, final ReadableArguments status, final Promise promise) {
+    mAVManager.setParamsForSound(key, status, promise);
   }
 
   @ExpoMethod

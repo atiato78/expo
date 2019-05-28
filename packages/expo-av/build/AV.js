@@ -16,8 +16,7 @@ export var PitchCorrectionQuality;
     PitchCorrectionQuality[PitchCorrectionQuality["High"] = ExponentAV && ExponentAV.Qualities && ExponentAV.Qualities.High] = "High";
 })(PitchCorrectionQuality || (PitchCorrectionQuality = {}));
 export const _DEFAULT_PROGRESS_UPDATE_INTERVAL_MILLIS = 500;
-export const _DEFAULT_INITIAL_PLAYBACK_STATUS = {
-    positionMillis: 0,
+export const _DEFAULT_INITIAL_PLAYBACK_PARAMS = {
     progressUpdateIntervalMillis: _DEFAULT_PROGRESS_UPDATE_INTERVAL_MILLIS,
     shouldPlay: false,
     rate: 1.0,
@@ -85,13 +84,13 @@ export function assertStatusValuesInBounds(status) {
         throw new RangeError('Volume value must be between 0.0 and 1.0');
     }
 }
-export async function getNativeSourceAndFullInitialStatusForLoadAsync(source, initialStatus, downloadFirst) {
+export async function getNativeSourceAndFullInitialStatusForLoadAsync(source, initialParams, downloadFirst) {
     // Get the full initial status
-    const fullInitialStatus = initialStatus == null
-        ? _DEFAULT_INITIAL_PLAYBACK_STATUS
+    const fullInitialStatus = initialParams == null
+        ? _DEFAULT_INITIAL_PLAYBACK_PARAMS
         : {
-            ..._DEFAULT_INITIAL_PLAYBACK_STATUS,
-            ...initialStatus,
+            ..._DEFAULT_INITIAL_PLAYBACK_PARAMS,
+            ...initialParams,
         };
     assertStatusValuesInBounds(fullInitialStatus);
     if (typeof source === 'string' && Platform.OS === 'web') {
@@ -119,7 +118,10 @@ export async function getNativeSourceAndFullInitialStatusForLoadAsync(source, in
 export function getUnloadedStatus(error = null) {
     return {
         isLoaded: false,
-        ...(error ? { error } : null),
+        isPlaying: false,
+        isLoading: false,
+        isBuffering: false,
+        didJustFinish: false,
     };
 }
 /**
@@ -128,47 +130,47 @@ export function getUnloadedStatus(error = null) {
  */
 export const PlaybackMixin = {
     async playAsync() {
-        return this.setStatusAsync({ shouldPlay: true });
+        return this.setParamsAsync({ shouldPlay: true });
     },
     async playFromPositionAsync(positionMillis, tolerances = {}) {
-        return this.setStatusAsync({
-            positionMillis,
+        return this.setParamsAsync({
+            initialPosition: positionMillis,
             shouldPlay: true,
             seekMillisToleranceAfter: tolerances.toleranceMillisAfter,
             seekMillisToleranceBefore: tolerances.toleranceMillisBefore,
         });
     },
     async pauseAsync() {
-        return this.setStatusAsync({ shouldPlay: false });
+        return this.setParamsAsync({ shouldPlay: false });
     },
     async stopAsync() {
-        return this.setStatusAsync({ positionMillis: 0, shouldPlay: false });
+        return this.setParamsAsync({ initialPosition: 0, shouldPlay: false });
     },
     async setPositionAsync(positionMillis, tolerances = {}) {
-        return this.setStatusAsync({
-            positionMillis,
+        return this.setParamsAsync({
+            initialPosition: positionMillis,
             seekMillisToleranceAfter: tolerances.toleranceMillisAfter,
             seekMillisToleranceBefore: tolerances.toleranceMillisBefore,
         });
     },
     async setRateAsync(rate, shouldCorrectPitch = false, pitchCorrectionQuality = PitchCorrectionQuality.Low) {
-        return this.setStatusAsync({
+        return this.setParamsAsync({
             rate,
             shouldCorrectPitch,
             pitchCorrectionQuality,
         });
     },
     async setVolumeAsync(volume) {
-        return this.setStatusAsync({ volume });
+        return this.setParamsAsync({ volume });
     },
     async setIsMutedAsync(isMuted) {
-        return this.setStatusAsync({ isMuted });
+        return this.setParamsAsync({ isMuted });
     },
     async setIsLoopingAsync(isLooping) {
-        return this.setStatusAsync({ isLooping });
+        return this.setParamsAsync({ isLooping });
     },
     async setProgressUpdateIntervalAsync(progressUpdateIntervalMillis) {
-        return this.setStatusAsync({ progressUpdateIntervalMillis });
+        return this.setParamsAsync({ progressUpdateIntervalMillis });
     },
 };
 //# sourceMappingURL=AV.js.map
