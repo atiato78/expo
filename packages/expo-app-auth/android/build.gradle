@@ -71,6 +71,8 @@ dependencies {
   unimodule "unimodules-core"
   unimodule "unimodules-constants-interface"
 
-  implementation "net.openid:appauth:0.7.1"
+  api 'androidx.annotation:annotation:1.0.2'
+
+  implementation 'net.openid:appauth:0.7.1'
   implementation 'de.greenrobot:eventbus:2.4.0'
 }

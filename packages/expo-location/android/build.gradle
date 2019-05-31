@@ -71,6 +71,8 @@ dependencies {
   unimodule "unimodules-permissions-interface"
   unimodule "unimodules-task-manager-interface"
 
+  api 'androidx.annotation:annotation:1.0.2'
+
   api 'com.google.android.gms:play-services-location:16.0.0'
 
   api('io.nlopez.smartlocation:library:3.2.11') {

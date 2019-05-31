@@ -13,8 +13,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.media.ExifInterface;
-import android.support.v4.content.FileProvider;
+import androidx.core.content.FileProvider;
+import androidx.exifinterface.media.ExifInterface;
 import android.util.Base64;
 import android.webkit.MimeTypeMap;
 

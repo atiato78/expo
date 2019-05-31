@@ -68,5 +68,7 @@ if (new File(rootProject.projectDir.parentFile, 'package.json').exists()) {
 
 dependencies {
   unimodule "unimodules-core"
+
+  api 'androidx.annotation:annotation:1.0.2'
   api 'com.google.android.gms:play-services-ads:15.0.1'
 }

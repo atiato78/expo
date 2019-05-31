@@ -70,6 +70,9 @@ dependencies {
   unimodule "unimodules-core"
   unimodule "unimodules-barcode-scanner-interface"
   unimodule "unimodules-image-loader-interface"
+
+  api 'androidx.core:core:1.0.2'
+
   implementation 'com.google.android.gms:play-services-vision:15.0.2'
   implementation 'com.google.zxing:core:3.3.3'
 }

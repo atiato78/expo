@@ -18,7 +18,7 @@ package com.google.android.cameraview;
 
 import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.support.test.espresso.UiController;
 import android.support.test.espresso.ViewAction;
 import android.view.View;
