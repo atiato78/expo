@@ -71,7 +71,6 @@ export default class AudioPlayer extends React.Component<Props, State> {
   _updateStateToStatus = (status: any) => this.setState(status);
 
   _playAsync = async () => {
-    console.log('Sound: ', this._sound);
     this._sound!.playAsync();
   };
 
