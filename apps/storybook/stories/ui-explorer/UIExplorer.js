@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { Label } from './DocItem';
 import AppText from './AppText';
 import ExternalLink from './ExternalLink';
 import insertBetween from './insertBetween';
@@ -33,9 +34,19 @@ const SourceLink = ({ uri }) => (
   </ExternalLink>
 );
 
-const UIExplorer = ({ children, description, sections, title, url }) => (
+const UIExplorer = ({ children, packageName, description, sections, title, url }) => (
   <View style={styles.root}>
     <Title>{title}</Title>
+    {packageName && (
+      <View style={{ alignItems: 'start', marginTop: 8 }}>
+        <Label
+          accessibilityRole="link"
+          target="_blank"
+          href={`https://npmjs.com/package/${packageName}`}>
+          {packageName}
+        </Label>
+      </View>
+    )}
     {description && <Description>{description}</Description>}
     {children}
     {url && <SourceLink uri={url} />}

@@ -1,39 +1,5 @@
-import AppText from './AppText';
-import insertBetween from './insertBetween';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-
-const Divider = () => <View style={styles.verticalDivider} />;
-
-const createDescription = description => {
-  const nodeList = React.Children.toArray(description);
-  let content;
-  if (nodeList.length === 1) {
-    content = <Text>{nodeList}</Text>;
-  } else {
-    content = insertBetween(() => <Divider key={Math.random()} />, nodeList);
-  }
-  return <Text style={styles.text}>{content}</Text>;
-};
-
-const DocItem = ({ description, example = {}, name, typeInfo, label }) => (
-  <View style={styles.example}>
-    {name && (
-      <AppText style={styles.title}>
-        <PropText label={label} name={name} typeInfo={typeInfo} />
-      </AppText>
-    )}
-    {description && <View style={styles.description}>{createDescription(description)}</View>}
-    {(example.render || example.code) && (
-      <View style={styles.renderBox}>
-        <AppText style={styles.exampleText}>Example</AppText>
-        {example.render && <View>{example.render()}</View>}
-        {example.render && example.code && <View style={styles.verticalDivider} />}
-        {example.code && <Text style={styles.code}>{example.code}</Text>}
-      </View>
-    )}
-  </View>
-);
 
 /**
  * ### getContactByIdAsync
@@ -66,6 +32,40 @@ const DocItem = ({ description, example = {}, name, typeInfo, label }) => (
  */
 
 import { Table, TableWrapper, Row, Rows, Col, Cols, Cell } from 'react-native-table-component';
+import insertBetween from './insertBetween';
+import AppText from './AppText';
+
+const Divider = () => <View style={styles.verticalDivider} />;
+
+const createDescription = description => {
+  const nodeList = React.Children.toArray(description);
+  let content;
+  if (nodeList.length === 1) {
+    content = <Text>{nodeList}</Text>;
+  } else {
+    content = insertBetween(() => <Divider key={Math.random()} />, nodeList);
+  }
+  return <Text style={styles.text}>{content}</Text>;
+};
+
+const DocItem = ({ description, example = {}, name, typeInfo, label }) => (
+  <View style={styles.example}>
+    {name && (
+      <AppText style={styles.title}>
+        <PropText label={label} name={name} typeInfo={typeInfo} />
+      </AppText>
+    )}
+    {description && <View style={styles.description}>{createDescription(description)}</View>}
+    {(example.render || example.code) && (
+      <View style={styles.renderBox}>
+        <AppText style={styles.exampleText}>Example</AppText>
+        {example.render && <View>{example.render()}</View>}
+        {example.render && example.code && <View style={styles.verticalDivider} />}
+        {example.code && <Text style={styles.code}>{example.code}</Text>}
+      </View>
+    )}
+  </View>
+);
 
 const ParametersTable = ({ data, header }) => {
   return (
@@ -157,9 +157,15 @@ export const DocFunctionItem = ({
   </View>
 );
 
+export const Label = ({ style, children, ...props }) => (
+  <Text {...props} style={[styles.label, children === 'web' && styles.webLabel, style]}>
+    {children}
+  </Text>
+);
+
 const PropText = ({ label, name, typeInfo }) => (
   <AppText>
-    {label && <Text style={[styles.label, label === 'web' && styles.webLabel]}>{label}</Text>}
+    {label && <Label>{label}</Label>}
     <Text style={styles.propName}>{name}</Text>
     {typeInfo && (
       <Text>

@@ -60,7 +60,10 @@ function loadStories() {
     }
 
     const screen = (props = {}) => (
-      <UIExplorer title={title} description={description || packageJson.description}>
+      <UIExplorer
+        title={title}
+        description={description || packageJson.description}
+        packageName={packageJson.name}>
         <Component {...props} />
       </UIExplorer>
     );
