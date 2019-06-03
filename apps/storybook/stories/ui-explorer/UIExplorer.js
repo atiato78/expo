@@ -36,7 +36,7 @@ const SourceLink = ({ uri }) => (
 const UIExplorer = ({ children, description, sections, title, url }) => (
   <View style={styles.root}>
     <Title>{title}</Title>
-    {description}
+    {description && <Description>{description}</Description>}
     {children}
     {url && <SourceLink uri={url} />}
   </View>

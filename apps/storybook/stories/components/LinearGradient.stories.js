@@ -1,51 +1,48 @@
 import { color, number } from '@storybook/addon-knobs/react';
-import { storiesOf } from '@storybook/react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
+import { View } from 'react-native';
 
-import UIExplorer, { Description, DocItem, Section } from '../ui-explorer';
-import notes from './LinearGradient.notes.md';
+import UIExplorer, { DocItem, Section } from '../ui-explorer';
 
-const TITLE = 'Linear Gradient';
+export const title = 'Linear Gradient';
+export const kind = 'Components';
+export const packageJson = require('expo-linear-gradient/package.json');
+export { default as notes } from './LinearGradient.notes.md';
 
-storiesOf('Components', module).add(
-  TITLE,
-  () => {
-    const options = {
-      range: true,
-      min: 0.0,
-      max: 1.0,
-      step: 0.05,
-    };
+export const component = () => {
+  const options = {
+    range: true,
+    min: 0.0,
+    max: 1.0,
+    step: 0.05,
+  };
 
-    const colors = [color('colors 0', 'red'), color('colors 1', 'blue')];
+  const colors = [color('colors 0', 'red'), color('colors 1', 'blue')];
 
-    const props = {
-      colors,
-      start: {
-        x: number('start x', 0.5, options),
-        y: number('start y', 0.0, options),
-      },
-      end: {
-        x: number('end x', 0.5, options),
-        y: number('end y', 1.0, options),
-      },
-      locations: [number('locations 0', 0, options), number('locations 1', 1, options)],
-    };
-    return (
-      <UIExplorer title={TITLE}>
-        <Description>A React component that renders a gradient view.</Description>
-        <DocItem
-          name="Importing the module"
-          example={{
-            code: `import { LinearGradient } from 'expo-linear-gradient';`,
-          }}
-        />
-        <Section title="Playground">
-          <LinearGradient style={{ flex: 1, height: 200 }} {...props} />
-        </Section>
-      </UIExplorer>
-    );
-  },
-  { notes }
-);
+  const props = {
+    colors,
+    start: {
+      x: number('start x', 0.5, options),
+      y: number('start y', 0.0, options),
+    },
+    end: {
+      x: number('end x', 0.5, options),
+      y: number('end y', 1.0, options),
+    },
+    locations: [number('locations 0', 0, options), number('locations 1', 1, options)],
+  };
+  return (
+    <View>
+      <DocItem
+        name="Importing the module"
+        example={{
+          code: `import { LinearGradient } from 'expo-linear-gradient';`,
+        }}
+      />
+      <Section title="Playground">
+        <LinearGradient style={{ flex: 1, minHeight: 200, maxHeight: 200 }} {...props} />
+      </Section>
+    </View>
+  );
+};
