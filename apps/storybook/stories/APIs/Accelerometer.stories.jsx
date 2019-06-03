@@ -2,12 +2,15 @@ import { Accelerometer } from 'expo-sensors';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import UIExplorer, { AppText, Code, Description, DocItem, Section } from '../ui-explorer';
-import { storiesOf } from '@storybook/react-native';
+import { AppText, DocItem, Section } from '../ui-explorer';
 
 const TITLE = 'Accelerometer';
 
-class DemoScreen extends React.Component {
+export const title = 'Accelerometer';
+export const description = `Access the device accelerometer sensor(s) to respond to changes in acceleration in 3d
+space.`;
+
+export class component extends React.Component {
   state = {
     accelerometerData: {},
     isAvailable: null,
@@ -52,82 +55,73 @@ class DemoScreen extends React.Component {
     const { x, y, z } = this.state.accelerometerData;
     const { isAvailable } = this.state;
     return (
-      <UIExplorer title={TITLE}>
-        <Description>
-          <AppText>
-            Access the device accelerometer sensor(s) to respond to changes in acceleration in 3d
-            space.
-          </AppText>
-        </Description>
-
-        <Section title="Methods">
-          <DocItem
-            name="isAvailableAsync"
-            typeInfo="Promise<boolean>"
-            description="Returns whether the accelerometer is enabled on the device."
-            example={{
-              render: () => (
-                <View style={{ flex: 1 }}>
-                  <TouchableOpacity onPress={this._toggle} style={styles.button}>
-                    <Text
-                      onPress={async () => {
-                        this.setState({
-                          isAvailable: await Accelerometer.isAvailableAsync(),
-                        });
-                      }}>
-                      Is Available: {isAvailable ? 'true' : 'false'}
+      <Section title="Methods">
+        <DocItem
+          name="isAvailableAsync"
+          typeInfo="Promise<boolean>"
+          description="Returns whether the accelerometer is enabled on the device."
+          example={{
+            render: () => (
+              <View style={{ flex: 1 }}>
+                <TouchableOpacity onPress={this._toggle} style={styles.button}>
+                  <Text
+                    onPress={async () => {
+                      this.setState({
+                        isAvailable: await Accelerometer.isAvailableAsync(),
+                      });
+                    }}>
+                    Is Available: {isAvailable ? 'true' : 'false'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ),
+          }}
+        />
+        <DocItem
+          name="addListener"
+          typeInfo="({ x: number, y: number, z: number}) => void"
+          description="Subscribe to events and update the component state with the new data from the Accelerometer. We save the subscription object away so that we can remove it when the component is unmounted."
+          example={{
+            render: () => (
+              <View style={{ flex: 1 }}>
+                <TouchableOpacity onPress={this._toggle} style={styles.button}>
+                  <Text>Toggle</Text>
+                </TouchableOpacity>
+                <AppText>Values:</AppText>
+                {Object.keys({ x, y, z }).map(key => {
+                  return (
+                    <Text key={key}>
+                      {key}: {round(this.state.accelerometerData[key])}
                     </Text>
-                  </TouchableOpacity>
-                </View>
-              ),
-            }}
-          />
-          <DocItem
-            name="addListener"
-            typeInfo="({ x: number, y: number, z: number}) => void"
-            description="Subscribe to events and update the component state with the new data from the Accelerometer. We save the subscription object away so that we can remove it when the component is unmounted."
-            example={{
-              render: () => (
-                <View style={{ flex: 1 }}>
-                  <TouchableOpacity onPress={this._toggle} style={styles.button}>
-                    <Text>Toggle</Text>
-                  </TouchableOpacity>
-                  <AppText>Values:</AppText>
-                  {Object.keys({ x, y, z }).map(key => {
-                    return (
-                      <Text key={key}>
-                        {key}: {round(this.state.accelerometerData[key])}
-                      </Text>
-                    );
-                  })}
-                </View>
-              ),
-            }}
-          />
+                  );
+                })}
+              </View>
+            ),
+          }}
+        />
 
-          <DocItem
-            name="setUpdateInterval"
-            typeInfo="(interval: number) => Promise<void>"
-            description="Subscribe for updates to the accelerometer."
-            example={{
-              render: () => (
-                <View style={{ flexDirection: 'row', flex: 1 }}>
-                  <View style={styles.buttonContainer}>
-                    <TouchableOpacity
-                      onPress={this._slow}
-                      style={[styles.button, styles.middleButton]}>
-                      <Text>Slow</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={this._fast} style={styles.button}>
-                      <Text>Fast</Text>
-                    </TouchableOpacity>
-                  </View>
+        <DocItem
+          name="setUpdateInterval"
+          typeInfo="(interval: number) => Promise<void>"
+          description="Subscribe for updates to the accelerometer."
+          example={{
+            render: () => (
+              <View style={{ flexDirection: 'row', flex: 1 }}>
+                <View style={styles.buttonContainer}>
+                  <TouchableOpacity
+                    onPress={this._slow}
+                    style={[styles.button, styles.middleButton]}>
+                    <Text>Slow</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={this._fast} style={styles.button}>
+                    <Text>Fast</Text>
+                  </TouchableOpacity>
                 </View>
-              ),
-            }}
-          />
-        </Section>
-      </UIExplorer>
+              </View>
+            ),
+          }}
+        />
+      </Section>
     );
   }
 }
@@ -166,7 +160,3 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
 });
-
-import notes from './Accelerometer.notes.md';
-
-storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
