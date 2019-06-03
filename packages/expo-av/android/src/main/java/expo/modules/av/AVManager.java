@@ -336,10 +336,10 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   @Override
   public void loadForSound(final Source source, final ReadableArguments arguments, final Promise promise) {
     final int key = mSoundMapKeyCount++;
-    final PlayerManager data = mPlayerCreator.createUnloadedPlayerData(source, new Params().update(arguments));
-    data.setErrorListener(error -> removeSoundForKey(key));
-    mAudioEventHandlers.addAudio(key, data);
-    data.load(arguments, new PlayerManager.LoadCompletionListener() {
+    final PlayerManager playerManager = mPlayerCreator.createUnloadedPlayerData(source, new Params().update(arguments));
+    playerManager.setErrorListener(error -> removeSoundForKey(key));
+    mAudioEventHandlers.addAudio(key, playerManager);
+    playerManager.load(arguments, new PlayerManager.LoadCompletionListener() {
       @Override
       public void onLoadSuccess(@NonNull Status status) {
         promise.resolve(Arrays.asList(key, status.toBundle()));
@@ -352,7 +352,7 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
       }
     });
 
-    data.setStatusUpdateListener(status -> {
+    playerManager.setStatusUpdateListener(status -> {
       Bundle payload = new Bundle();
       payload.putInt("key", key);
       payload.putBundle("status", status.toBundle());

@@ -11,22 +11,15 @@ function getStatusFromMedia(media) {
     // TODO: Distinguish status and params, merging it makes no sense.
     const status = {
         isLoaded: true,
-        uri: media.src,
-        progressUpdateIntervalMillis: 100,
         durationMillis: media.duration * 1000,
         positionMillis: media.currentTime * 1000,
         // playableDurationMillis: media.buffered * 1000,
         // seekMillisToleranceBefore?: number
         // seekMillisToleranceAfter?: number
-        shouldPlay: media.autoplay,
         isPlaying,
+        isLoading: false,
         isBuffering: false,
-        rate: media.playbackRate,
         // TODO: Bacon: This seems too complicated right now: https://webaudio.github.io/web-audio-api/#dom-biquadfilternode-frequency
-        shouldCorrectPitch: false,
-        volume: media.volume,
-        isMuted: media.muted,
-        isLooping: media.loop,
         didJustFinish: media.ended,
     };
     return status;
