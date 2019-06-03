@@ -1,19 +1,7 @@
 import React from 'react';
+import { View } from 'react-native';
 
-import UIExplorer, { AppText, Description } from '../ui-explorer';
-
-const TITLE = 'registerRootComponent';
-
-class DemoScreen extends React.Component {
-  render() {
-    return (
-      <UIExplorer title={TITLE}>
-        <Description>
-          <AppText>Desc</AppText>
-        </Description>
-      </UIExplorer>
-    );
-  }
-}
-
-// storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
+export const title = 'registerRootComponent';
+export const packageJson = require('expo/package.json');
+export const description = '';
+export const component = () => <View />;

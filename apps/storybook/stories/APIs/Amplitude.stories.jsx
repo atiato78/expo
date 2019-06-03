@@ -1,19 +1,6 @@
 import React from 'react';
+import { View } from 'react-native';
 
-import UIExplorer, { AppText, Description } from '../ui-explorer';
-
-const TITLE = 'Amplitude';
-
-class DemoScreen extends React.Component {
-  render() {
-    return (
-      <UIExplorer title={TITLE}>
-        <Description>
-          <AppText>Desc</AppText>
-        </Description>
-      </UIExplorer>
-    );
-  }
-}
-
-// storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
+export const title = 'Amplitude';
+export const description = 'TODO: Bacon: Description';
+export const component = () => <View />;

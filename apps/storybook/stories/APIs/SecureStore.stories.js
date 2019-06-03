@@ -1,17 +1,6 @@
 import React from 'react';
+import { View } from 'react-native';
 
-import UIExplorer, { Description } from '../ui-explorer';
-
-const TITLE = 'SecureStore';
-
-class DemoScreen extends React.Component {
-  render() {
-    return (
-      <UIExplorer title={TITLE}>
-        <Description>Desc</Description>
-      </UIExplorer>
-    );
-  }
-}
-
-// storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
+export const title = 'Secure Store';
+export const packageJson = require('expo-secure-store/package.json');
+export const component = () => <View />;

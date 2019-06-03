@@ -1,19 +1,6 @@
-import { storiesOf } from '@storybook/react-native';
 import React from 'react';
+import { View } from 'react-native';
 
-import UIExplorer, { Description } from '../ui-explorer';
-import notes from './Sharing.notes.md';
-
-const TITLE = 'Sharing';
-
-class DemoScreen extends React.Component {
-  render() {
-    return (
-      <UIExplorer title={TITLE}>
-        <Description>Desc</Description>
-      </UIExplorer>
-    );
-  }
-}
-
-// storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
+export const title = 'Sharing';
+export const packageJson = require('expo-sharing/package.json');
+export const component = () => <View />;

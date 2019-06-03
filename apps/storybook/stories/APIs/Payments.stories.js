@@ -1,19 +1,6 @@
 import React from 'react';
+import { View } from 'react-native';
 
-import UIExplorer, { AppText, Description } from '../ui-explorer';
-
-const TITLE = 'Payments';
-
-class DemoScreen extends React.Component {
-  render() {
-    return (
-      <UIExplorer title={TITLE}>
-        <Description>
-          <AppText>Desc</AppText>
-        </Description>
-      </UIExplorer>
-    );
-  }
-}
-
-// storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
+export const title = 'Payments';
+export const packageJson = require('expo-payments-stripe/package.json');
+export const component = () => <View />;

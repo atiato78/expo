@@ -1,19 +1,6 @@
 import React from 'react';
+import { View } from 'react-native';
 
-import UIExplorer, { AppText, Description } from '../ui-explorer';
-
-const TITLE = 'MediaLibrary';
-
-class DemoScreen extends React.Component {
-  render() {
-    return (
-      <UIExplorer title={TITLE}>
-        <Description>
-          <AppText>Desc</AppText>
-        </Description>
-      </UIExplorer>
-    );
-  }
-}
-
-// storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
+export const title = 'Media Library';
+export const packageJson = require('expo-media-library/package.json');
+export const component = () => <View />;

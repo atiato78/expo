@@ -1,17 +1,6 @@
-import { storiesOf } from '@storybook/react-native';
 import React from 'react';
+import { View } from 'react-native';
 
-import UIExplorer, { Description } from '../ui-explorer';
-import notes from './Speech.notes.md';
-
-const TITLE = 'Speech';
-
-// storiesOf('APIs', module).add(
-//   TITLE,
-//   () => (
-//     <UIExplorer title={TITLE}>
-//       <Description>Desc</Description>
-//     </UIExplorer>
-//   ),
-//   { notes }
-// );
+export const title = 'Speech';
+export const packageJson = require('expo-speech/package.json');
+export const component = () => <View />;

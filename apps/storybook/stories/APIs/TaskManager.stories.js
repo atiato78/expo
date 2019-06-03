@@ -1,22 +1,6 @@
 import React from 'react';
+import { View } from 'react-native';
 
-import UIExplorer, { AppText, Description, Section } from '../ui-explorer';
-import { storiesOf } from '@storybook/react-native';
-
-const TITLE = 'TaskManager';
-
-class DemoScreen extends React.Component {
-  render() {
-    return (
-      <UIExplorer title={TITLE}>
-        <Description>
-          <AppText>Desc</AppText>
-        </Description>
-      </UIExplorer>
-    );
-  }
-}
-
-import notes from './TaskManager.notes.md';
-
-// storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
+export const title = 'Task Manager';
+export const packageJson = require('expo-task-manager/package.json');
+export const component = () => <View />;

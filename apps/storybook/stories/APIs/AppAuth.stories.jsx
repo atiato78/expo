@@ -1,16 +1,6 @@
-import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { View } from 'react-native';
 
-import UIExplorer, { Description } from '../ui-explorer';
-
-const TITLE = 'AppAuth';
-
-storiesOf('APIs', module).add(
-  TITLE,
-  () => (
-    <UIExplorer title={TITLE}>
-      <Description>App Auth Desc</Description>
-    </UIExplorer>
-  )
-  // { notes }
-);
+export const title = 'App Auth';
+export const packageJson = require('expo-app-auth/package.json');
+export const component = () => <View />;

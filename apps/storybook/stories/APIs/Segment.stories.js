@@ -1,19 +1,6 @@
-import { storiesOf } from '@storybook/react-native';
 import React from 'react';
+import { View } from 'react-native';
 
-import UIExplorer, { Description } from '../ui-explorer';
-import notes from './Segment.notes.md';
-
-const TITLE = 'Segment';
-
-class DemoScreen extends React.Component {
-  render() {
-    return (
-      <UIExplorer title={TITLE}>
-        <Description>Desc</Description>
-      </UIExplorer>
-    );
-  }
-}
-
-// storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
+export const title = 'Segment';
+export const packageJson = require('expo-analytics-segment/package.json');
+export const component = () => <View />;
