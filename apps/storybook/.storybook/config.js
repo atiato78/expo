@@ -6,6 +6,7 @@ import { withA11y } from '@storybook/addon-a11y';
 import requireContext from 'require-context.macro';
 import centered from './decorator-centered';
 import * as React from 'react';
+import path from 'path';
 
 addDecorator(centered);
 
@@ -41,26 +42,34 @@ import UIExplorer, {
 } from '../stories/ui-explorer';
 
 function loadStories() {
-  // require('../stories/apis/Accelerometer.stories');
-  // require('../stories/components/LinearGradient.stories');
-  // require('../stories/get-started/Introduction.stories');
   // automatically import all story js files that end with *.stories.js
-  const req = requireContext('../stories', true, /\.stories\.js$/);
-  // const req = requireContext('../stories', true, /\.stories\.js$/);
-  req.keys().forEach(filename => {
+  const req = requireContext('../stories', true, /\.stories\.jsx?$/);
+  const mdreq = requireContext('../stories', true, /\.notes\.md$/);
+
+  function loadModule(filename) {
     const module = req(filename);
-    if (module.component && module.kind) {
-      const { component: Component, packageJson, notes, description, title, kind } = module;
-      console.log('filename', filename, module, Component);
-      const screen = (props = {}) => (
-        <UIExplorer title={title} description={description || packageJson.description}>
-          <Component {...props} />
-        </UIExplorer>
-      );
-      storiesOf(kind, global.module).add(title, screen, { notes });
+    if (!module.component || !module.kind) {
+      return;
     }
-    // req(filename)
-  });
+    const { component: Component, packageJson, notes, description, title, kind } = module;
+
+    let markdown = notes;
+    if (!notes) {
+      const mdPath = filename.substr(0, filename.lastIndexOf('.stories')) + '.notes.md';
+      markdown = mdreq(mdPath);
+    }
+
+    const screen = (props = {}) => (
+      <UIExplorer title={title} description={description || packageJson.description}>
+        <Component {...props} />
+      </UIExplorer>
+    );
+    storiesOf(kind, global.module).add(title, screen, { notes: { markdown } });
+  }
+
+  // loadModule('./apis/Accelerometer.stories.jsx');
+
+  req.keys().forEach(filename => loadModule(filename));
 }
 
 configure(loadStories, module);

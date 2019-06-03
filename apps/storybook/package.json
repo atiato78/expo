@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Storybook for the Expo SDK",
   "main": "__generated__/AppEntry.js",
+  "sideEffects": [
+    "/.storybook/config.js"
+  ],
   "scripts": {
     "postinstall": "expo-yarn-workspaces postinstall",
     "start": "start-storybook --port 6006",
