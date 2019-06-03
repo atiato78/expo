@@ -48,7 +48,7 @@ function loadStories() {
 
   function loadModule(filename) {
     const module = req(filename);
-    if (!module.component || !module.kind) {
+    if (!module.component) {
       return;
     }
     const { component: Component, packageJson, notes, description, title, kind } = module;
@@ -64,7 +64,11 @@ function loadStories() {
         <Component {...props} />
       </UIExplorer>
     );
-    storiesOf(kind, global.module).add(title, screen, { notes: { markdown } });
+
+    console.log('KIND: ', kind || filename.split('/')[1]);
+    storiesOf(kind || filename.split('/')[1], global.module).add(title, screen, {
+      notes: { markdown },
+    });
   }
 
   // loadModule('./apis/Accelerometer.stories.jsx');

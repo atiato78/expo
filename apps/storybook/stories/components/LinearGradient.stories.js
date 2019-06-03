@@ -3,13 +3,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
 import { View } from 'react-native';
 
-import UIExplorer, { DocItem, Section } from '../ui-explorer';
+import { DocItem, Section } from '../ui-explorer';
 
 export const title = 'Linear Gradient';
-export const kind = 'Components';
+// export const kind = 'Components';
 export const packageJson = require('expo-linear-gradient/package.json');
-// export { default as notes } from './LinearGradient.notes.md';
-
 export const component = () => {
   const options = {
     range: true,
