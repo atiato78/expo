@@ -1,15 +1,12 @@
-import { storiesOf } from '@storybook/react-native';
 import { Camera } from 'expo-camera';
 import { askAsync, CAMERA } from 'expo-permissions';
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
-import UIExplorer from '../ui-explorer';
-import notes from './Camera.notes.md';
+export const title = 'Camera';
+export const packageJson = require('expo-camera/package.json');
 
-const TITLE = 'Camera';
-
-class DemoScreen extends React.Component {
+export class component extends React.Component {
   state = {
     hasCameraPermission: null,
     type: Camera.Constants.Type.back,
@@ -20,7 +17,7 @@ class DemoScreen extends React.Component {
     this.setState({ hasCameraPermission: status === 'granted' });
   }
 
-  renderCamera = () => {
+  render() {
     const { hasCameraPermission } = this.state;
     if (hasCameraPermission === null) {
       return <View />;
@@ -57,11 +54,5 @@ class DemoScreen extends React.Component {
         </View>
       );
     }
-  };
-
-  render() {
-    return <UIExplorer title={TITLE}>{this.renderCamera()}</UIExplorer>;
   }
 }
-
-storiesOf('Components', module).add(TITLE, () => <DemoScreen />, { notes });

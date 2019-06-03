@@ -1,12 +1,14 @@
-import { storiesOf } from '@storybook/react-native';
 import React from 'react';
 import { Linking, StyleSheet, Text, View } from 'react-native';
 
-import UIExplorer, { Description, DocItem, Section } from '../ui-explorer';
-import notes from './Linking.notes.md';
+import UIExplorer, { DocItem, Section } from '../ui-explorer';
 
 const url = 'https://mathiasbynens.github.io/rel-noopener/malicious.html';
-const TITLE = 'Linking';
+export const title = 'Linking';
+
+export const packageJson = require('expo/package.json');
+export const description =
+  'Linking gives you a general interface for securely opening external URLs from JavaScript.';
 
 export default class OpenURL extends React.PureComponent {
   handlePress() {
@@ -39,27 +41,19 @@ const styles = StyleSheet.create({
   },
 });
 
-const LinkingScreen = () => (
-  <UIExplorer title={TITLE}>
-    <Description>
-      Linking gives you a general interface for securely opening external URLs from JavaScript.
-    </Description>
+export const component = () => (
+  <Section title="Methods">
+    <DocItem name="canOpenURL" typeInfo="(url) => Promise<true>" />
 
-    <Section title="Methods">
-      <DocItem name="canOpenURL" typeInfo="(url) => Promise<true>" />
+    <DocItem name="getInitialURL" typeInfo="() => Promise<string>" />
 
-      <DocItem name="getInitialURL" typeInfo="() => Promise<string>" />
-
-      <DocItem
-        name="openURL"
-        typeInfo="(url: string) => Promise<>"
-        description="Try to open the given url in a secure fashion. The method returns a Promise object. If the url opens, the promise is resolved. If not, the promise is rejected."
-        example={{
-          render: () => <OpenURL />,
-        }}
-      />
-    </Section>
-  </UIExplorer>
+    <DocItem
+      name="openURL"
+      typeInfo="(url: string) => Promise<>"
+      description="Try to open the given url in a secure fashion. The method returns a Promise object. If the url opens, the promise is resolved. If not, the promise is rejected."
+      example={{
+        render: () => <OpenURL />,
+      }}
+    />
+  </Section>
 );
-
-storiesOf('APIs', module).add(TITLE, () => <LinkingScreen />, { notes });

@@ -6,6 +6,8 @@ import { Section } from '../ui-explorer';
 
 export const title = 'SVG';
 export const description = 'TODO: Bacon: Description';
+export const packageJson = require('expo/package.json');
+
 export const hasKnobs = true;
 export const component = () => (
   <Section>

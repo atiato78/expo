@@ -1,4 +1,3 @@
-import { storiesOf } from '@storybook/react-native';
 import { ScreenOrientation } from 'expo';
 import React from 'react';
 import {
@@ -11,11 +10,23 @@ import {
   View,
 } from 'react-native';
 
-import UIExplorer, { Description } from '../ui-explorer';
-import notes from './ScreenOrientation.notes.md';
-
-const TITLE = 'ScreenOrientation';
-
+export const title = 'Screen Orientation';
+export const packageJson = require('expo/package.json');
+export const description = (
+  <>
+    Screen Orientation is defined as the orientation in which graphics are painted on the device.
+    For example, the figure below has a device in a vertical and horizontal physical orientation,
+    but a portrait screen orientation. For physical device orientation, see the orientation section
+    of [Device Motion](../devicemotion/). ![Portrait orientation in different physical
+    orientations](/static/images/screen-orientation-portrait.png) This API allows changing supported
+    screen orientations at runtime. This will take priority over the `orientation` key in
+    `app.json`. On both iOS and Android platforms, changes to the screen orientation will override
+    any system settings or user preferences. On Android, it is possible to change the screen
+    orientation while taking the user's preferred orientation into account. On iOS, user and system
+    settings are not accessible by the application and any changes to the screen orientation will
+    override existing settings.
+  </>
+);
 class ListButton extends React.Component {
   render() {
     const style = [styles.button];
@@ -38,7 +49,7 @@ class ListButton extends React.Component {
   }
 }
 
-class DemoScreen extends React.Component {
+export class component extends React.Component {
   state = {};
   async componentDidMount() {
     this.listener = ScreenOrientation.addOrientationChangeListener(
@@ -115,48 +126,31 @@ class DemoScreen extends React.Component {
   render() {
     const { orientation, orientationLock } = this.state;
     return (
-      <UIExplorer title={TITLE}>
-        <Description>
-          Screen Orientation is defined as the orientation in which graphics are painted on the
-          device. For example, the figure below has a device in a vertical and horizontal physical
-          orientation, but a portrait screen orientation. For physical device orientation, see the
-          orientation section of [Device Motion](../devicemotion/). ![Portrait orientation in
-          different physical orientations](/static/images/screen-orientation-portrait.png) This API
-          allows changing supported screen orientations at runtime. This will take priority over the
-          `orientation` key in `app.json`. On both iOS and Android platforms, changes to the screen
-          orientation will override any system settings or user preferences. On Android, it is
-          possible to change the screen orientation while taking the user's preferred orientation
-          into account. On iOS, user and system settings are not accessible by the application and
-          any changes to the screen orientation will override existing settings.
-        </Description>
-        <ScrollView style={{ padding: 10 }}>
-          {orientation && <Text>Orientation: {orientation}</Text>}
-          {orientationLock && <Text>OrientationLock: {orientationLock}</Text>}
-          {Object.keys(ScreenOrientation.Orientation).map(o => (
-            <ListButton key={o} onPress={() => this.lock(o)} title={o} />
-          ))}
-          <ListButton
-            key="lockPlatformAsync Example"
-            onPress={this.lockPlatformExample}
-            title="Apply a custom native lock"
-          />
-          <ListButton
-            key="doesSupport"
-            onPress={this.doesSupport}
-            title="Check Orientation.PORTRAIT_DOWN support"
-          />
-          <ListButton
-            key="unlock"
-            onPress={this.unlock}
-            title="unlock orientation back to default settings"
-          />
-        </ScrollView>
-      </UIExplorer>
+      <ScrollView style={{ padding: 10 }}>
+        {orientation && <Text>Orientation: {orientation}</Text>}
+        {orientationLock && <Text>OrientationLock: {orientationLock}</Text>}
+        {Object.keys(ScreenOrientation.Orientation).map(o => (
+          <ListButton key={o} onPress={() => this.lock(o)} title={o} />
+        ))}
+        <ListButton
+          key="lockPlatformAsync Example"
+          onPress={this.lockPlatformExample}
+          title="Apply a custom native lock"
+        />
+        <ListButton
+          key="doesSupport"
+          onPress={this.doesSupport}
+          title="Check Orientation.PORTRAIT_DOWN support"
+        />
+        <ListButton
+          key="unlock"
+          onPress={this.unlock}
+          title="unlock orientation back to default settings"
+        />
+      </ScrollView>
     );
   }
 }
-
-storiesOf('APIs', module).add(TITLE, () => <DemoScreen />, { notes });
 
 const styles = StyleSheet.create({
   container: {},

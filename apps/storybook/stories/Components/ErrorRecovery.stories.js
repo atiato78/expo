@@ -7,6 +7,7 @@ import { Description, Section, DocItem } from '../ui-explorer';
 export const title = 'Error Recovery';
 export const description =
   'Utilities for helping you gracefully handle crashes due to fatal JavaScript errors.';
+export const packageJson = require('expo/package.json');
 export const component = () => {
   ErrorRecovery.setRecoveryProps(object('Recovery', {}));
   return (
