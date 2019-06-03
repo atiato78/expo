@@ -1,5 +1,6 @@
 import React from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import * as Permissions from 'expo-permissions';
 
 export const title = 'Permissions';
 export const packageJson = require('expo-permissions/package.json');

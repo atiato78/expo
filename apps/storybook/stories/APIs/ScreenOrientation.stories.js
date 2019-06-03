@@ -1,4 +1,4 @@
-import { ScreenOrientation } from 'expo';
+import * as ScreenOrientation from 'expo/build/ScreenOrientation/ScreenOrientation';
 import React from 'react';
 import {
   PixelRatio,

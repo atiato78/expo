@@ -1,39 +1,12 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-
-/**
- * ### getContactByIdAsync
- *
- * ```js
- * getContactByIdAsync(contactId: string, fields: FieldType[]): Promise<Contact>
- * ```
- * Returns a contact matching the input id. Used for gathering precise data about a contact.
- * **Parameters**
- *
- * | Name      | Type          | Description                                                                                  |
- * | --------- | ------------- | -------------------------------------------------------------------------------------------- |
- * | contactId | `string`      | The ID of a system contact.                                                                  |
- * | fields    | `FieldType[]` | If available the fields defined will be returned. If `nil` then all fields will be returned. |
- *
- * **Returns**
- *
- * | Name    | Type      | Description                               |
- * | ------- | --------- | ----------------------------------------- |
- * | contact | `Contact` | Contact with an ID matching the input ID. |
- *
- * **Example**
- *
- * ```js
- * const contact = await Contacts.getContactByIdAsync('161A368D-D614-4A15-8DC6-665FDBCFAE55');
- * if (contact) {
- *   console.log(contact);
- * }
- * ```
- */
-
-import { Table, TableWrapper, Row, Rows, Col, Cols, Cell } from 'react-native-table-component';
-import insertBetween from './insertBetween';
 import AppText from './AppText';
+import insertBetween from './insertBetween';
+// import { Row, Rows, Table } from 'react-native-table-component';
+
+const Row = View;
+const Rows = View;
+const Table = View;
 
 const Divider = () => <View style={styles.verticalDivider} />;
 

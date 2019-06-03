@@ -38,7 +38,7 @@ const UIExplorer = ({ children, packageName, description, sections, title, url }
   <View style={styles.root}>
     <Title>{title}</Title>
     {packageName && (
-      <View style={{ alignItems: 'start', marginTop: 8 }}>
+      <View style={{ alignItems: 'flex-start', marginTop: 8 }}>
         <Label
           accessibilityRole="link"
           target="_blank"

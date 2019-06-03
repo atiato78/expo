@@ -1,4 +1,5 @@
-import { DocumentPicker, Print } from 'expo';
+import * as Print from 'expo-print';
+import * as DocumentPicker from 'expo-document-picker';
 import React from 'react';
 import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 

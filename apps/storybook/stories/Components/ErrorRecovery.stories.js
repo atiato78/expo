@@ -1,5 +1,5 @@
 import { object } from '@storybook/addon-knobs/react';
-import { ErrorRecovery } from 'expo';
+import * as ErrorRecovery from 'expo/build/ErrorRecovery/ErrorRecovery';
 import React from 'react';
 import { View } from 'react-native';
 import { Description, Section, DocItem } from '../ui-explorer';
