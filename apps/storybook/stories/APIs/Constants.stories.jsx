@@ -1,7 +1,6 @@
 import React from 'react';
-import { storiesOf } from '@storybook/react-native';
 
-import UIExplorer, { AppText, Description, DocItem, Section } from '../ui-explorer';
+import { DocItem, Section } from '../ui-explorer';
 
 const api = [
   {
@@ -60,29 +59,22 @@ const api = [
     typeInfo: 'Object',
   },
 ];
-const ConstantsScreen = () => (
-  <UIExplorer title="Constants">
-    <Description>
-      <AppText>
-        System information that remains constant throughout the lifetime of your app.
-      </AppText>
-    </Description>
 
-    <Section title="API">
-      <DocItem
-        name="Importing the module"
-        example={{
-          code: `import Constants from 'expo-constants';`,
-        }}
-      />
+export const title = 'Constants';
+export const packageJson = require('expo-constants/package.json');
+export const description =
+  'System information that remains constant throughout the lifetime of your app.';
+export const component = () => (
+  <Section title="API">
+    <DocItem
+      name="Importing the module"
+      example={{
+        code: `import Constants from 'expo-constants';`,
+      }}
+    />
 
-      {api.map((props, index) => (
-        <DocItem key={index} {...props} />
-      ))}
-    </Section>
-  </UIExplorer>
+    {api.map((props, index) => (
+      <DocItem key={index} {...props} />
+    ))}
+  </Section>
 );
-
-import notes from './Constants.notes.md';
-
-storiesOf('APIs', module).add('Constants', ConstantsScreen, { notes });

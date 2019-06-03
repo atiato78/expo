@@ -1,17 +1,15 @@
-import { configure, addParameters, addDecorator } from '@storybook/react';
-import { create } from '@storybook/theming';
-import { withTests } from '@storybook/addon-jest';
 import { withKnobs } from '@storybook/addon-knobs';
-import { withA11y } from '@storybook/addon-a11y';
-import requireContext from 'require-context.macro';
-import centered from './decorator-centered';
+import { addDecorator, addParameters, configure } from '@storybook/react';
+import { create } from '@storybook/theming';
 import * as React from 'react';
-import path from 'path';
+import requireContext from 'require-context.macro';
+
+import UIExplorer, { storiesOf } from '../stories/ui-explorer';
+import centered from './decorator-centered';
 
 addDecorator(centered);
 
-// addDecorator(withA11y);
-addDecorator(withKnobs({ escapeHTML: false, skipIfNoParametersOrOptions: true }));
+// addDecorator(withKnobs({ escapeHTML: false, skipIfNoParametersOrOptions: true }));
 
 addParameters({
   options: {
@@ -32,14 +30,7 @@ addParameters({
   },
 });
 
-import UIExplorer, {
-  AppText,
-  Code,
-  storiesOf,
-  Description,
-  DocItem,
-  Section,
-} from '../stories/ui-explorer';
+let storiesCache = {};
 
 function loadStories() {
   // automatically import all story js files that end with *.stories.js
@@ -51,7 +42,16 @@ function loadStories() {
     if (!module.component) {
       return;
     }
-    const { component: Component, packageJson = {}, notes, description, title, kind } = module;
+    const {
+      component: Component,
+      packageJson = {},
+      notes,
+      description,
+      title,
+      kind,
+      hasKnobs,
+      onStoryCreated,
+    } = module;
 
     let markdown = notes;
     if (!notes) {
@@ -65,10 +65,21 @@ function loadStories() {
       </UIExplorer>
     );
 
-    console.log('KIND: ', kind || filename.split('/')[1]);
-    storiesOf(kind || filename.split('/')[1], global.module).add(title, screen, {
+    const storiesKind = kind || filename.split('/')[1];
+    let stories = storiesCache[storiesKind];
+    if (!stories) {
+      stories = storiesOf(storiesKind, global.module);
+      storiesCache[storiesKind] = stories;
+    }
+    if (hasKnobs) {
+      stories.addDecorator(withKnobs({ escapeHTML: false, skipIfNoParametersOrOptions: true }));
+    }
+    stories.add(title, screen, {
       notes: { markdown },
     });
+    if (onStoryCreated) {
+      onStoryCreated({ stories });
+    }
   }
 
   // loadModule('./apis/Accelerometer.stories.jsx');

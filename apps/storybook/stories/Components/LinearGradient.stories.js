@@ -1,12 +1,13 @@
 import { color, number } from '@storybook/addon-knobs/react';
 import { LinearGradient } from 'expo-linear-gradient';
 import React from 'react';
-import { View } from 'react-native';
+import { View, Button } from 'react-native';
 
 import { DocItem, Section } from '../ui-explorer';
 
 export const title = 'Linear Gradient';
 // export const kind = 'Components';
+export const hasKnobs = true;
 export const packageJson = require('expo-linear-gradient/package.json');
 export const component = () => {
   const options = {
