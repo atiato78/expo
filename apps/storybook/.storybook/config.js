@@ -51,7 +51,7 @@ function loadStories() {
     if (!module.component) {
       return;
     }
-    const { component: Component, packageJson, notes, description, title, kind } = module;
+    const { component: Component, packageJson = {}, notes, description, title, kind } = module;
 
     let markdown = notes;
     if (!notes) {

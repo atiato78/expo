@@ -1,17 +1,6 @@
 import React from 'react';
+import { View } from 'react-native';
 
-import UIExplorer, { Description } from '../ui-explorer';
-
-const TITLE = 'FacebookAds';
-
-class DemoScreen extends React.Component {
-  render() {
-    return (
-      <UIExplorer title={TITLE}>
-        <Description>Desc</Description>
-      </UIExplorer>
-    );
-  }
-}
-
-// storiesOf('Components', module).add(TITLE, () => <DemoScreen />, { notes });
+export const title = 'Facebook Ads';
+export const description = 'TODO: Bacon: Description';
+export const component = () => <View />;
