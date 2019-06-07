@@ -5,21 +5,21 @@ import android.os.Bundle;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-public class PostOfficeInterfaceProxy implements PostOfficeInterface {
+public class PostOfficeProxy implements PostOfficeInterface {
 
   private Executor mSingleThreadExecutor = Executors.newSingleThreadExecutor();
 
-  private static volatile PostOfficeInterfaceProxy instance = null;
+  private static volatile PostOfficeProxy instance = null;
 
   private PostOfficeInterface mPostOffice;
 
-  private PostOfficeInterfaceProxy() {
+  private PostOfficeProxy() {
     mPostOffice = new PostOffice();
   }
 
   public static synchronized PostOfficeInterface getInstance() {
     if (instance == null) {
-      instance = new PostOfficeInterfaceProxy();
+      instance = new PostOfficeProxy();
     }
     return instance;
   }

@@ -7,7 +7,7 @@ import android.support.v4.app.NotificationCompat;
 public class ImportanceModifier implements NotificationModifierInterface {
   @Override
   public void modify(NotificationCompat.Builder builder, Bundle notification, Context context, String experienceId) {
-    if (notification.containsKey("importanceBelowOreo")) {
+    if (notification.containsKey("priorityBelowOreo")) {
       // ToDo
     }
   }

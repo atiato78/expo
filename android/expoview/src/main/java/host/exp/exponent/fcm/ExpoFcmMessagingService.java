@@ -1,10 +1,14 @@
 package host.exp.exponent.fcm;
 
+import android.os.Bundle;
+
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 import host.exp.exponent.Constants;
+import host.exp.exponent.analytics.EXL;
 import host.exp.exponent.notifications.PushNotificationHelper;
+import host.exp.exponent.notifications.presenters.NotificationPresenterProvider;
 
 public class ExpoFcmMessagingService extends FirebaseMessagingService {
 
@@ -23,8 +27,24 @@ public class ExpoFcmMessagingService extends FirebaseMessagingService {
       return;
     }
 
-    // Todo: plug in NotificationPresenter
+    Bundle bundle = new Bundle();
 
-    //PushNotificationHelper.getInstance().onMessageReceived(this, remoteMessage.getData().get("experienceId"), remoteMessage.getData().get("channelId"), remoteMessage.getData().get("message"), remoteMessage.getData().get("body"), remoteMessage.getData().get("title"), remoteMessage.getData().get("categoryId"));
+    String experienceId = (String) remoteMessage.getData().get("experienceId");
+    bundle.putString("experienceId", experienceId);
+
+    bundle.putString("channelId", remoteMessage.getData().get("channelId"));
+    bundle.putString("body", remoteMessage.getData().get("body"));
+    bundle.putString("title", remoteMessage.getData().get("title"));
+    bundle.putString("categoryId", remoteMessage.getData().get("categoryId"));
+    bundle.putString("icon", remoteMessage.getData().get("icon"));
+    bundle.putString("priorityBelowOreo", remoteMessage.getData().get("priorityBelowOreo"));
+    bundle.putString("color", remoteMessage.getData().get("color"));
+    bundle.putString("data", remoteMessage.getData().get("data"));
+
+    NotificationPresenterProvider.getNotificationPresenter().presentNotification(
+        this.getApplicationContext(),
+        experienceId,
+        bundle
+    );
   }
 }

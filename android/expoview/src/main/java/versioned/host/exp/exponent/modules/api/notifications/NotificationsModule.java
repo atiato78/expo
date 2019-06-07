@@ -3,6 +3,7 @@
 package versioned.host.exp.exponent.modules.api.notifications;
 
 import com.cronutils.model.Cron;
+import android.os.Bundle;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -17,6 +18,8 @@ import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.unimodules.core.ModuleRegistry;
+import org.unimodules.core.arguments.MapArguments;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -38,6 +41,10 @@ import host.exp.exponent.notifications.NotificationConstants;
 import host.exp.exponent.notifications.NotificationHelper;
 import host.exp.exponent.notifications.schedulers.IntervalSchedulerModel;
 import host.exp.exponent.notifications.schedulers.SchedulerImpl;
+import host.exp.exponent.notifications.postoffice.MailboxInterface;
+import host.exp.exponent.notifications.postoffice.PostOfficeProxy;
+import host.exp.exponent.notifications.presenters.NotificationPresenter;
+import host.exp.exponent.notifications.presenters.NotificationPresenterInterface;
 import host.exp.exponent.storage.ExponentSharedPreferences;
 import host.exp.exponent.notifications.exceptions.UnableToScheduleException;
 import host.exp.exponent.notifications.managers.SchedulersManagerProxy;
@@ -46,7 +53,7 @@ import host.exp.exponent.notifications.schedulers.CalendarSchedulerModel;
 import static com.cronutils.model.field.expression.FieldExpressionFactory.on;
 import static host.exp.exponent.notifications.helpers.ExpoCronParser.createCronInstance;
 
-public class NotificationsModule extends ReactContextBaseJavaModule {
+public class NotificationsModule extends ReactContextBaseJavaModule implements MailboxInterface {
 
   private static final String TAG = NotificationsModule.class.getSimpleName();
 
@@ -235,19 +242,13 @@ public class NotificationsModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void presentLocalNotificationWithChannel(final ReadableMap data, final ReadableMap legacyChannelData, final Promise promise) {
-    HashMap<String, java.io.Serializable> details = new HashMap<>();
     String experienceId;
 
-    HashMap<String, Object> hashMap = data.toHashMap();
-    if (data.hasKey("categoryId")) {
-      hashMap.put("categoryId", getScopedIdIfNotDetached(data.getString("categoryId")));
-    }
-
-    details.put("data", hashMap);
+    Bundle bundle = new MapArguments(data.toHashMap()).toBundle();
 
     try {
       experienceId = mManifest.getString(ExponentManifest.MANIFEST_ID_KEY);
-      details.put("experienceId", experienceId);
+      bundle.putString("experienceId", experienceId);
     } catch (Exception e) {
       promise.reject("E_FAILED_PRESENTING_NOTIFICATION", "Requires Experience ID");
       return;
@@ -263,70 +264,22 @@ public class NotificationsModule extends ReactContextBaseJavaModule {
           getReactApplicationContext(),
           experienceId,
           channelId,
-          legacyChannelData.toHashMap());
+          legacyChannelData.toHashMap()
+      );
     }
 
-    int notificationId = new Random().nextInt();
+    Integer notificationId = Math.abs( new Random().nextInt() );
+    bundle.putString("notificationId", notificationId.toString());
 
-    NotificationHelper.showNotification(
+    NotificationPresenterInterface notificationPresenter = new NotificationPresenter();
+    notificationPresenter.presentNotification(
         getReactApplicationContext(),
-        notificationId,
-        details,
-        mExponentManifest,
-        new NotificationHelper.Listener() {
-          public void onSuccess(int id) {
-            promise.resolve(id);
-          }
+        experienceId,
+        bundle,
+        notificationId
+    );
 
-          public void onFailure(Exception e) {
-            promise.reject(e);
-          }
-        });
-  }
-
-  @ReactMethod
-  public void scheduleLocalNotification(final ReadableMap data, final ReadableMap options, final Promise promise) {
-    scheduleLocalNotificationWithChannel(data, options, null, promise);
-  }
-
-  @ReactMethod
-  public void scheduleLocalNotificationWithChannel(final ReadableMap data, final ReadableMap options, final ReadableMap legacyChannelData, final Promise promise) {
-    if (legacyChannelData != null) {
-      String experienceId = mManifest.optString(ExponentManifest.MANIFEST_ID_KEY, null);
-      String channelId = data.getString("channelId");
-      if (channelId == null || experienceId == null) {
-        promise.reject("E_FAILED_PRESENTING_NOTIFICATION", "legacyChannelData was nonnull with no channelId or no experienceId");
-        return;
-      }
-      NotificationHelper.maybeCreateLegacyStoredChannel(
-          getReactApplicationContext(),
-          experienceId,
-          channelId,
-          legacyChannelData.toHashMap());
-    }
-
-    int notificationId = new Random().nextInt();
-
-    HashMap<String, Object> hashMap = data.toHashMap();
-    if (data.hasKey("categoryId")) {
-      hashMap.put("categoryId", getScopedIdIfNotDetached(data.getString("categoryId")));
-    }
-
-    NotificationHelper.scheduleLocalNotification(
-        getReactApplicationContext(),
-        notificationId,
-        hashMap,
-        options.toHashMap(),
-        mManifest,
-        new NotificationHelper.Listener() {
-          public void onSuccess(int id) {
-            promise.resolve(id);
-          }
-
-          public void onFailure(Exception e) {
-            promise.reject(e);
-          }
-        });
+    promise.resolve(notificationId.toString());
   }
 
   @ReactMethod
@@ -437,7 +390,7 @@ public class NotificationsModule extends ReactContextBaseJavaModule {
         }
     );
   }
-  
+
   @ReactMethod
   public void scheduleNotificationWithCalendar(final ReadableMap data, final ReadableMap optionsMap, final Promise promise) {
     HashMap<String, Object> options = optionsMap.toHashMap();
@@ -480,6 +433,38 @@ public class NotificationsModule extends ReactContextBaseJavaModule {
           return true;
         }
     );
+  }
+
+  public void onCreate(ModuleRegistry moduleRegistry) {
+    String experienceId = "";
+    try {
+      experienceId = mManifest.getString(ExponentManifest.MANIFEST_ID_KEY);
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+    PostOfficeProxy.getInstance().registerModuleAndGetPendingDeliveries(experienceId, this);
+  }
+
+  public void onDestory() {
+    String experienceId = "";
+    try {
+      experienceId = mManifest.getString(ExponentManifest.MANIFEST_ID_KEY);
+    } catch (JSONException e) {
+      e.printStackTrace();
+    }
+    PostOfficeProxy.getInstance().unregisterModule(experienceId);
+  }
+
+  @Override
+  public void onUserInteraction(Bundle userInteraction) {
+    // ToDo
+    // Send event to js
+  }
+
+  @Override
+  public void onForegroundNotification(Bundle notification) {
+    // ToDo
+    // Send event to js
   }
 
 }

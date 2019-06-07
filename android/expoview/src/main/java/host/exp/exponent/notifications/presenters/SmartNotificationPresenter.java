@@ -1,10 +1,9 @@
 package host.exp.exponent.notifications.presenters;
 
-import android.app.Application;
 import android.content.Context;
 import android.os.Bundle;
 
-import host.exp.exponent.notifications.postoffice.PostOfficeInterfaceProxy;
+import host.exp.exponent.notifications.postoffice.PostOfficeProxy;
 
 public class SmartNotificationPresenter implements NotificationPresenterInterface {
 
@@ -15,7 +14,7 @@ public class SmartNotificationPresenter implements NotificationPresenterInterfac
   @Override
   public void presentNotification(Context context, String experienceId, Bundle notification, int notificationId) {
     if (isForeground) {
-      PostOfficeInterfaceProxy.getInstance().sendForegroundNotification(experienceId, notification);
+      PostOfficeProxy.getInstance().sendForegroundNotification(experienceId, notification);
     } else {
       mNotificationPresenter.presentNotification(context, experienceId, notification, notificationId);
     }

@@ -9,7 +9,7 @@ import host.exp.exponent.kernel.KernelConstants;
 import host.exp.exponent.notifications.ExponentNotification;
 import host.exp.exponent.notifications.ExponentNotificationManager;
 import host.exp.exponent.notifications.NotificationActionCenter;
-import host.exp.exponent.notifications.postoffice.PostOfficeInterfaceProxy;
+import host.exp.exponent.notifications.postoffice.PostOfficeProxy;
 
 public class UserInteractionReceiver {
 
@@ -41,7 +41,7 @@ public class UserInteractionReceiver {
         exponentNotification.setInputText(remoteInput.getString(NotificationActionCenter.KEY_TEXT_REPLY));
       }
 
-      PostOfficeInterfaceProxy.getInstance().notifyAboutUserInteraction(
+      PostOfficeProxy.getInstance().notifyAboutUserInteraction(
           exponentNotification.experienceId,
           exponentNotification.toBundle()
       );
