@@ -480,29 +480,6 @@ public class Kernel extends KernelInterface {
         return;
       }
 
-      // Notification
-      String notification = bundle.getString(KernelConstants.NOTIFICATION_KEY); // deprecated
-      String notificationObject = bundle.getString(KernelConstants.NOTIFICATION_OBJECT_KEY);
-      String notificationManifestUrl = bundle.getString(KernelConstants.NOTIFICATION_MANIFEST_URL_KEY);
-      if (notificationManifestUrl != null) {
-        ExponentNotification exponentNotification = ExponentNotification.fromJSONObjectString(notificationObject);
-        if (exponentNotification != null) {
-          // Add action type
-          if (bundle.containsKey(KernelConstants.NOTIFICATION_ACTION_TYPE_KEY)) {
-            exponentNotification.setActionType(bundle.getString(KernelConstants.NOTIFICATION_ACTION_TYPE_KEY));
-            ExponentNotificationManager manager = new ExponentNotificationManager(mContext);
-            manager.cancel(exponentNotification.experienceId, exponentNotification.notificationId);
-          }
-          // Add remote input
-          Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
-          if (remoteInput != null) {
-            exponentNotification.setInputText(remoteInput.getString(NotificationActionCenter.KEY_TEXT_REPLY));
-          }
-        }
-        openExperience(new KernelConstants.ExperienceOptions(notificationManifestUrl, intentUri == null ? notificationManifestUrl : intentUri, notification, exponentNotification));
-        return;
-      }
-
       // Shortcut
       String shortcutManifestUrl = bundle.getString(KernelConstants.SHORTCUT_MANIFEST_URL_KEY);
       if (shortcutManifestUrl != null) {

@@ -2,6 +2,8 @@
 
 package host.exp.exponent.notifications;
 
+import android.os.Bundle;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -62,6 +64,12 @@ public class ExponentNotification {
       EXL.e(TAG, e.toString());
     }
 
+    return notification;
+  }
+
+  public Bundle toBundle() {
+    Bundle notification = new Bundle();
+    // toDo
     return notification;
   }
 
