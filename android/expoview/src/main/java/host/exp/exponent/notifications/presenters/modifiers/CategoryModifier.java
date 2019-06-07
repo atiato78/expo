@@ -24,7 +24,7 @@ public class CategoryModifier implements NotificationModifierInterface {
         public Intent provide() {
           Class activityClass = KernelConstants.MAIN_ACTIVITY_CLASS;
           Intent intent = new Intent(context, activityClass);
-          intent.putExtra(KernelConstants.NOTIFICATION_OBJECT_KEY, notification.toString());
+          intent.putExtra(KernelConstants.NOTIFICATION_OBJECT_KEY, notification);
           return intent;
         }
       });

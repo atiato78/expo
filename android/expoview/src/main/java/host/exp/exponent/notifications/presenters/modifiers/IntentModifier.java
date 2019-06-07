@@ -15,7 +15,7 @@ public class IntentModifier implements NotificationModifierInterface {
   public void modify(NotificationCompat.Builder builder, Bundle notification, Context context, String experienceId) {
     Class activityClass = KernelConstants.MAIN_ACTIVITY_CLASS;
     Intent intent = new Intent(context, activityClass);
-    intent.putExtra(KernelConstants.NOTIFICATION_OBJECT_KEY, notification.toString());
+    intent.putExtra(KernelConstants.NOTIFICATION_OBJECT_KEY, notification);
 
     PendingIntent contentIntent = PendingIntent.getActivity(
         context,

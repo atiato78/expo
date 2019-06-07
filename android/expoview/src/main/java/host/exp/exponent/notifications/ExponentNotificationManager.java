@@ -9,6 +9,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.v4.app.NotificationManagerCompat;
 
 import host.exp.exponent.Constants;
@@ -242,14 +243,14 @@ public class ExponentNotificationManager {
     }
   }
 
-  public void schedule(String experienceId, int id, HashMap details, long time, Long interval) throws ClassNotFoundException {
+  public void schedule(String experienceId, int id, Bundle notification, long time, Long interval) throws ClassNotFoundException {
     Intent notificationIntent = new Intent(mContext, ScheduledNotificationReceiver.class);
 
     notificationIntent.setType(experienceId);
     notificationIntent.setAction(String.valueOf(id));
 
     notificationIntent.putExtra(KernelConstants.NOTIFICATION_ID_KEY, id);
-    notificationIntent.putExtra(KernelConstants.NOTIFICATION_OBJECT_KEY, details);
+    notificationIntent.putExtra(KernelConstants.NOTIFICATION_OBJECT_KEY, notification);
 
     PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 

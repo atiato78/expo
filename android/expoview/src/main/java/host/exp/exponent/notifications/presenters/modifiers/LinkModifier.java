@@ -7,6 +7,6 @@ import android.support.v4.app.NotificationCompat;
 public class LinkModifier implements NotificationModifierInterface {
   @Override
   public void modify(NotificationCompat.Builder builder, Bundle notification, Context context, String experienceId) {
-
+    // ToDo
   }
 }
