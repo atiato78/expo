@@ -129,7 +129,7 @@ export default class Video extends React.Component<VideoProps, VideoState> imple
     dismissFullscreenPlayer: () => Promise<PlaybackStatus>;
     dismissIOSFullscreenPlayer: () => void;
     getStatusAsync: () => Promise<PlaybackStatus>;
-    loadAsync: (source: PlaybackSource, initialStatus?: PlaybackParams, downloadFirst?: boolean) => Promise<PlaybackStatus>;
+    loadAsync: (source: PlaybackSource, initialParams?: PlaybackParams, downloadFirst?: boolean) => Promise<PlaybackStatus>;
     unloadAsync: () => Promise<PlaybackStatus>;
     setParamsAsync: (status: PlaybackParams) => Promise<PlaybackStatus>;
     replayAsync: (status?: PlaybackParams) => Promise<PlaybackStatus>;

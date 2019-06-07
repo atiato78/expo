@@ -17,14 +17,7 @@ interface AVManagerInterface {
 
   fun unregisterVideoViewForAudioLifecycle(videoView: VideoView)
 
-  fun abandonAudioFocusIfUnused()
-
   fun getVolumeForDuckAndFocus(isMuted: Boolean, volume: Float): Float
-
-  @Throws(AudioFocusNotAcquiredException::class)
-  fun acquireAudioFocus()
-
-  fun setAudioIsEnabled(value: Boolean?)
 
   fun setAudioMode(map: ReadableArguments)
 

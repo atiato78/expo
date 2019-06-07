@@ -14,11 +14,11 @@ export declare class Sound implements Playback {
     _eventEmitter: EventEmitter;
     _coalesceStatusUpdatesInMillis: number;
     _onPlaybackStatusUpdate: ((status: PlaybackStatus) => void) | null;
-    static create: (source: PlaybackSource, initialStatus?: PlaybackParams, onPlaybackStatusUpdate?: ((status: PlaybackStatus) => void) | null, downloadFirst?: boolean) => Promise<{
+    static create: (source: PlaybackSource, params?: PlaybackParams, onPlaybackStatusUpdate?: ((status: PlaybackStatus) => void) | null, downloadFirst?: boolean) => Promise<{
         sound: Sound;
         status: PlaybackStatus;
     }>;
-    static createAsync: (source: PlaybackSource, initialStatus?: PlaybackParams, onPlaybackStatusUpdate?: ((status: PlaybackStatus) => void) | null, downloadFirst?: boolean) => Promise<{
+    static createAsync: (source: PlaybackSource, params?: PlaybackParams, onPlaybackStatusUpdate?: ((status: PlaybackStatus) => void) | null, downloadFirst?: boolean) => Promise<{
         sound: Sound;
         status: PlaybackStatus;
     }>;
@@ -37,7 +37,7 @@ export declare class Sound implements Playback {
     _errorCallback: (error: string) => void;
     getStatusAsync: () => Promise<PlaybackStatus>;
     setOnPlaybackStatusUpdate(onPlaybackStatusUpdate: ((status: PlaybackStatus) => void) | null): void;
-    loadAsync(source: PlaybackSource, initialStatus?: PlaybackParams, downloadFirst?: boolean): Promise<PlaybackStatus>;
+    loadAsync(source: PlaybackSource, params?: PlaybackParams, downloadFirst?: boolean): Promise<PlaybackStatus>;
     unloadAsync(): Promise<PlaybackStatus>;
     setParamsAsync(params: PlaybackParams): Promise<PlaybackStatus>;
     replayAsync(params?: PlaybackParams): Promise<PlaybackStatus>;

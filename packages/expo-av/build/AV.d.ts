@@ -50,7 +50,7 @@ export declare function getNativeSourceFromSource(source: PlaybackSource | null)
 export declare function assertStatusValuesInBounds(status: PlaybackParams): void;
 export declare function getNativeSourceAndFullInitialStatusForLoadAsync(source: PlaybackSource | null, initialParams: PlaybackParams | null, downloadFirst: boolean): Promise<{
     nativeSource: PlaybackNativeSource;
-    fullInitialStatus: PlaybackParams;
+    fullParams: PlaybackParams;
 }>;
 export declare function getUnloadedStatus(error?: string | null): PlaybackStatus;
 export interface AV {

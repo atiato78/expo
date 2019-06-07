@@ -1,14 +1,17 @@
 package expo.modules.av.player
 
 import android.net.Uri
+import android.os.Build
 import android.os.Handler
+import android.util.Log
 import android.util.Pair
 import android.view.Surface
 import expo.modules.av.AVManagerInterface
-import expo.modules.av.AudioFocusNotAcquiredException
+import expo.modules.av.AudioFocusAquiringError
 import expo.modules.av.Params
 import expo.modules.av.Status
 import expo.modules.av.audio.AudioEventHandler
+import expo.modules.av.audio.AudioFocusHandler
 import org.unimodules.core.Promise
 import org.unimodules.core.arguments.ReadableArguments
 import java.io.IOException
@@ -18,11 +21,13 @@ import java.net.HttpCookie
 import java.net.URI
 import java.util.*
 
-class PlayerManager(private val player: ExpoPlayer, private val avModule: AVManagerInterface,
+class PlayerManager(private val player: ExpoPlayer, private val cookieHandler: CookieHandler?,
+                    private val focusManager: AudioFocusHandler,
                     private val uri: Uri) : AudioEventHandler, ExpoPlayer.PlayerStateListener {
 
   private val mHandler = Handler()
   private val mProgressUpdater = ProgressUpdater(this)
+  private val focusChangeListener = AudioFocusListener()
 
   private var mFullscreenPresenter: FullscreenPresenter? = null
   private var mParamsUpdatedListener: ParamsUpdatedListener? = null
@@ -68,25 +73,21 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   private// do nothing, we'll return an empty list
   val httpCookiesList: List<HttpCookie>
     get() {
-      if (avModule.moduleRegistry != null) {
-        val cookieHandler = avModule.moduleRegistry.getModule(CookieHandler::class.java)
-        if (cookieHandler != null) {
-          try {
-            val headersMap = cookieHandler.get(URI.create(uri.toString()), null)
-            val cookies = headersMap["Cookie"]
-            return if (cookies != null) {
-              val httpCookies = ArrayList<HttpCookie>()
-              for (cookieValue in cookies) {
-                httpCookies.addAll(HttpCookie.parse(cookieValue))
-              }
-              httpCookies
-            } else {
-              emptyList()
+      if (cookieHandler != null) {
+        try {
+          val headersMap = cookieHandler.get(URI.create(uri.toString()), null)
+          val cookies = headersMap["Cookie"]
+          return if (cookies != null) {
+            val httpCookies = ArrayList<HttpCookie>()
+            for (cookieValue in cookies) {
+              httpCookies.addAll(HttpCookie.parse(cookieValue))
             }
-          } catch (e: IOException) {
-            // TODO: This look nasty
+            httpCookies
+          } else {
+            emptyList()
           }
-
+        } catch (e: IOException) {
+          // TODO: This look nasty
         }
       }
       return emptyList()
@@ -182,13 +183,14 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   // Status update listener
 
   private fun callStatusUpdateListenerWithStatus(status: Status?) {
+    Log.d("PLAYER_STATUS", "updating status " + System.currentTimeMillis())
     mStatusUpdateListener?.onStatusUpdate(status)
   }
 
   private fun callStatusUpdateListenerWithDidJustFinish() {
-    val status = status
+    var status = status
     // TODO: Correct!
-    //    status.putBoolean(STATUS_DID_JUST_FINISH_KEY_PATH, true);
+    status = status.copy(didJustFinish = true)
     callStatusUpdateListenerWithStatus(status)
   }
 
@@ -204,6 +206,7 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
     if (!player.continueUpdatingProgress || params.updateInterval <= 0) {
       stopUpdatingProgressIfNecessary()
     } else {
+      Log.d("PLAYER_STATUS", "Post Delaying " + System.currentTimeMillis())
       mHandler.postDelayed(mProgressUpdater, params.updateInterval.toLong())
     }
   }
@@ -212,8 +215,8 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
     mHandler.post(mProgressUpdater)
   }
 
-  fun setStatusUpdateListener(listener: ParamsUpdatedListener) {
-    mParamsUpdatedListener = listener
+  fun setStatusUpdateListener(listener: StatusUpdateListener) {
+    mStatusUpdateListener = listener
     if (mParamsUpdatedListener != null) {
       beginUpdatingProgressIfNecessary()
     }
@@ -267,13 +270,9 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
       player.pauseImmediately()
     } else {
       try {
-        avModule.acquireAudioFocus()
         updateVolumeMuteAndDuck()
-        player.play(this.params.isMuted, this.params.rate, this.params.shouldCorrectPitch)
-
-        avModule.abandonAudioFocusIfUnused()
-      } catch (ex: AudioFocusNotAcquiredException) {
-        avModule.abandonAudioFocusIfUnused()
+        acquireFocusAndPlay()
+      } catch (ex: AudioFocusAquiringError) {
         setParamsCompletionListener.onSetStatusError(ex.toString())
       }
 
@@ -308,7 +307,7 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
   override fun handleAudioFocusGained() {
     try {
       acquireFocusAndPlay()
-    } catch (e: AudioFocusNotAcquiredException) {
+    } catch (e: AudioFocusAquiringError) {
       // This is ok -- we might be paused or audio might have been disabled.
     }
 
@@ -328,15 +327,14 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
 
   override fun updateVolumeMuteAndDuck() {
     if (player.loaded) {
-      player.volume =
-          avModule.getVolumeForDuckAndFocus(this.params.isMuted, this.params.volume)
+      player.volume = this.params.volume
     }
   }
 
   override fun onResume() {
     try {
       acquireFocusAndPlay()
-    } catch (e: AudioFocusNotAcquiredException) {
+    } catch (e: AudioFocusAquiringError) {
       // Do nothing -- another app has audio focus for now, and handleAudioFocusGained() will be
       // called when it abandons it.
     }
@@ -347,8 +345,9 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
     callStatusUpdateListenerWithDidJustFinish()
 
     if (!player.looping) {
-      avModule.abandonAudioFocusIfUnused()
+      // TODO: Abandon audio focus after finishing playing
     }
+
   }
 
   override fun onSeekCompleted() {
@@ -379,21 +378,42 @@ class PlayerManager(private val player: ExpoPlayer, private val avModule: AVMana
     mVideoSizeUpdateListener?.onVideoSizeUpdate(Pair(width, height))
   }
 
-  @Throws(AudioFocusNotAcquiredException::class)
+  inner class AudioFocusListener : AudioFocusHandler.AudioFocusChangeListener {
+
+    override fun focusStateChanged(state: AudioFocusHandler.FocusState) {
+      when (state) {
+        AudioFocusHandler.FocusState.GAINED -> this@PlayerManager.considerPlaying()
+      }
+    }
+  }
+
+  @Throws(AudioFocusAquiringError::class)
   private fun acquireFocusAndPlay() {
     if (!player.loaded || !shouldPlayerPlay()) {
       return
     }
 
     if (!this.params.isMuted) {
-      avModule.acquireAudioFocus()
+      if (Build.VERSION.SDK_INT >= 26) {
+        focusManager.requestFocus(AudioFocusHandler.FocusParams(AudioFocusHandler.FocusGain.GAIN,
+            AudioFocusHandler.AudioUsage.MEDIA, AudioFocusHandler.AudioContentType.TYPE_MUSIC, true,
+            true), focusChangeListener)
+      } else {
+        focusManager.requestFocus(
+            AudioFocusHandler.PreOreoFocusParams(AudioFocusHandler.StreamType.MUSIC,
+                AudioFocusHandler.FocusGain.GAIN), focusChangeListener)
+      }
     }
 
+  }
+
+  private fun considerPlaying() {
     updateVolumeMuteAndDuck()
+    if(shouldPlayerPlay()) {
+      player.play(this.params.isMuted, this.params.rate, this.params.shouldCorrectPitch)
+      beginUpdatingProgressIfNecessary()
+    }
 
-    player.play(this.params.isMuted, this.params.rate, this.params.shouldCorrectPitch)
-
-    beginUpdatingProgressIfNecessary()
   }
 
 }

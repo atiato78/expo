@@ -36,6 +36,8 @@ export class Sound {
             if (this._loaded) {
                 return this._performOperationAndHandleStatusAsync(() => ExponentAV.getStatusForSound(this._key));
             }
+            else {
+            }
             const status = getUnloadedStatus();
             this._callOnPlaybackStatusUpdateForNewStatus(status);
             return status;
@@ -79,14 +81,14 @@ export class Sound {
         this.getStatusAsync();
     }
     // Loading / unloading API
-    async loadAsync(source, initialStatus = {}, downloadFirst = true) {
+    async loadAsync(source, params = {}, downloadFirst = true) {
         throwIfAudioIsDisabled();
         if (this._loading) {
             throw new Error('The Sound is already loading.');
         }
         if (!this._loaded) {
             this._loading = true;
-            const { nativeSource, fullInitialStatus, } = await getNativeSourceAndFullInitialStatusForLoadAsync(source, initialStatus, downloadFirst);
+            const { nativeSource, fullParams } = await getNativeSourceAndFullInitialStatusForLoadAsync(source, params, downloadFirst);
             // This is a workaround, since using load with resolve / reject seems to not work.
             return new Promise((resolve, reject) => {
                 const loadSuccess = (result) => {
@@ -102,7 +104,7 @@ export class Sound {
                     this._loading = false;
                     reject(error);
                 };
-                ExponentAV.loadForSound(nativeSource, fullInitialStatus)
+                ExponentAV.loadForSound(nativeSource, fullParams)
                     .then(loadSuccess)
                     .catch(loadError);
             });
@@ -141,14 +143,14 @@ export class Sound {
         }));
     }
 }
-Sound.create = async (source, initialStatus = {}, onPlaybackStatusUpdate = null, downloadFirst = true) => {
+Sound.create = async (source, params = {}, onPlaybackStatusUpdate = null, downloadFirst = true) => {
     console.warn(`Sound.create is deprecated in favor of Sound.createAsync with the same API except for the new method name`);
-    return Sound.createAsync(source, initialStatus, onPlaybackStatusUpdate, downloadFirst);
+    return Sound.createAsync(source, params, onPlaybackStatusUpdate, downloadFirst);
 };
-Sound.createAsync = async (source, initialStatus = {}, onPlaybackStatusUpdate = null, downloadFirst = true) => {
+Sound.createAsync = async (source, params = {}, onPlaybackStatusUpdate = null, downloadFirst = true) => {
     const sound = new Sound();
     sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
-    const status = await sound.loadAsync(source, initialStatus, downloadFirst);
+    const status = await sound.loadAsync(source, params, downloadFirst);
     return { sound, status };
 };
 Object.assign(Sound.prototype, PlaybackMixin);

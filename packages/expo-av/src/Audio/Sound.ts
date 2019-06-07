@@ -27,25 +27,25 @@ export class Sound implements Playback {
 
   static create = async (
     source: PlaybackSource,
-    initialStatus: PlaybackParams = {},
+    params: PlaybackParams = {},
     onPlaybackStatusUpdate: ((status: PlaybackStatus) => void) | null = null,
     downloadFirst: boolean = true
   ): Promise<{ sound: Sound; status: PlaybackStatus }> => {
     console.warn(
       `Sound.create is deprecated in favor of Sound.createAsync with the same API except for the new method name`
     );
-    return Sound.createAsync(source, initialStatus, onPlaybackStatusUpdate, downloadFirst);
+    return Sound.createAsync(source, params, onPlaybackStatusUpdate, downloadFirst);
   };
 
   static createAsync = async (
     source: PlaybackSource,
-    initialStatus: PlaybackParams = {},
+    params: PlaybackParams = {},
     onPlaybackStatusUpdate: ((status: PlaybackStatus) => void) | null = null,
     downloadFirst: boolean = true
   ): Promise<{ sound: Sound; status: PlaybackStatus }> => {
     const sound: Sound = new Sound();
     sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
-    const status: PlaybackStatus = await sound.loadAsync(source, initialStatus, downloadFirst);
+    const status: PlaybackStatus = await sound.loadAsync(source, params, downloadFirst);
     return { sound, status };
   };
 
@@ -133,6 +133,7 @@ export class Sound implements Playback {
       return this._performOperationAndHandleStatusAsync(() =>
         ExponentAV.getStatusForSound(this._key)
       );
+    } else {
     }
     const status: PlaybackStatus = getUnloadedStatus();
     this._callOnPlaybackStatusUpdateForNewStatus(status);
@@ -148,7 +149,7 @@ export class Sound implements Playback {
 
   async loadAsync(
     source: PlaybackSource,
-    initialStatus: PlaybackParams = {},
+    params: PlaybackParams = {},
     downloadFirst: boolean = true
   ): Promise<PlaybackStatus> {
     throwIfAudioIsDisabled();
@@ -158,12 +159,9 @@ export class Sound implements Playback {
     if (!this._loaded) {
       this._loading = true;
 
-      const {
-        nativeSource,
-        fullInitialStatus,
-      } = await getNativeSourceAndFullInitialStatusForLoadAsync(
+      const { nativeSource, fullParams } = await getNativeSourceAndFullInitialStatusForLoadAsync(
         source,
-        initialStatus,
+        params,
         downloadFirst
       );
 
@@ -184,7 +182,7 @@ export class Sound implements Playback {
           reject(error);
         };
 
-        ExponentAV.loadForSound(nativeSource, fullInitialStatus)
+        ExponentAV.loadForSound(nativeSource, fullParams)
           .then(loadSuccess)
           .catch(loadError);
       });

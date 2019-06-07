@@ -86,20 +86,20 @@ export function assertStatusValuesInBounds(status) {
 }
 export async function getNativeSourceAndFullInitialStatusForLoadAsync(source, initialParams, downloadFirst) {
     // Get the full initial status
-    const fullInitialStatus = initialParams == null
+    const fullParams = initialParams == null
         ? _DEFAULT_INITIAL_PLAYBACK_PARAMS
         : {
             ..._DEFAULT_INITIAL_PLAYBACK_PARAMS,
             ...initialParams,
         };
-    assertStatusValuesInBounds(fullInitialStatus);
+    assertStatusValuesInBounds(fullParams);
     if (typeof source === 'string' && Platform.OS === 'web') {
         return {
             nativeSource: {
                 uri: source,
                 overridingExtension: null,
             },
-            fullInitialStatus,
+            fullParams,
         };
     }
     // Download first if necessary.
@@ -113,7 +113,7 @@ export async function getNativeSourceAndFullInitialStatusForLoadAsync(source, in
     if (nativeSource === null) {
         throw new Error(`Cannot load an AV asset from a null playback source`);
     }
-    return { nativeSource, fullInitialStatus };
+    return { nativeSource, fullParams };
 }
 export function getUnloadedStatus(error = null) {
     return {

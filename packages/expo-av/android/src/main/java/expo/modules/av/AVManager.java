@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 
+import org.jetbrains.annotations.NotNull;
 import org.unimodules.core.ModuleRegistry;
 import org.unimodules.core.Promise;
 import org.unimodules.core.arguments.ReadableArguments;
@@ -43,7 +44,7 @@ import expo.modules.av.video.VideoViewWrapper;
 
 import static android.media.MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED;
 
-public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFocusChangeListener, MediaRecorder.OnInfoListener, AVManagerInterface, InternalModule, ModuleRegistryConsumer {
+public class AVManager implements LifecycleEventListener, MediaRecorder.OnInfoListener, AVManagerInterface, InternalModule, ModuleRegistryConsumer {
   private static final String AUDIO_MODE_SHOULD_DUCK_KEY = "shouldDuckAndroid";
   private static final String AUDIO_MODE_INTERRUPTION_MODE_KEY = "interruptionModeAndroid";
   private static final String AUDIO_MODE_PLAY_THROUGH_EARPIECE = "playThroughEarpieceAndroid";
@@ -65,14 +66,10 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
 
   private final Context mContext;
 
-  private boolean mEnabled = true;
-
-  private final BroadcastReceiver mNoisyAudioStreamReceiver;
   private boolean mAcquiredAudioFocus = false;
 
   private boolean mAppIsPaused = false;
 
-  private AudioInterruptionMode mAudioInterruptionMode = AudioInterruptionMode.DUCK_OTHERS;
   private boolean mShouldDuckAudio = true;
   private boolean mIsDuckingAudio = false;
   private boolean mStaysActiveInBackground = false;
@@ -108,16 +105,16 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
     mAudioFocusHandler = new AudioFocusHandler(audioManager);
     // Implemented because of the suggestion here:
     // https://developer.android.com/guide/topics/media-apps/volume-and-earphones.html
-    mNoisyAudioStreamReceiver = new BroadcastReceiver() {
-      @Override
-      public void onReceive(Context context, Intent intent) {
-        if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
-          abandonAudioFocus();
-        }
-      }
-    };
-    mContext.registerReceiver(mNoisyAudioStreamReceiver,
-        new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
+//    mNoisyAudioStreamReceiver = new BroadcastReceiver() {
+//      @Override
+//      public void onReceive(Context context, Intent intent) {
+//        if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
+//          abandonAudioFocus();
+//        }
+//      }
+//    };
+//    mContext.registerReceiver(mNoisyAudioStreamReceiver,
+//        new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
   }
 
   @Override
@@ -174,13 +171,11 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
       for (final AudioEventHandler handler : mAudioEventHandlers.getAudioEventHandlers()) {
         handler.onPause();
       }
-      abandonAudioFocus();
     }
   }
 
   @Override
   public void onHostDestroy() {
-    mContext.unregisterReceiver(mNoisyAudioStreamReceiver);
     for (final Integer key : mAudioEventHandlers.getAudios().keySet()) {
       removeSoundForKey(key);
     }
@@ -189,7 +184,6 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
     }
 
     removeAudioRecorder();
-    abandonAudioFocus();
   }
 
   // Global audio state control API
@@ -204,76 +198,6 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
     mAudioEventHandlers.removeVideo(videoView);
   }
 
-  @Override // AudioManager.OnAudioFocusChangeListener
-  public void onAudioFocusChange(int focusChange) {
-    switch (focusChange) {
-      case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-        if (mShouldDuckAudio) {
-          mIsDuckingAudio = true;
-          mAcquiredAudioFocus = true;
-          updateDuckStatusForAllPlayersPlaying();
-          break;
-        } // Otherwise, it is treated as AUDIOFOCUS_LOSS_TRANSIENT:
-      case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-      case AudioManager.AUDIOFOCUS_LOSS:
-        mIsDuckingAudio = false;
-        mAcquiredAudioFocus = false;
-        for (final AudioEventHandler handler : mAudioEventHandlers.getAudioEventHandlers()) {
-          handler.handleAudioFocusInterruptionBegan();
-        }
-        break;
-      case AudioManager.AUDIOFOCUS_GAIN:
-        mIsDuckingAudio = false;
-        mAcquiredAudioFocus = true;
-        for (final AudioEventHandler handler : mAudioEventHandlers.getAudioEventHandlers()) {
-          handler.handleAudioFocusGained();
-        }
-        break;
-    }
-  }
-
-  @Override
-  public void acquireAudioFocus() throws AudioFocusNotAcquiredException {
-    if (!mEnabled) {
-      throw new AudioFocusNotAcquiredException("Expo Audio is disabled, so audio focus could not be acquired.");
-    }
-
-    if (mAppIsPaused) {
-      throw new AudioFocusNotAcquiredException("This experience is currently in the background, so audio focus could not be acquired.");
-    }
-
-    if (mAcquiredAudioFocus) {
-      return;
-    }
-
-//    final int audioFocusRequest = mAudioInterruptionMode == AudioInterruptionMode.DO_NOT_MIX
-//        ? AudioManager.AUDIOFOCUS_GAIN : AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK;
-
-    // TODO: Prepare proper focus requests for both pre and post oreo devices.
-    mAudioFocusHandler.requestFocus(
-        new AudioFocusHandler.PreOreoFocusParams(AudioFocusHandler.StreamType.MUSIC, AudioFocusHandler.FocusGain.GAIN)
-    );
-  }
-
-  private void abandonAudioFocus() {
-    for (final AudioEventHandler handler : mAudioEventHandlers.getAudioEventHandlers()) {
-      if (handler.requiresAudioFocus()) {
-        handler.pauseImmediately();
-      }
-    }
-    mAcquiredAudioFocus = false;
-    mAudioFocusHandler.releaseAudioFocus();
-  }
-
-  public void abandonAudioFocusIfUnused() { // used by PlayerManager
-    for (final AudioEventHandler handler : mAudioEventHandlers.getAudioEventHandlers()) {
-      if (handler.requiresAudioFocus()) {
-        return;
-      }
-    }
-    abandonAudioFocus();
-  }
-
   @Override
   public float getVolumeForDuckAndFocus(final boolean isMuted, final float volume) {
     return (!mAcquiredAudioFocus || isMuted) ? 0.0f : mIsDuckingAudio ? volume / 2.0f : volume;
@@ -286,28 +210,11 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
   }
 
   @Override
-  public void setAudioIsEnabled(final Boolean value) {
-    mEnabled = value;
-    if (!value) {
-      abandonAudioFocus();
-    }
-  }
-
-  @Override
   public void setAudioMode(final ReadableArguments map) {
     mShouldDuckAudio = map.getBoolean(AUDIO_MODE_SHOULD_DUCK_KEY);
     if (!mShouldDuckAudio) {
       mIsDuckingAudio = false;
       updateDuckStatusForAllPlayersPlaying();
-    }
-
-    final int interruptionModeInt = map.getInt(AUDIO_MODE_INTERRUPTION_MODE_KEY);
-    switch (interruptionModeInt) {
-      case 1:
-        mAudioInterruptionMode = AudioInterruptionMode.DO_NOT_MIX;
-      case 2:
-      default:
-        mAudioInterruptionMode = AudioInterruptionMode.DUCK_OTHERS;
     }
 
     mStaysActiveInBackground = map.getBoolean(AUDIO_MODE_STAYS_ACTIVE_IN_BACKGROUND);
@@ -329,14 +236,13 @@ public class AVManager implements LifecycleEventListener, AudioManager.OnAudioFo
     mAudioEventHandlers.removeAudio(key);
     if (data != null) {
       data.release();
-      abandonAudioFocusIfUnused();
     }
   }
 
   @Override
   public void loadForSound(final Source source, final ReadableArguments arguments, final Promise promise) {
     final int key = mSoundMapKeyCount++;
-    final PlayerManager playerManager = mPlayerCreator.createUnloadedPlayerData(source, new Params().update(arguments));
+    final PlayerManager playerManager = mPlayerCreator.createUnloadedPlayerData(source, new Params().update(arguments), getModuleRegistry());
     playerManager.setErrorListener(error -> removeSoundForKey(key));
     mAudioEventHandlers.addAudio(key, playerManager);
     playerManager.load(arguments, new PlayerManager.LoadCompletionListener() {

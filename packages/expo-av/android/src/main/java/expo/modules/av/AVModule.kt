@@ -21,12 +21,6 @@ class AVModule(context: Context) : ExportedModule(context), ModuleRegistryConsum
   }
 
   @ExpoMethod
-  fun setAudioIsEnabled(value: Boolean?, promise: Promise) {
-    mAVManager.setAudioIsEnabled(value)
-    promise.resolve(null)
-  }
-
-  @ExpoMethod
   fun setAudioMode(map: ReadableArguments, promise: Promise) {
     mAVManager.setAudioMode(map)
     promise.resolve(null)

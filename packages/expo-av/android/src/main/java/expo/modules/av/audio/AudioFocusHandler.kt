@@ -7,16 +7,21 @@ import android.media.AudioManager
 import android.os.Build
 import android.support.annotation.RequiresApi
 
-class AudioFocusHandler(private val audioManager: AudioManager) :
-    AudioManager.OnAudioFocusChangeListener {
-
-  private var focusListener: AudioFocusChangeListener? = null
+class AudioFocusHandler(private val audioManager: AudioManager) {
 
   enum class FocusGain(val value: Int) {
     GAIN(AudioManager.AUDIOFOCUS_GAIN),
     GAIN_TRANSIENT(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT),
     GAIN_TRANSIENT_MAY_DUCK(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK),
     GAIN_TRANSIENT_EXCLUSIVE(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE)
+  }
+
+  enum class FocusState {
+    GAINED,
+    LOST_MAY_DUCK,
+    TEMPORARILY_LOST,
+    LOST,
+    ERROR
   }
 
   @TargetApi(Build.VERSION_CODES.O)
@@ -67,7 +72,7 @@ class AudioFocusHandler(private val audioManager: AudioManager) :
                          val acceptDelayedFocus: Boolean = true)
 
   @RequiresApi(Build.VERSION_CODES.O)
-  fun requestFocus(params: FocusParams) {
+  fun requestFocus(params: FocusParams, focusListener: AudioFocusChangeListener) {
     val (focusGain, usage, contentType, pauseWhenDucked, acceptDelayedFocus) = params
     val audioAttributes =
         AudioAttributes.Builder()
@@ -79,55 +84,51 @@ class AudioFocusHandler(private val audioManager: AudioManager) :
             .setWillPauseWhenDucked(pauseWhenDucked)
             .setAcceptsDelayedFocusGain(acceptDelayedFocus)
             .setAudioAttributes(audioAttributes)
-            .setOnAudioFocusChangeListener(this)
+            .setOnAudioFocusChangeListener(audioFocusListener(focusListener))
             .build()
     val result = this.audioManager.requestAudioFocus(focusRequest)
-    handleAudioRequestResult(result)
+    handleAudioRequestResult(result, focusListener)
   }
 
-  fun requestFocus(params: PreOreoFocusParams) {
+  fun requestFocus(params: PreOreoFocusParams, focusListener: AudioFocusChangeListener) {
     val (streamType, durationHint) = params
     @Suppress("deprecation")
-    val result = this.audioManager.requestAudioFocus(this, streamType.value, durationHint.value)
-    handleAudioRequestResult(result)
+    val result = this.audioManager.requestAudioFocus(audioFocusListener(focusListener), streamType.value, durationHint.value)
+    handleAudioRequestResult(result, focusListener)
   }
 
-  fun releaseAudioFocus() {
+  fun releaseAudioFocus(focusListener: AudioFocusChangeListener) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
       @Suppress("deprecation")
-      audioManager.abandonAudioFocus(this)
+      audioManager.abandonAudioFocus(audioFocusListener(focusListener))
     }
   }
 
-  override fun onAudioFocusChange(focusChange: Int) {
-    when (focusChange) {
-      AudioManager.AUDIOFOCUS_GAIN ->
-        focusListener?.play()
-      AudioManager.AUDIOFOCUS_LOSS ->
-        focusListener?.stop()
-      AudioManager.AUDIOFOCUS_LOSS_TRANSIENT ->
-        focusListener?.pause()
-      AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK ->
-        focusListener?.duck()
-    }
-  }
+  fun audioFocusListener(focusListener: AudioFocusChangeListener): (focusChange: Int) -> Unit =
+      { focusChange ->
+        when (focusChange) {
+          AudioManager.AUDIOFOCUS_GAIN ->
+            focusListener.focusStateChanged(FocusState.GAINED)
+          AudioManager.AUDIOFOCUS_LOSS ->
+            focusListener.focusStateChanged(FocusState.LOST)
+          AudioManager.AUDIOFOCUS_LOSS_TRANSIENT ->
+            focusListener.focusStateChanged(FocusState.TEMPORARILY_LOST)
+          AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK ->
+            focusListener.focusStateChanged(FocusState.LOST_MAY_DUCK)
+        }
+      }
 
-  private fun handleAudioRequestResult(result: Int) {
+  private fun handleAudioRequestResult(result: Int, focusListener: AudioFocusChangeListener) {
     when (result) {
       AudioManager.AUDIOFOCUS_REQUEST_GRANTED ->
-        focusListener?.play()
+        focusListener.focusStateChanged(FocusState.GAINED)
       AudioManager.AUDIOFOCUS_REQUEST_FAILED ->
-        focusListener?.audioFocusError("Unable to gain audio focus!")
+        focusListener.focusStateChanged(FocusState.ERROR)
     }
   }
 
   interface AudioFocusChangeListener {
-    fun play()
-    fun pause()
-    fun duck()
-    fun audioFocusError(message: String)
-    fun stop()
-
+    fun focusStateChanged(state: FocusState)
   }
 
 }

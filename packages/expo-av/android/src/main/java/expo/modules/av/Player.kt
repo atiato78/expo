@@ -58,6 +58,9 @@ private const val defaultIsBuffering = false
 private const val STATUS_DID_JUST_FINISH_KEY_PATH = "didJustFinish"
 private const val defaultDidJustFinish = false
 
+private const val PARAMS_PAUSE_WHEN_NOISY = "pauseWhenNoisy"
+private const val defaultPauseWhenNoisy = true
+
 data class Params(val uriPath: String = defaultUri,
                   val initialPosition: Int = defaultInitialPosition,
                   val shouldPlay: Boolean = defaultShouldPlay,
@@ -67,7 +70,8 @@ data class Params(val uriPath: String = defaultUri,
                   val shouldCorrectPitch: Boolean = defaultShouldCorrectPitch,
                   val volume: Float = defaultVolume,
                   val isMuted: Boolean = defaultIsMuted,
-                  val isLooping: Boolean = defaultIsLooping) {
+                  val isLooping: Boolean = defaultIsLooping,
+                  val pauseWhenNoisy: Boolean = defaultPauseWhenNoisy) {
 
   fun update(arguments: ReadableArguments): Params {
     var result = this
@@ -111,6 +115,10 @@ data class Params(val uriPath: String = defaultUri,
     if (arguments.containsKey(PARAM_IS_LOOPING_KEY_PATH)) {
       result =
           result.copy(isLooping = arguments.getBoolean(PARAM_IS_LOOPING_KEY_PATH, defaultIsLooping))
+    }
+    if (arguments.containsKey(PARAMS_PAUSE_WHEN_NOISY)) {
+      result =
+          result.copy(pauseWhenNoisy = arguments.getBoolean(PARAMS_PAUSE_WHEN_NOISY, defaultPauseWhenNoisy))
     }
 
     return result

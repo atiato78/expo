@@ -95,9 +95,9 @@ export default class Video extends React.Component {
             return this._performOperationAndHandleStatusAsync((tag) => ExponentAV.getStatusForVideo(tag));
         };
         // Loading / unloading API
-        this.loadAsync = async (source, initialStatus = {}, downloadFirst = true) => {
-            const { nativeSource, fullInitialStatus, } = await getNativeSourceAndFullInitialStatusForLoadAsync(source, initialStatus, downloadFirst);
-            return this._performOperationAndHandleStatusAsync((tag) => ExponentAV.loadForVideo(tag, nativeSource, fullInitialStatus));
+        this.loadAsync = async (source, initialParams = {}, downloadFirst = true) => {
+            const { nativeSource, fullParams } = await getNativeSourceAndFullInitialStatusForLoadAsync(source, initialParams, downloadFirst);
+            return this._performOperationAndHandleStatusAsync((tag) => ExponentAV.loadForVideo(tag, nativeSource, fullParams));
         };
         // Equivalent to setting URI to null.
         this.unloadAsync = async () => {
