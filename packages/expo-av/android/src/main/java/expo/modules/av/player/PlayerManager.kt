@@ -6,12 +6,12 @@ import android.os.Handler
 import android.util.Log
 import android.util.Pair
 import android.view.Surface
-import expo.modules.av.AVManagerInterface
-import expo.modules.av.AudioFocusAquiringError
+import expo.modules.av.audio.focus.AudioFocusAquiringError
 import expo.modules.av.Params
 import expo.modules.av.Status
 import expo.modules.av.audio.AudioEventHandler
-import expo.modules.av.audio.AudioFocusHandler
+import expo.modules.av.audio.focus.AudioFocusChangeListener
+import expo.modules.av.audio.focus.AudioFocusHandler
 import org.unimodules.core.Promise
 import org.unimodules.core.arguments.ReadableArguments
 import java.io.IOException
@@ -378,13 +378,37 @@ class PlayerManager(private val player: ExpoPlayer, private val cookieHandler: C
     mVideoSizeUpdateListener?.onVideoSizeUpdate(Pair(width, height))
   }
 
-  inner class AudioFocusListener : AudioFocusHandler.AudioFocusChangeListener {
+  private fun handleFocusLostMayDuck() {
+    // TODO: Handle according to params.
+  }
+
+  private fun handleFocustemporarirlyLost() {
+    // TODO: Handle - pause player without unloading it
+  }
+
+  private fun handleFocusLost() {
+    // TODO: Handle by stopping player
+}
+
+  private fun reactToMayBecomeNoisy() {
+    // TODO: Handle according to params.
+  }
+
+  inner class AudioFocusListener : AudioFocusChangeListener {
 
     override fun focusStateChanged(state: AudioFocusHandler.FocusState) {
       when (state) {
         AudioFocusHandler.FocusState.GAINED -> this@PlayerManager.considerPlaying()
+        AudioFocusHandler.FocusState.LOST_MAY_DUCK -> this@PlayerManager.handleFocusLostMayDuck()
+        AudioFocusHandler.FocusState.TEMPORARILY_LOST -> this@PlayerManager.handleFocustemporarirlyLost()
+        AudioFocusHandler.FocusState.LOST -> this@PlayerManager.handleFocusLost()
       }
     }
+
+    override fun mayBecomeNoisy() {
+      this@PlayerManager.reactToMayBecomeNoisy()
+    }
+
   }
 
   @Throws(AudioFocusAquiringError::class)
@@ -395,12 +419,14 @@ class PlayerManager(private val player: ExpoPlayer, private val cookieHandler: C
 
     if (!this.params.isMuted) {
       if (Build.VERSION.SDK_INT >= 26) {
-        focusManager.requestFocus(AudioFocusHandler.FocusParams(AudioFocusHandler.FocusGain.GAIN,
+        focusManager.requestFocus(AudioFocusHandler.FocusParams(
+            AudioFocusHandler.FocusGain.GAIN,
             AudioFocusHandler.AudioUsage.MEDIA, AudioFocusHandler.AudioContentType.TYPE_MUSIC, true,
             true), focusChangeListener)
       } else {
         focusManager.requestFocus(
-            AudioFocusHandler.PreOreoFocusParams(AudioFocusHandler.StreamType.MUSIC,
+            AudioFocusHandler.PreOreoFocusParams(
+                AudioFocusHandler.StreamType.MUSIC,
                 AudioFocusHandler.FocusGain.GAIN), focusChangeListener)
       }
     }

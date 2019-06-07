@@ -1,3 +1,3 @@
-package expo.modules.av
+package expo.modules.av.audio.focus
 
 class AudioFocusAquiringError(message: String) : Exception(message)

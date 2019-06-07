@@ -34,32 +34,31 @@ private const val defaultIsMuted = false
 private const val PARAM_IS_LOOPING_KEY_PATH = "isLooping"
 private const val defaultIsLooping = false
 
-private const val STATUS_IS_LOADED_KEY_PATH = "isLoaded"
-private const val defaultIsLoaded = false
-
-private const val STATUS_DURATION_MILLIS_KEY_PATH = "durationMillis"
-private const val defaultDurationMillis = 0
-private const val STATUS_POSITION_MILLIS_KEY_PATH = "positionMillis"
-
-private const val defaultPositionMillis = 0
-private const val STATUS_PLAYABLE_DURATION_MILLIS_KEY_PATH = "playableDurationMillis"
-
-
-private const val defaultPlayableDurationMillis = 0
-
-
-private const val STATUS_IS_PLAYING_KEY_PATH = "isPlaying"
-private const val defaultIsPlaying = false
-
-
-private const val STATUS_IS_BUFFERING_KEY_PATH = "isBuffering"
-private const val defaultIsBuffering = false
-
-private const val STATUS_DID_JUST_FINISH_KEY_PATH = "didJustFinish"
-private const val defaultDidJustFinish = false
-
 private const val PARAMS_PAUSE_WHEN_NOISY = "pauseWhenNoisy"
 private const val defaultPauseWhenNoisy = true
+
+private const val PARAMS_MAY_DUCK = "mayDuck"
+private const val defaultMayDuck = false
+
+data class Source(val uri: String, val requestHeaders: Map<*, *>?,
+                  val uriOverridingExtension: String?) {
+
+  companion object {
+    private const val STATUS_HEADERS_KEY_PATH = "headers"
+    private const val STATUS_URI_KEY_PATH = "uri"
+    private const val STATUS_OVERRIDING_EXTENSION_KEY_PATH = "overridingExtension"
+
+    @JvmStatic
+    fun fromReadableArguments(readableArguments: ReadableArguments): Source {
+      val uri = readableArguments.getString(STATUS_URI_KEY_PATH)
+      val headers = readableArguments.getMap(STATUS_HEADERS_KEY_PATH)
+      val overridingExtension = readableArguments.getString(STATUS_OVERRIDING_EXTENSION_KEY_PATH)
+      return Source(uri, headers, overridingExtension)
+    }
+
+  }
+
+}
 
 data class Params(val uriPath: String = defaultUri,
                   val initialPosition: Int = defaultInitialPosition,
@@ -71,7 +70,8 @@ data class Params(val uriPath: String = defaultUri,
                   val volume: Float = defaultVolume,
                   val isMuted: Boolean = defaultIsMuted,
                   val isLooping: Boolean = defaultIsLooping,
-                  val pauseWhenNoisy: Boolean = defaultPauseWhenNoisy) {
+                  val pauseWhenNoisy: Boolean = defaultPauseWhenNoisy,
+                  val mayDuck: Boolean = defaultPauseWhenNoisy) {
 
   fun update(arguments: ReadableArguments): Params {
     var result = this
@@ -120,6 +120,10 @@ data class Params(val uriPath: String = defaultUri,
       result =
           result.copy(pauseWhenNoisy = arguments.getBoolean(PARAMS_PAUSE_WHEN_NOISY, defaultPauseWhenNoisy))
     }
+    if (arguments.containsKey(PARAMS_MAY_DUCK)) {
+      result =
+          result.copy(mayDuck = arguments.getBoolean(PARAMS_MAY_DUCK, defaultMayDuck))
+    }
 
     return result
   }
@@ -135,10 +139,33 @@ data class Params(val uriPath: String = defaultUri,
     bundle.putDouble(PARAM_VOLUME_KEY_PATH, volume.toDouble())
     bundle.putBoolean(PARAM_IS_MUTED_KEY_PATH, isMuted)
     bundle.putBoolean(PARAM_IS_LOOPING_KEY_PATH, isLooping)
+    bundle.putBoolean(PARAMS_PAUSE_WHEN_NOISY, pauseWhenNoisy)
+    bundle.putBoolean(PARAMS_MAY_DUCK, defaultMayDuck)
     return bundle
   }
 
 }
+
+private const val STATUS_IS_LOADED_KEY_PATH = "isLoaded"
+private const val defaultIsLoaded = false
+
+private const val STATUS_DURATION_MILLIS_KEY_PATH = "durationMillis"
+private const val defaultDurationMillis = 0
+
+private const val STATUS_POSITION_MILLIS_KEY_PATH = "positionMillis"
+private const val defaultPositionMillis = 0
+
+private const val STATUS_PLAYABLE_DURATION_MILLIS_KEY_PATH = "playableDurationMillis"
+private const val defaultPlayableDurationMillis = 0
+
+private const val STATUS_IS_PLAYING_KEY_PATH = "isPlaying"
+private const val defaultIsPlaying = false
+
+private const val STATUS_IS_BUFFERING_KEY_PATH = "isBuffering"
+private const val defaultIsBuffering = false
+
+private const val STATUS_DID_JUST_FINISH_KEY_PATH = "didJustFinish"
+private const val defaultDidJustFinish = false
 
 data class Status(val isLoaded: Boolean = defaultIsLoaded,
                   val durationInMillis: Int = defaultDurationMillis,

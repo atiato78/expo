@@ -3,10 +3,7 @@
 package expo.modules.av;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.MediaRecorder;
@@ -16,7 +13,6 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 
-import org.jetbrains.annotations.NotNull;
 import org.unimodules.core.ModuleRegistry;
 import org.unimodules.core.Promise;
 import org.unimodules.core.arguments.ReadableArguments;
@@ -36,7 +32,7 @@ import java.util.UUID;
 
 import expo.modules.av.audio.AudioEventHandler;
 import expo.modules.av.audio.AudioEventHandlers;
-import expo.modules.av.audio.AudioFocusHandler;
+import expo.modules.av.audio.focus.AudioFocusHandler;
 import expo.modules.av.player.PlayerCreator;
 import expo.modules.av.player.PlayerManager;
 import expo.modules.av.video.VideoView;
@@ -102,7 +98,7 @@ public class AVManager implements LifecycleEventListener, MediaRecorder.OnInfoLi
     }
 
 
-    mAudioFocusHandler = new AudioFocusHandler(audioManager);
+    mAudioFocusHandler = new AudioFocusHandler(reactContext, audioManager);
     // Implemented because of the suggestion here:
     // https://developer.android.com/guide/topics/media-apps/volume-and-earphones.html
 //    mNoisyAudioStreamReceiver = new BroadcastReceiver() {

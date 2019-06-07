@@ -1,13 +1,22 @@
-package expo.modules.av.audio
+package expo.modules.av.audio.focus
 
 import android.annotation.TargetApi
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.os.Build
 import android.support.annotation.RequiresApi
 
-class AudioFocusHandler(private val audioManager: AudioManager) {
+class AudioFocusHandler(private val context: Context, val audioManager: AudioManager):
+    BecomingNoisyListener {
+
+  private val noisyReceiver =
+      NoisyBroadcastReceiver(this)
+  var focusListener: AudioFocusChangeListener? = null
 
   enum class FocusGain(val value: Int) {
     GAIN(AudioManager.AUDIOFOCUS_GAIN),
@@ -73,6 +82,7 @@ class AudioFocusHandler(private val audioManager: AudioManager) {
 
   @RequiresApi(Build.VERSION_CODES.O)
   fun requestFocus(params: FocusParams, focusListener: AudioFocusChangeListener) {
+    this.focusListener = focusListener
     val (focusGain, usage, contentType, pauseWhenDucked, acceptDelayedFocus) = params
     val audioAttributes =
         AudioAttributes.Builder()
@@ -84,51 +94,112 @@ class AudioFocusHandler(private val audioManager: AudioManager) {
             .setWillPauseWhenDucked(pauseWhenDucked)
             .setAcceptsDelayedFocusGain(acceptDelayedFocus)
             .setAudioAttributes(audioAttributes)
-            .setOnAudioFocusChangeListener(audioFocusListener(focusListener))
+            .setOnAudioFocusChangeListener(audioFocusListener())
             .build()
     val result = this.audioManager.requestAudioFocus(focusRequest)
     handleAudioRequestResult(result, focusListener)
   }
 
   fun requestFocus(params: PreOreoFocusParams, focusListener: AudioFocusChangeListener) {
+    this.focusListener = focusListener
     val (streamType, durationHint) = params
     @Suppress("deprecation")
-    val result = this.audioManager.requestAudioFocus(audioFocusListener(focusListener), streamType.value, durationHint.value)
+    val result =
+        this.audioManager.requestAudioFocus(audioFocusListener(), streamType.value,
+            durationHint.value)
     handleAudioRequestResult(result, focusListener)
   }
 
-  fun releaseAudioFocus(focusListener: AudioFocusChangeListener) {
+  fun releaseAudioFocus() {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
       @Suppress("deprecation")
-      audioManager.abandonAudioFocus(audioFocusListener(focusListener))
+      audioManager.abandonAudioFocus(audioFocusListener())
     }
   }
 
-  fun audioFocusListener(focusListener: AudioFocusChangeListener): (focusChange: Int) -> Unit =
+  fun audioFocusListener(): (focusChange: Int) -> Unit =
       { focusChange ->
         when (focusChange) {
           AudioManager.AUDIOFOCUS_GAIN ->
-            focusListener.focusStateChanged(FocusState.GAINED)
+            handleFocusGained()
           AudioManager.AUDIOFOCUS_LOSS ->
-            focusListener.focusStateChanged(FocusState.LOST)
+            handleFocusLost()
           AudioManager.AUDIOFOCUS_LOSS_TRANSIENT ->
-            focusListener.focusStateChanged(FocusState.TEMPORARILY_LOST)
+            handleFocusLostTransient()
           AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK ->
-            focusListener.focusStateChanged(FocusState.LOST_MAY_DUCK)
+            handleFocusLostMayDuck()
         }
       }
+
+  private fun handleFocusGained() {
+    focusListener?.focusStateChanged(
+        FocusState.GAINED)
+    noisyReceiver.register(context)
+  }
+
+  private fun handleFocusLost() {
+    focusListener?.focusStateChanged(FocusState.LOST)
+    noisyReceiver.unregister(context)
+  }
+
+  private fun handleFocusLostTransient() {
+    focusListener?.focusStateChanged(
+        FocusState.TEMPORARILY_LOST)
+  }
+
+  private fun handleFocusLostMayDuck() {
+    focusListener?.focusStateChanged(
+        FocusState.LOST_MAY_DUCK)
+  }
+
+  override fun becomingNoisy() {
+    focusListener?.mayBecomeNoisy()
+  }
 
   private fun handleAudioRequestResult(result: Int, focusListener: AudioFocusChangeListener) {
     when (result) {
       AudioManager.AUDIOFOCUS_REQUEST_GRANTED ->
-        focusListener.focusStateChanged(FocusState.GAINED)
+        focusListener.focusStateChanged(
+            FocusState.GAINED)
       AudioManager.AUDIOFOCUS_REQUEST_FAILED ->
-        focusListener.focusStateChanged(FocusState.ERROR)
+        focusListener.focusStateChanged(
+            FocusState.ERROR)
     }
   }
 
-  interface AudioFocusChangeListener {
-    fun focusStateChanged(state: FocusState)
+  private class NoisyBroadcastReceiver(val noisyListener: BecomingNoisyListener) : BroadcastReceiver() {
+
+    private var registered: Boolean = false
+
+    fun register(context: Context?) {
+      if(!registered) {
+        context?.registerReceiver(this,
+            IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY))
+        registered = true
+      }
+    }
+
+    fun unregister(context: Context?) {
+      if(registered) {
+        context?.unregisterReceiver(this)
+        registered = false
+      }
+    }
+
+    override fun onReceive(context: Context?, intent: Intent?) {
+      if (AudioManager.ACTION_AUDIO_BECOMING_NOISY == intent?.action) {
+        this.noisyListener.becomingNoisy()
+      } //To change body of created functions use File | Settings | File Templates.
+    }
   }
 
+}
+
+interface AudioFocusChangeListener {
+  fun focusStateChanged(state: AudioFocusHandler.FocusState)
+  fun mayBecomeNoisy()
+}
+
+interface BecomingNoisyListener {
+  fun becomingNoisy()
 }

@@ -7,11 +7,12 @@ import com.google.android.exoplayer2.util.Util
 import expo.modules.av.AVManagerInterface
 import expo.modules.av.Params
 import expo.modules.av.Source
-import expo.modules.av.audio.AudioFocusHandler
+import expo.modules.av.audio.focus.AudioFocusHandler
 import expo.modules.av.player.datasource.DataSourceFactoryProvider
 import expo.modules.av.player.exoplayer.ExoPlayerWrapper
 import expo.modules.av.player.mediaPlayer.MediaPlayerWrapper
 import org.unimodules.core.ModuleRegistry
+import org.unimodules.core.errors.SystemServiceNotAvailableException
 import java.net.CookieHandler
 
 class PlayerCreator(val context: Context, val avModule: AVManagerInterface) {
@@ -24,18 +25,22 @@ class PlayerCreator(val context: Context, val avModule: AVManagerInterface) {
     val requestHeaders: Map<String, Any>? = source.requestHeaders as? Map<String, Any>
     val cookieHandler = avModule.moduleRegistry.getModule(CookieHandler::class.java)
     val audioManager = avModule.context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
-    val audioFocusHandler = AudioFocusHandler(audioManager!!)
+    if(audioManager != null) {
+      val audioFocusHandler = AudioFocusHandler(context, audioManager)
 
-    return if (mediaPlayerImplementationName == params.implementation) {
-      PlayerManager(MediaPlayerWrapper(context, requestHeaders), cookieHandler
-          , audioFocusHandler, uri)
+      return if (mediaPlayerImplementationName == params.implementation) {
+        PlayerManager(MediaPlayerWrapper(context, requestHeaders), cookieHandler
+            , audioFocusHandler, uri)
+      } else {
+        val sourceFactory = avModule.moduleRegistry.getModule(
+            DataSourceFactoryProvider::class.java).createFactory(context, avModule.moduleRegistry,
+            Util.getUserAgent(avModule.context, "yourApplicationName"), requestHeaders)
+        PlayerManager(ExoPlayerWrapper(context, source.uriOverridingExtension, sourceFactory),
+            cookieHandler,
+            audioFocusHandler, uri)
+      }
     } else {
-      val sourceFactory = avModule.moduleRegistry.getModule(
-          DataSourceFactoryProvider::class.java).createFactory(context, avModule.moduleRegistry,
-          Util.getUserAgent(avModule.context, "yourApplicationName"), requestHeaders)
-      PlayerManager(ExoPlayerWrapper(context, source.uriOverridingExtension, sourceFactory),
-          cookieHandler,
-          audioFocusHandler, uri)
+      throw SystemServiceNotAvailableException(AudioManager::class.java)
     }
   }
 
