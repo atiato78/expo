@@ -1,0 +1,42 @@
+{
+  "name": "expo-app-icon",
+  "version": "1.0.0",
+  "description": "Change the native app icon at runtime.",
+  "main": "build/AppIcon.js",
+  "types": "build/AppIcon.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "build": "expo-module build",
+    "clean": "expo-module clean",
+    "test": "expo-module test",
+    "prepare": "expo-module prepare",
+    "prepublishOnly": "expo-module prepublishOnly",
+    "expo-module": "expo-module"
+  },
+  "keywords": [
+    "react-native",
+    "react-native-web",
+    "reactjs",
+    "expo",
+    "icon",
+    "app-icon"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/expo/expo.git",
+    "directory": "packages/expo-app-icon"
+  },
+  "bugs": {
+    "url": "https://github.com/expo/expo/issues/labels/AppIcon"
+  },
+  "author": "650 Industries, Inc.",
+  "license": "MIT",
+  "homepage": "https://docs.expo.io/versions/latest/sdk/app-icon/",
+  "unimodulePeerDependencies": {
+    "@unimodules/core": "*"
+  },
+  "devDependencies": {
+    "expo-module-scripts": "^1.0.0"
+  },
+  "gitHead": "9119d190fbbf9f6a7a9c116e068d240e60e441fc"
+}

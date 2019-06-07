@@ -1,0 +1,4 @@
+{
+  "name": "expo-app-icon",
+  "platforms": ["ios", "android"]
+}
