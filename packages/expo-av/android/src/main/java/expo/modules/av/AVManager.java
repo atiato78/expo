@@ -13,6 +13,8 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.unimodules.core.ModuleRegistry;
 import org.unimodules.core.Promise;
 import org.unimodules.core.arguments.ReadableArguments;
@@ -272,17 +274,25 @@ public class AVManager implements LifecycleEventListener, MediaRecorder.OnInfoLi
 
   @Override
   public void setParamsForSound(final Integer key, final ReadableArguments status, final Promise promise) {
-    final PlayerManager data = tryGetSoundForKey(key, promise);
-    if (data != null) {
-      data.setParams(status, promise);
+    final PlayerManager playerManager = tryGetSoundForKey(key, promise);
+    if (playerManager != null) {
+      playerManager.setParams(status, promise);
     } // Otherwise, tryGetSoundForKey has already rejected the promise.
   }
 
   @Override
+  public void seekTo(@Nullable Integer key, @NotNull ReadableArguments params, @NotNull Promise promise) {
+    final PlayerManager playerManager = tryGetSoundForKey(key, promise);
+    if (playerManager != null) {
+      playerManager.seekTo(params, promise);
+    }
+  }
+
+  @Override
   public void replaySound(final Integer key, final ReadableArguments status, final Promise promise) {
-    final PlayerManager data = tryGetSoundForKey(key, promise);
-    if (data != null) {
-      data.setParams(status, promise);
+    final PlayerManager playerManager = tryGetSoundForKey(key, promise);
+    if (playerManager != null) {
+      playerManager.setParams(status, promise);
     } // Otherwise, tryGetSoundForKey has already rejected the promise.
   }
 

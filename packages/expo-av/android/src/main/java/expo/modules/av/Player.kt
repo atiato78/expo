@@ -2,12 +2,14 @@ package expo.modules.av
 
 import android.os.Bundle
 import org.unimodules.core.arguments.ReadableArguments
+import org.unimodules.core.errors.CodedException
+import java.lang.IllegalArgumentException
 
 private const val PARAM_URI_KEY_PATH = "uri"
 private const val defaultUri = ""
 
-private const val PARAM_INITIAL_POSITION_PATH = "initialPosition"
-private const val defaultInitialPosition = 0
+private const val PARAM_REQUESTED_POSITION_PATH = "requestedPosition"
+private const val defaultRequestedPosition = 0
 
 private const val PARAM_ANDROID_IMPLEMENTATION_KEY_PATH = "androidImplementation"
 private const val defaultAndroidImplementation = ""
@@ -61,7 +63,7 @@ data class Source(val uri: String, val requestHeaders: Map<*, *>?,
 }
 
 data class Params(val uriPath: String = defaultUri,
-                  val initialPosition: Int = defaultInitialPosition,
+                  val initialPosition: Int = defaultRequestedPosition,
                   val shouldPlay: Boolean = defaultShouldPlay,
                   val updateInterval: Int = defaultUpdateIntervalMillis,
                   val implementation: String = defaultAndroidImplementation,
@@ -79,9 +81,10 @@ data class Params(val uriPath: String = defaultUri,
     if (arguments.containsKey(PARAM_URI_KEY_PATH)) {
       result = result.copy(uriPath = arguments.getString(PARAM_URI_KEY_PATH, defaultUri))
     }
-    if (arguments.containsKey(PARAM_INITIAL_POSITION_PATH)) {
+    if (arguments.containsKey(PARAM_REQUESTED_POSITION_PATH)) {
       result = result.copy(
-          initialPosition = arguments.getInt(PARAM_INITIAL_POSITION_PATH, defaultInitialPosition))
+          initialPosition = arguments.getInt(PARAM_REQUESTED_POSITION_PATH,
+              defaultRequestedPosition))
     }
     if (arguments.containsKey(PARAM_SHOULD_PLAY_KEY_PATH)) {
       result = result.copy(
@@ -118,7 +121,8 @@ data class Params(val uriPath: String = defaultUri,
     }
     if (arguments.containsKey(PARAMS_PAUSE_WHEN_NOISY)) {
       result =
-          result.copy(pauseWhenNoisy = arguments.getBoolean(PARAMS_PAUSE_WHEN_NOISY, defaultPauseWhenNoisy))
+          result.copy(
+              pauseWhenNoisy = arguments.getBoolean(PARAMS_PAUSE_WHEN_NOISY, defaultPauseWhenNoisy))
     }
     if (arguments.containsKey(PARAMS_MAY_DUCK)) {
       result =
@@ -187,4 +191,21 @@ data class Status(val isLoaded: Boolean = defaultIsLoaded,
     return result
   }
 
+}
+
+private const val SEEK_TO_PARAM_POSITION = "position"
+
+data class SeekToParams(val position: Int) {
+  companion object {
+
+    @JvmStatic
+    fun fromReadableArguments(arguments: ReadableArguments): SeekToParams? {
+      return if (arguments.containsKey(SEEK_TO_PARAM_POSITION)) {
+        SeekToParams(arguments.getInt(SEEK_TO_PARAM_POSITION))
+      } else {
+        null
+      }
+    }
+
+  }
 }

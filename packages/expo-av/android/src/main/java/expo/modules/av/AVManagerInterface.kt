@@ -27,6 +27,8 @@ interface AVManagerInterface {
 
   fun setParamsForSound(key: Int?, status: ReadableArguments, promise: Promise)
 
+  fun seekTo(key: Int?, params: ReadableArguments, promise: Promise)
+
   fun replaySound(key: Int?, status: ReadableArguments, promise: Promise)
 
   fun getStatusForSound(key: Int?, promise: Promise)
@@ -52,4 +54,5 @@ interface AVManagerInterface {
   fun getAudioRecordingStatus(promise: Promise)
 
   fun unloadAudioRecorder(promise: Promise)
+
 }

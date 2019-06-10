@@ -33,6 +33,11 @@ export declare type PlaybackParams = {
     seekMillisToleranceAfter?: number;
     pitchCorrectionQuality?: PitchCorrectionQuality;
 };
+export declare type SeekToParams = {
+    position: number;
+    toleranceBefore?: number;
+    toleranceAfter?: number;
+};
 export declare type PlaybackStatus = {
     isLoaded: boolean;
     error?: string;
@@ -55,6 +60,7 @@ export declare function getNativeSourceAndFullInitialStatusForLoadAsync(source: 
 export declare function getUnloadedStatus(error?: string | null): PlaybackStatus;
 export interface AV {
     setParamsAsync(status: PlaybackParams): Promise<PlaybackStatus>;
+    seekTo(params: SeekToParams): Promise<boolean>;
 }
 export interface Playback extends AV {
     playAsync(): Promise<PlaybackStatus>;
@@ -89,7 +95,7 @@ export declare const PlaybackMixin: {
     setPositionAsync(positionMillis: number, tolerances?: {
         toleranceMillisBefore?: number | undefined;
         toleranceMillisAfter?: number | undefined;
-    }): Promise<PlaybackStatus>;
+    }): Promise<boolean>;
     setRateAsync(rate: number, shouldCorrectPitch?: boolean, pitchCorrectionQuality?: PitchCorrectionQuality): Promise<PlaybackStatus>;
     setVolumeAsync(volume: number): Promise<PlaybackStatus>;
     setIsMutedAsync(isMuted: boolean): Promise<PlaybackStatus>;

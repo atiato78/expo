@@ -57,13 +57,16 @@ export default class Video extends React.Component {
                 this.props.onPlaybackStatusUpdate(status);
             }
         };
-        this._performOperationAndHandleStatusAsync = async (operation) => {
+        this._performOperationWithTag = (operation) => {
             const video = this._nativeRef.current;
             if (!video) {
                 throw new Error(`Cannot complete operation because the Video component has not yet loaded`);
             }
             const handle = findNodeHandle(this._nativeRef.current);
-            const status = await operation(handle);
+            return operation(handle);
+        };
+        this._performOperationAndHandleStatusAsync = async (operation) => {
+            const status = await this._performOperationWithTag(operation);
             this._handleNewStatus(status);
             return status;
         };
@@ -107,6 +110,11 @@ export default class Video extends React.Component {
         this.setParamsAsync = async (status) => {
             assertStatusValuesInBounds(status);
             return this._performOperationAndHandleStatusAsync((tag) => ExponentAV.setStatusForVideo(tag, status));
+        };
+        this.seekTo = async (params) => {
+            return this._performOperationWithTag((tag) => {
+                return ExponentAV.seekTo(tag, params);
+            });
         };
         this.replayAsync = async (status = {}) => {
             if (status.initialPosition && status.initialPosition !== 0) {

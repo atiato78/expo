@@ -37,8 +37,13 @@ class AVModule(context: Context) : ExportedModule(context), ModuleRegistryConsum
   }
 
   @ExpoMethod
-  fun setParamsForSound(key: Int?, status: ReadableArguments, promise: Promise) {
-    mAVManager.setParamsForSound(key, status, promise)
+  fun setParamsForSound(key: Int?, params: ReadableArguments, promise: Promise) {
+    mAVManager.setParamsForSound(key, params, promise)
+  }
+
+  @ExpoMethod
+  fun seekTo(key: Int?, params: ReadableArguments, promise: Promise) {
+    mAVManager.seekTo(key, params, promise)
   }
 
   @ExpoMethod

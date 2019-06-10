@@ -132,6 +132,9 @@ export class Sound {
         assertStatusValuesInBounds(params);
         return this._performOperationAndHandleStatusAsync(() => ExponentAV.setParamsForSound(this._key, params));
     }
+    async seekTo(params) {
+        return ExponentAV.seekTo(this._key, params);
+    }
     async replayAsync(params = {}) {
         if (params.initialPosition && params.initialPosition !== 0) {
             throw new Error('Requested position after replay has to be 0.');

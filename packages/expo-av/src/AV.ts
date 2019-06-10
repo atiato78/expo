@@ -47,6 +47,12 @@ export type PlaybackParams = {
   pitchCorrectionQuality?: PitchCorrectionQuality;
 };
 
+export type SeekToParams = {
+  position: number;
+  toleranceBefore?: number;
+  toleranceAfter?: number;
+};
+
 export type PlaybackStatus = {
   isLoaded: boolean;
   error?: string;
@@ -201,6 +207,7 @@ export function getUnloadedStatus(error: string | null = null): PlaybackStatus {
 
 export interface AV {
   setParamsAsync(status: PlaybackParams): Promise<PlaybackStatus>;
+  seekTo(params: SeekToParams): Promise<boolean>;
 }
 
 export interface Playback extends AV {
@@ -258,11 +265,11 @@ export const PlaybackMixin = {
   async setPositionAsync(
     positionMillis: number,
     tolerances: { toleranceMillisBefore?: number; toleranceMillisAfter?: number } = {}
-  ): Promise<PlaybackStatus> {
-    return ((this as any) as AV).setParamsAsync({
-      initialPosition: positionMillis,
-      seekMillisToleranceAfter: tolerances.toleranceMillisAfter,
-      seekMillisToleranceBefore: tolerances.toleranceMillisBefore,
+  ): Promise<boolean> {
+    return ((this as any) as AV).seekTo({
+      position: positionMillis,
+      toleranceAfter: tolerances.toleranceMillisAfter,
+      toleranceBefore: tolerances.toleranceMillisBefore,
     });
   },
 

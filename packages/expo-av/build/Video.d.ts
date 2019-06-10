@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import * as React from 'react';
-import { Playback, PlaybackSource, PlaybackStatus, PlaybackParams } from './AV';
+import { Playback, PlaybackSource, PlaybackStatus, PlaybackParams, SeekToParams } from './AV';
 import { ExponentVideoComponent, FullscreenUpdateEvent, NativeProps, NaturalSize, VideoProps, ReadyForDisplayEvent, ResizeMode, VideoState } from './Video.types';
 export { ExponentVideoComponent, FullscreenUpdateEvent, NativeProps, NaturalSize, VideoProps, ReadyForDisplayEvent, ResizeMode, VideoState, };
 export declare const FULLSCREEN_UPDATE_PLAYER_WILL_PRESENT = 0;
@@ -121,6 +121,7 @@ export default class Video extends React.Component<VideoProps, VideoState> imple
     constructor(props: VideoProps);
     setNativeProps(nativeProps: NativeProps): void;
     _handleNewStatus: (status: PlaybackStatus) => void;
+    _performOperationWithTag: (operation: (tag: number) => Promise<any>) => Promise<any>;
     _performOperationAndHandleStatusAsync: (operation: (tag: number) => Promise<PlaybackStatus>) => Promise<PlaybackStatus>;
     _setFullscreen: (value: boolean) => Promise<PlaybackStatus>;
     presentFullscreenPlayer: () => Promise<PlaybackStatus>;
@@ -132,6 +133,7 @@ export default class Video extends React.Component<VideoProps, VideoState> imple
     loadAsync: (source: PlaybackSource, initialParams?: PlaybackParams, downloadFirst?: boolean) => Promise<PlaybackStatus>;
     unloadAsync: () => Promise<PlaybackStatus>;
     setParamsAsync: (status: PlaybackParams) => Promise<PlaybackStatus>;
+    seekTo: (params: SeekToParams) => Promise<boolean>;
     replayAsync: (status?: PlaybackParams) => Promise<PlaybackStatus>;
     playAsync: () => Promise<PlaybackStatus>;
     playFromPositionAsync: (positionMillis: number, tolerances?: {

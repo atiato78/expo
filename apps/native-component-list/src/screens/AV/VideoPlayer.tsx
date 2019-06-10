@@ -82,7 +82,7 @@ export default class VideoPlayer extends React.Component<
       resizeMode={this.state.resizeMode}
       onError={this._handleError}
       style={{ height: 300 }}
-      progressUpdateIntervalMillis={100}
+      progressUpdateIntervalMillis={250}
       onPlaybackStatusUpdate={this._updateStateToStatus}
     />
   );

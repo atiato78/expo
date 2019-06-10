@@ -6,6 +6,7 @@ import {
   PlaybackSource,
   PlaybackStatus,
   PlaybackParams,
+  SeekToParams,
   assertStatusValuesInBounds,
   getNativeSourceAndFullInitialStatusForLoadAsync,
   getUnloadedStatus,
@@ -212,6 +213,10 @@ export class Sound implements Playback {
     return this._performOperationAndHandleStatusAsync(() =>
       ExponentAV.setParamsForSound(this._key, params)
     );
+  }
+
+  async seekTo(params: SeekToParams): Promise<boolean> {
+    return ExponentAV.seekTo(this._key, params);
   }
 
   async replayAsync(params: PlaybackParams = {}): Promise<PlaybackStatus> {

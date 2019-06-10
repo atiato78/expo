@@ -1,5 +1,5 @@
 import { EventEmitter } from '@unimodules/core';
-import { Playback, PlaybackSource, PlaybackStatus, PlaybackParams } from '../AV';
+import { Playback, PlaybackSource, PlaybackStatus, PlaybackParams, SeekToParams } from '../AV';
 import { PitchCorrectionQuality } from '../Audio';
 declare type AudioInstance = number | HTMLMediaElement | null;
 export declare class Sound implements Playback {
@@ -40,6 +40,7 @@ export declare class Sound implements Playback {
     loadAsync(source: PlaybackSource, params?: PlaybackParams, downloadFirst?: boolean): Promise<PlaybackStatus>;
     unloadAsync(): Promise<PlaybackStatus>;
     setParamsAsync(params: PlaybackParams): Promise<PlaybackStatus>;
+    seekTo(params: SeekToParams): Promise<boolean>;
     replayAsync(params?: PlaybackParams): Promise<PlaybackStatus>;
     playAsync: () => Promise<PlaybackStatus>;
     playFromPositionAsync: (positionMillis: number, tolerances?: {

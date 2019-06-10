@@ -147,10 +147,10 @@ export const PlaybackMixin = {
         return this.setParamsAsync({ initialPosition: 0, shouldPlay: false });
     },
     async setPositionAsync(positionMillis, tolerances = {}) {
-        return this.setParamsAsync({
-            initialPosition: positionMillis,
-            seekMillisToleranceAfter: tolerances.toleranceMillisAfter,
-            seekMillisToleranceBefore: tolerances.toleranceMillisBefore,
+        return this.seekTo({
+            position: positionMillis,
+            toleranceAfter: tolerances.toleranceMillisAfter,
+            toleranceBefore: tolerances.toleranceMillisBefore,
         });
     },
     async setRateAsync(rate, shouldCorrectPitch = false, pitchCorrectionQuality = PitchCorrectionQuality.Low) {

@@ -21,6 +21,7 @@ import {
   PlaybackSource,
   PlaybackStatus,
   PlaybackParams,
+  SeekToParams,
 } from './AV';
 import ExponentAV from './ExponentAV';
 import ExponentVideo from './ExponentVideo';
@@ -190,16 +191,20 @@ export default class Video extends React.Component<VideoProps, VideoState> imple
     }
   };
 
-  _performOperationAndHandleStatusAsync = async (
-    operation: (tag: number) => Promise<PlaybackStatus>
-  ): Promise<PlaybackStatus> => {
+  _performOperationWithTag = (operation: (tag: number) => Promise<any>): Promise<any> => {
     const video = this._nativeRef.current;
     if (!video) {
       throw new Error(`Cannot complete operation because the Video component has not yet loaded`);
     }
 
     const handle = findNodeHandle(this._nativeRef.current)!;
-    const status: PlaybackStatus = await operation(handle);
+    return operation(handle);
+  };
+
+  _performOperationAndHandleStatusAsync = async (
+    operation: (tag: number) => Promise<PlaybackStatus>
+  ): Promise<PlaybackStatus> => {
+    const status: PlaybackStatus = await this._performOperationWithTag(operation);
     this._handleNewStatus(status);
     return status;
   };
@@ -280,6 +285,12 @@ export default class Video extends React.Component<VideoProps, VideoState> imple
     return this._performOperationAndHandleStatusAsync((tag: number) =>
       ExponentAV.setStatusForVideo(tag, status)
     );
+  };
+
+  seekTo = async (params: SeekToParams): Promise<boolean> => {
+    return this._performOperationWithTag((tag: number) => {
+      return ExponentAV.seekTo(tag, params);
+    });
   };
 
   replayAsync = async (status: PlaybackParams = {}): Promise<PlaybackStatus> => {

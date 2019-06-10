@@ -8,6 +8,7 @@ import android.util.Pair
 import android.view.Surface
 import expo.modules.av.audio.focus.AudioFocusAquiringError
 import expo.modules.av.Params
+import expo.modules.av.SeekToParams
 import expo.modules.av.Status
 import expo.modules.av.audio.AudioEventHandler
 import expo.modules.av.audio.focus.AudioFocusChangeListener
@@ -99,6 +100,16 @@ class PlayerManager(private val player: ExpoPlayer, private val cookieHandler: C
 
   fun pause() {
     this.params = params.copy(shouldPlay = false)
+  }
+
+  fun seekTo(arguments: ReadableArguments, promise: Promise) {
+    val seekToParams = SeekToParams.fromReadableArguments(arguments);
+    if(seekToParams != null) {
+      seekTo(seekToParams.position)
+      promise.resolve(true)
+    } else {
+      promise.reject("E_AV_SEEK_TO", "Params are invalid!")
+    }
   }
 
   fun seekTo(positionMillis: Int) {
