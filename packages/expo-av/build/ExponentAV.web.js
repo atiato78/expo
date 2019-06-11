@@ -19,8 +19,6 @@ function getStatusFromMedia(media) {
         isPlaying,
         isLoading: false,
         isBuffering: false,
-        // TODO: Bacon: This seems too complicated right now: https://webaudio.github.io/web-audio-api/#dom-biquadfilternode-frequency
-        didJustFinish: media.ended,
     };
     return status;
 }

@@ -26,15 +26,16 @@ class PlayerManager(private val player: ExpoPlayer, private val cookieHandler: C
                     private val focusManager: AudioFocusHandler,
                     private val uri: Uri) : AudioEventHandler, ExpoPlayer.PlayerStateListener {
 
-  private val mHandler = Handler()
-  private val mProgressUpdater = ProgressUpdater(this)
+  private val handler = Handler()
+  private val progressUpdater = ProgressUpdater(this)
   private val focusChangeListener = AudioFocusListener()
 
-  private var mFullscreenPresenter: FullscreenPresenter? = null
-  private var mParamsUpdatedListener: ParamsUpdatedListener? = null
-  private var mStatusUpdateListener: StatusUpdateListener? = null
-  private var mErrorListener: ErrorListener? = null
-  private var mVideoSizeUpdateListener: VideoSizeUpdateListener? = null
+  private var fullscreenPresenter: FullscreenPresenter? = null
+  private var paramsUpdatedListener: ParamsUpdatedListener? = null
+  private var statusUpdateListener: StatusUpdateListener? = null
+  private var playbackCompletionListener: PlaybackCompletionListener? = null
+  private var errorListener: ErrorListener? = null
+  private var videoSizeUpdateListener: VideoSizeUpdateListener? = null
 
 //  private var mPlayerStatus: PlayerStatus = PlayerStatus.unloadedPlayerStatus()
 
@@ -61,7 +62,8 @@ class PlayerManager(private val player: ExpoPlayer, private val cookieHandler: C
           positionMillis = player.currentPosition,
           isPlaying = player.playing,
           isBuffering = player.buffering,
-          playableDurationMillis = player.playableDuration ?: 0
+          playableDurationMillis = player.playableDuration ?: 0,
+          didJustFinish = false
       )
     }
 
@@ -69,7 +71,7 @@ class PlayerManager(private val player: ExpoPlayer, private val cookieHandler: C
     get() = player.audioSessionId
 
   val isPresentedFullscreen: Boolean
-    get() = mFullscreenPresenter!!.isBeingPresentedFullscreen
+    get() = fullscreenPresenter!!.isBeingPresentedFullscreen
 
   private// do nothing, we'll return an empty list
   val httpCookiesList: List<HttpCookie>
@@ -138,6 +140,10 @@ class PlayerManager(private val player: ExpoPlayer, private val cookieHandler: C
     fun onStatusUpdate(status: Status?)
   }
 
+  interface PlaybackCompletionListener {
+    fun playbackCompleted()
+  }
+
   internal interface SetParamsCompletionListener {
     fun onSetStatusComplete()
 
@@ -194,15 +200,18 @@ class PlayerManager(private val player: ExpoPlayer, private val cookieHandler: C
   // Status update listener
 
   private fun callStatusUpdateListenerWithStatus(status: Status?) {
-    Log.d("PLAYER_STATUS", "updating status " + System.currentTimeMillis())
-    mStatusUpdateListener?.onStatusUpdate(status)
+    statusUpdateListener?.onStatusUpdate(status)
   }
 
-  private fun callStatusUpdateListenerWithDidJustFinish() {
+  private fun callCompletionListener() {
+    playbackCompletionListener?.playbackCompleted()
+  }
+
+  private fun sendDidJustFinishEvent() {
     var status = status
-    // TODO: Correct!
     status = status.copy(didJustFinish = true)
     callStatusUpdateListenerWithStatus(status)
+    callCompletionListener()
   }
 
   private fun callStatusUpdateListener() {
@@ -210,7 +219,7 @@ class PlayerManager(private val player: ExpoPlayer, private val cookieHandler: C
   }
 
   private fun stopUpdatingProgressIfNecessary() {
-    mHandler.removeCallbacks(mProgressUpdater)
+    handler.removeCallbacks(progressUpdater)
   }
 
   private fun progressUpdateLoop() {
@@ -218,25 +227,29 @@ class PlayerManager(private val player: ExpoPlayer, private val cookieHandler: C
       stopUpdatingProgressIfNecessary()
     } else {
       Log.d("PLAYER_STATUS", "Post Delaying " + System.currentTimeMillis())
-      mHandler.postDelayed(mProgressUpdater, params.updateInterval.toLong())
+      handler.postDelayed(progressUpdater, params.updateInterval.toLong())
     }
   }
 
   private fun beginUpdatingProgressIfNecessary() {
-    mHandler.post(mProgressUpdater)
+    handler.post(progressUpdater)
   }
 
   fun setStatusUpdateListener(listener: StatusUpdateListener) {
-    mStatusUpdateListener = listener
-    if (mParamsUpdatedListener != null) {
+    statusUpdateListener = listener
+    if (paramsUpdatedListener != null) {
       beginUpdatingProgressIfNecessary()
     }
+  }
+
+  fun setPlaybackCompletionListener(listener: PlaybackCompletionListener) {
+    playbackCompletionListener = listener
   }
 
   // Error listener
 
   fun setErrorListener(listener: ErrorListener) {
-    mErrorListener = listener
+    errorListener = listener
   }
 
   // Status
@@ -295,15 +308,15 @@ class PlayerManager(private val player: ExpoPlayer, private val cookieHandler: C
   // Video specific stuff
 
   fun setVideoSizeUpdateListener(videoSizeUpdateListener: VideoSizeUpdateListener) {
-    mVideoSizeUpdateListener = videoSizeUpdateListener
+    this.videoSizeUpdateListener = videoSizeUpdateListener
   }
 
   fun setFullscreenPresenter(fullscreenPresenter: FullscreenPresenter) {
-    mFullscreenPresenter = fullscreenPresenter
+    this.fullscreenPresenter = fullscreenPresenter
   }
 
   fun toggleFullscreen() {
-    mFullscreenPresenter?.setFullscreenMode(!isPresentedFullscreen)
+    fullscreenPresenter?.setFullscreenMode(!isPresentedFullscreen)
   }
 
   // AudioEventHandler
@@ -353,12 +366,10 @@ class PlayerManager(private val player: ExpoPlayer, private val cookieHandler: C
   }
 
   override fun onCompleted() {
-    callStatusUpdateListenerWithDidJustFinish()
-
+    sendDidJustFinishEvent()
     if (!player.looping) {
-      // TODO: Abandon audio focus after finishing playing
+      focusManager.releaseAudioFocus()
     }
-
   }
 
   override fun onSeekCompleted() {
@@ -366,7 +377,7 @@ class PlayerManager(private val player: ExpoPlayer, private val cookieHandler: C
   }
 
   override fun onError(message: String) {
-    mErrorListener!!.onError(message)
+    errorListener!!.onError(message)
   }
 
   override fun onBufferingStart() {
@@ -386,7 +397,7 @@ class PlayerManager(private val player: ExpoPlayer, private val cookieHandler: C
   }
 
   override fun videoSizeChanged(width: Int, height: Int) {
-    mVideoSizeUpdateListener?.onVideoSizeUpdate(Pair(width, height))
+    videoSizeUpdateListener?.onVideoSizeUpdate(Pair(width, height))
   }
 
   private fun handleFocusLostMayDuck() {

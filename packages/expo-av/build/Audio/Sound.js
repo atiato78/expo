@@ -12,10 +12,16 @@ export class Sound {
         this._subscriptions = [];
         this._eventEmitter = new EventEmitter(ExponentAV);
         this._coalesceStatusUpdatesInMillis = 100;
-        this._onPlaybackStatusUpdate = null;
+        this._onPlaybackStatusUpdate = undefined;
+        this._onPlaybackCompleted = undefined;
         this._internalStatusUpdateCallback = ({ key, status, }) => {
             if (this._key === key) {
                 this._callOnPlaybackStatusUpdateForNewStatus(status);
+            }
+        };
+        this._internalPlaybackCompletedCallback = ({ key }) => {
+            if (this._key === key) {
+                this._callOnPlaybackCompleted();
             }
         };
         this._internalErrorCallback = ({ key, error }) => {
@@ -54,6 +60,11 @@ export class Sound {
             this._lastStatusUpdate = JSON.stringify(status);
         }
     }
+    _callOnPlaybackCompleted() {
+        if (this._onPlaybackCompleted) {
+            this._onPlaybackCompleted();
+        }
+    }
     async _performOperationAndHandleStatusAsync(operation) {
         throwIfAudioIsDisabled();
         if (this._loaded) {
@@ -68,7 +79,7 @@ export class Sound {
     // TODO: We can optimize by only using time observer on native if (this._onPlaybackStatusUpdate).
     _subscribeToNativeEvents() {
         if (this._loaded) {
-            this._subscriptions.push(this._eventEmitter.addListener('didUpdatePlaybackStatus', this._internalStatusUpdateCallback));
+            this._subscriptions.push(this._eventEmitter.addListener('didUpdatePlaybackStatus', this._internalStatusUpdateCallback), this._eventEmitter.addListener('didCompletePlayback', this._internalPlaybackCompletedCallback));
             this._subscriptions.push(this._eventEmitter.addListener('ExponentAV.onError', this._internalErrorCallback));
         }
     }
@@ -79,6 +90,9 @@ export class Sound {
     setOnPlaybackStatusUpdate(onPlaybackStatusUpdate) {
         this._onPlaybackStatusUpdate = onPlaybackStatusUpdate;
         this.getStatusAsync();
+    }
+    setOnPlaybackCompleted(onPlaybackCompleted) {
+        this._onPlaybackCompleted = onPlaybackCompleted;
     }
     // Loading / unloading API
     async loadAsync(source, params = {}, downloadFirst = true) {
@@ -146,13 +160,14 @@ export class Sound {
         }));
     }
 }
-Sound.create = async (source, params = {}, onPlaybackStatusUpdate = null, downloadFirst = true) => {
+Sound.create = async (source, params = {}, onPlaybackStatusUpdate, onPlaybackCompleted, downloadFirst = true) => {
     console.warn(`Sound.create is deprecated in favor of Sound.createAsync with the same API except for the new method name`);
-    return Sound.createAsync(source, params, onPlaybackStatusUpdate, downloadFirst);
+    return Sound.createAsync(source, params, onPlaybackStatusUpdate, onPlaybackCompleted, downloadFirst);
 };
-Sound.createAsync = async (source, params = {}, onPlaybackStatusUpdate = null, downloadFirst = true) => {
+Sound.createAsync = async (source, params = {}, onPlaybackStatusUpdate, onPlaybackCompleted, downloadFirst = true) => {
     const sound = new Sound();
     sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
+    sound.setOnPlaybackCompleted(onPlaybackCompleted);
     const status = await sound.loadAsync(source, params, downloadFirst);
     return { sound, status };
 };

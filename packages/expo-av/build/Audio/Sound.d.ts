@@ -13,20 +13,25 @@ export declare class Sound implements Playback {
     }>;
     _eventEmitter: EventEmitter;
     _coalesceStatusUpdatesInMillis: number;
-    _onPlaybackStatusUpdate: ((status: PlaybackStatus) => void) | null;
-    static create: (source: PlaybackSource, params?: PlaybackParams, onPlaybackStatusUpdate?: ((status: PlaybackStatus) => void) | null, downloadFirst?: boolean) => Promise<{
+    _onPlaybackStatusUpdate?: (status: PlaybackStatus) => void;
+    _onPlaybackCompleted?: () => void;
+    static create: (source: PlaybackSource, params: PlaybackParams | undefined, onPlaybackStatusUpdate: (status: PlaybackStatus) => void, onPlaybackCompleted: () => void, downloadFirst?: boolean) => Promise<{
         sound: Sound;
         status: PlaybackStatus;
     }>;
-    static createAsync: (source: PlaybackSource, params?: PlaybackParams, onPlaybackStatusUpdate?: ((status: PlaybackStatus) => void) | null, downloadFirst?: boolean) => Promise<{
+    static createAsync: (source: PlaybackSource, params?: PlaybackParams, onPlaybackStatusUpdate?: ((status: PlaybackStatus) => void) | undefined, onPlaybackCompleted?: (() => void) | undefined, downloadFirst?: boolean) => Promise<{
         sound: Sound;
         status: PlaybackStatus;
     }>;
     _callOnPlaybackStatusUpdateForNewStatus(status: PlaybackStatus): void;
+    _callOnPlaybackCompleted(): void;
     _performOperationAndHandleStatusAsync(operation: () => Promise<PlaybackStatus>): Promise<PlaybackStatus>;
     _internalStatusUpdateCallback: ({ key, status, }: {
         key: AudioInstance;
         status: PlaybackStatus;
+    }) => void;
+    _internalPlaybackCompletedCallback: ({ key }: {
+        key: any;
     }) => void;
     _internalErrorCallback: ({ key, error }: {
         key: AudioInstance;
@@ -36,7 +41,8 @@ export declare class Sound implements Playback {
     _clearSubscriptions(): void;
     _errorCallback: (error: string) => void;
     getStatusAsync: () => Promise<PlaybackStatus>;
-    setOnPlaybackStatusUpdate(onPlaybackStatusUpdate: ((status: PlaybackStatus) => void) | null): void;
+    setOnPlaybackStatusUpdate(onPlaybackStatusUpdate?: (status: PlaybackStatus) => void): void;
+    setOnPlaybackCompleted(onPlaybackCompleted?: () => void): void;
     loadAsync(source: PlaybackSource, params?: PlaybackParams, downloadFirst?: boolean): Promise<PlaybackStatus>;
     unloadAsync(): Promise<PlaybackStatus>;
     setParamsAsync(params: PlaybackParams): Promise<PlaybackStatus>;

@@ -62,7 +62,6 @@ export type PlaybackStatus = {
   isPlaying: boolean;
   isLoading: boolean;
   isBuffering: boolean;
-  didJustFinish: boolean;
 };
 
 export const _DEFAULT_PROGRESS_UPDATE_INTERVAL_MILLIS: number = 500;
@@ -201,7 +200,6 @@ export function getUnloadedStatus(error: string | null = null): PlaybackStatus {
     isPlaying: false,
     isLoading: false,
     isBuffering: false,
-    didJustFinish: false,
   };
 }
 

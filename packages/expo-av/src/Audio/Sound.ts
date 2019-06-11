@@ -24,28 +24,38 @@ export class Sound implements Playback {
   _subscriptions: Array<{ remove: () => void }> = [];
   _eventEmitter: EventEmitter = new EventEmitter(ExponentAV);
   _coalesceStatusUpdatesInMillis: number = 100;
-  _onPlaybackStatusUpdate: ((status: PlaybackStatus) => void) | null = null;
+  _onPlaybackStatusUpdate?: (status: PlaybackStatus) => void = undefined;
+  _onPlaybackCompleted?: () => void = undefined;
 
   static create = async (
     source: PlaybackSource,
     params: PlaybackParams = {},
-    onPlaybackStatusUpdate: ((status: PlaybackStatus) => void) | null = null,
+    onPlaybackStatusUpdate: (status: PlaybackStatus) => void,
+    onPlaybackCompleted: () => void,
     downloadFirst: boolean = true
   ): Promise<{ sound: Sound; status: PlaybackStatus }> => {
     console.warn(
       `Sound.create is deprecated in favor of Sound.createAsync with the same API except for the new method name`
     );
-    return Sound.createAsync(source, params, onPlaybackStatusUpdate, downloadFirst);
+    return Sound.createAsync(
+      source,
+      params,
+      onPlaybackStatusUpdate,
+      onPlaybackCompleted,
+      downloadFirst
+    );
   };
 
   static createAsync = async (
     source: PlaybackSource,
     params: PlaybackParams = {},
-    onPlaybackStatusUpdate: ((status: PlaybackStatus) => void) | null = null,
+    onPlaybackStatusUpdate?: (status: PlaybackStatus) => void,
+    onPlaybackCompleted?: () => void,
     downloadFirst: boolean = true
   ): Promise<{ sound: Sound; status: PlaybackStatus }> => {
     const sound: Sound = new Sound();
     sound.setOnPlaybackStatusUpdate(onPlaybackStatusUpdate);
+    sound.setOnPlaybackCompleted(onPlaybackCompleted);
     const status: PlaybackStatus = await sound.loadAsync(source, params, downloadFirst);
     return { sound, status };
   };
@@ -62,6 +72,12 @@ export class Sound implements Playback {
       this._onPlaybackStatusUpdate(status);
       this._lastStatusUpdateTime = new Date();
       this._lastStatusUpdate = JSON.stringify(status);
+    }
+  }
+
+  _callOnPlaybackCompleted() {
+    if (this._onPlaybackCompleted) {
+      this._onPlaybackCompleted();
     }
   }
 
@@ -90,6 +106,12 @@ export class Sound implements Playback {
     }
   };
 
+  _internalPlaybackCompletedCallback = ({ key }) => {
+    if (this._key === key) {
+      this._callOnPlaybackCompleted();
+    }
+  };
+
   _internalErrorCallback = ({ key, error }: { key: AudioInstance; error: string }) => {
     if (this._key === key) {
       this._errorCallback(error);
@@ -103,6 +125,10 @@ export class Sound implements Playback {
         this._eventEmitter.addListener(
           'didUpdatePlaybackStatus',
           this._internalStatusUpdateCallback
+        ),
+        this._eventEmitter.addListener(
+          'didCompletePlayback',
+          this._internalPlaybackCompletedCallback
         )
       );
 
@@ -141,9 +167,13 @@ export class Sound implements Playback {
     return status;
   };
 
-  setOnPlaybackStatusUpdate(onPlaybackStatusUpdate: ((status: PlaybackStatus) => void) | null) {
+  setOnPlaybackStatusUpdate(onPlaybackStatusUpdate?: (status: PlaybackStatus) => void) {
     this._onPlaybackStatusUpdate = onPlaybackStatusUpdate;
     this.getStatusAsync();
+  }
+
+  setOnPlaybackCompleted(onPlaybackCompleted?: () => void) {
+    this._onPlaybackCompleted = onPlaybackCompleted;
   }
 
   // Loading / unloading API

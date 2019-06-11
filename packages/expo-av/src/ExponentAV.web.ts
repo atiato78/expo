@@ -26,7 +26,8 @@ function getStatusFromMedia(media?: HTMLMediaElement): PlaybackStatus {
     isLoading: false,
     isBuffering: false, //media.waiting,
     // TODO: Bacon: This seems too complicated right now: https://webaudio.github.io/web-audio-api/#dom-biquadfilternode-frequency
-    didJustFinish: media.ended,
+    // didJustFinish: media.ended,
+    // TODO: Make seperate event from that.
   };
 
   return status;

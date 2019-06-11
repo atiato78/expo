@@ -60,6 +60,7 @@ export default class AudioPlayer extends React.Component<Props, State> {
     try {
       await soundObject.loadAsync(source, { progressUpdateIntervalMillis: 250 });
       soundObject.setOnPlaybackStatusUpdate(this._updateStateToStatus);
+      soundObject.setOnPlaybackCompleted(this._playbackCompleted);
       const status = await soundObject.getStatusAsync();
       this._updateStateToStatus(status);
       this._sound = soundObject;
@@ -69,6 +70,8 @@ export default class AudioPlayer extends React.Component<Props, State> {
   };
 
   _updateStateToStatus = (status: any) => this.setState(status);
+
+  _playbackCompleted = () => {};
 
   _playAsync = async () => {
     this._sound!.playAsync();

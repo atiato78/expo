@@ -263,17 +263,17 @@ export class Recording {
     getURI() {
         return this._uri;
     }
-    async createNewLoadedSound(initialStatus = {}, onPlaybackStatusUpdate = null) {
+    async createNewLoadedSound(initialStatus = {}, onPlaybackStatusUpdate) {
         console.warn(`createNewLoadedSound is deprecated in favor of createNewLoadedSoundAsync, which has the same API aside from the method name`);
         return this.createNewLoadedSoundAsync(initialStatus, onPlaybackStatusUpdate);
     }
-    async createNewLoadedSoundAsync(initialStatus = {}, onPlaybackStatusUpdate = null) {
+    async createNewLoadedSoundAsync(initialStatus = {}, onPlaybackStatusUpdate, onPlaybackCompleted) {
         if (this._uri == null || !this._isDoneRecording) {
             throw new Error('Cannot create sound when the Recording has not finished!');
         }
         return Sound.createAsync(
         // $FlowFixMe: Flow can't distinguish between this literal and Asset
-        { uri: this._uri }, initialStatus, onPlaybackStatusUpdate, false);
+        { uri: this._uri }, initialStatus, onPlaybackStatusUpdate, onPlaybackCompleted, false);
     }
 }
 //# sourceMappingURL=Recording.js.map

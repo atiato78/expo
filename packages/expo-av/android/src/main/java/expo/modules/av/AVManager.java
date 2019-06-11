@@ -42,7 +42,8 @@ import expo.modules.av.video.VideoViewWrapper;
 
 import static android.media.MediaRecorder.MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED;
 
-public class AVManager implements LifecycleEventListener, MediaRecorder.OnInfoListener, AVManagerInterface, InternalModule, ModuleRegistryConsumer {
+public class AVManager implements LifecycleEventListener, MediaRecorder.OnInfoListener, AVManagerInterface,
+    InternalModule, ModuleRegistryConsumer {
   private static final String AUDIO_MODE_SHOULD_DUCK_KEY = "shouldDuckAndroid";
   private static final String AUDIO_MODE_INTERRUPTION_MODE_KEY = "interruptionModeAndroid";
   private static final String AUDIO_MODE_PLAY_THROUGH_EARPIECE = "playThroughEarpieceAndroid";
@@ -58,8 +59,7 @@ public class AVManager implements LifecycleEventListener, MediaRecorder.OnInfoLi
   private static final String RECORDING_OPTION_MAX_FILE_SIZE_KEY = "maxFileSize";
 
   private enum AudioInterruptionMode {
-    DO_NOT_MIX,
-    DUCK_OTHERS,
+    DO_NOT_MIX, DUCK_OTHERS,
   }
 
   private final Context mContext;
@@ -99,20 +99,19 @@ public class AVManager implements LifecycleEventListener, MediaRecorder.OnInfoLi
       throw new IllegalStateException("Unable to process sound, AudioManager not available");
     }
 
-
     mAudioFocusHandler = new AudioFocusHandler(reactContext, audioManager);
     // Implemented because of the suggestion here:
     // https://developer.android.com/guide/topics/media-apps/volume-and-earphones.html
-//    mNoisyAudioStreamReceiver = new BroadcastReceiver() {
-//      @Override
-//      public void onReceive(Context context, Intent intent) {
-//        if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
-//          abandonAudioFocus();
-//        }
-//      }
-//    };
-//    mContext.registerReceiver(mNoisyAudioStreamReceiver,
-//        new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
+    // mNoisyAudioStreamReceiver = new BroadcastReceiver() {
+    // @Override
+    // public void onReceive(Context context, Intent intent) {
+    // if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
+    // abandonAudioFocus();
+    // }
+    // }
+    // };
+    // mContext.registerReceiver(mNoisyAudioStreamReceiver,
+    // new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
   }
 
   @Override
@@ -222,7 +221,8 @@ public class AVManager implements LifecycleEventListener, MediaRecorder.OnInfoLi
 
   // Rejects the promise and returns null if the PlayerManager is not found.
   private PlayerManager tryGetSoundForKey(final Integer key, final Promise promise) {
-    final PlayerManager data = mAudioEventHandlers.getAudios().get(key).get(); //TODO: Convert to kotlin and optional chaining!
+    final PlayerManager data = mAudioEventHandlers.getAudios().get(key).get(); // TODO: Convert to kotlin and optional
+                                                                               // chaining!
     if (data == null && promise != null) {
       promise.reject("E_AUDIO_NOPLAYER", "Player does not exist.");
     }
@@ -240,7 +240,8 @@ public class AVManager implements LifecycleEventListener, MediaRecorder.OnInfoLi
   @Override
   public void loadForSound(final Source source, final ReadableArguments arguments, final Promise promise) {
     final int key = mSoundMapKeyCount++;
-    final PlayerManager playerManager = mPlayerCreator.createUnloadedPlayerData(source, new Params().update(arguments), getModuleRegistry());
+    final PlayerManager playerManager = mPlayerCreator.createUnloadedPlayerData(source, new Params().update(arguments),
+        getModuleRegistry());
     playerManager.setErrorListener(error -> removeSoundForKey(key));
     mAudioEventHandlers.addAudio(key, playerManager);
     playerManager.load(arguments, new PlayerManager.LoadCompletionListener() {
@@ -261,6 +262,12 @@ public class AVManager implements LifecycleEventListener, MediaRecorder.OnInfoLi
       payload.putInt("key", key);
       payload.putBundle("status", status.toBundle());
       sendEvent("didUpdatePlaybackStatus", payload);
+    });
+
+    playerManager.setPlaybackCompletionListener(() -> {
+      Bundle bundle = new Bundle();
+      bundle.putInt("key", key);
+      sendEvent("didCompletePlayback", bundle);
     });
   }
 
@@ -304,14 +311,15 @@ public class AVManager implements LifecycleEventListener, MediaRecorder.OnInfoLi
     } // Otherwise, tryGetSoundForKey has already rejected the promise.
   }
 
-// Unified playback API - Video
+  // Unified playback API - Video
 
   private interface VideoViewCallback {
     void runWithVideoView(final VideoView videoView);
 
   }
 
-  // Rejects the promise if the VideoView is not found, otherwise executes the callback.
+  // Rejects the promise if the VideoView is not found, otherwise executes the
+  // callback.
   private void tryRunWithVideoView(final Integer tag, final VideoViewCallback callback, final Promise promise) {
     if (mModuleRegistry != null) {
       UIManager uiManager = mModuleRegistry.getModule(UIManager.class);
@@ -332,37 +340,56 @@ public class AVManager implements LifecycleEventListener, MediaRecorder.OnInfoLi
   }
 
   @Override
-  public void loadForVideo(final Integer tag, final Source source, final ReadableArguments status, final Promise promise) {
-    tryRunWithVideoView(tag, videoView -> videoView.setSource(source, status, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
+  public void loadForVideo(final Integer tag, final Source source, final ReadableArguments status,
+      final Promise promise) {
+    tryRunWithVideoView(tag, videoView -> videoView.setSource(source, status, promise), promise); // Otherwise,
+                                                                                                  // tryRunWithVideoView
+                                                                                                  // has already
+                                                                                                  // rejected the
+                                                                                                  // promise.
   }
 
   @Override
   public void unloadForVideo(final Integer tag, final Promise promise) {
-    tryRunWithVideoView(tag, videoView -> videoView.setSource(null, null, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
+    tryRunWithVideoView(tag, videoView -> videoView.setSource(null, null, promise), promise); // Otherwise,
+                                                                                              // tryRunWithVideoView has
+                                                                                              // already rejected the
+                                                                                              // promise.
   }
 
   @Override
   public void setStatusForVideo(final Integer tag, final ReadableArguments params, final Promise promise) {
-    tryRunWithVideoView(tag, videoView -> videoView.setParams(params, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
+    tryRunWithVideoView(tag, videoView -> videoView.setParams(params, promise), promise); // Otherwise,
+                                                                                          // tryRunWithVideoView has
+                                                                                          // already rejected the
+                                                                                          // promise.
   }
 
   @Override
   public void replayVideo(final Integer tag, final ReadableArguments params, final Promise promise) {
     // TODO: consider whether should be status (unlikely) or params
-    tryRunWithVideoView(tag, videoView -> videoView.setParams(params, promise), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
+    tryRunWithVideoView(tag, videoView -> videoView.setParams(params, promise), promise); // Otherwise,
+                                                                                          // tryRunWithVideoView has
+                                                                                          // already rejected the
+                                                                                          // promise.
   }
 
   @Override
   public void getStatusForVideo(final Integer tag, final Promise promise) {
-    tryRunWithVideoView(tag, videoView -> promise.resolve(videoView.getStatus()), promise); // Otherwise, tryRunWithVideoView has already rejected the promise.
+    tryRunWithVideoView(tag, videoView -> promise.resolve(videoView.getStatus()), promise); // Otherwise,
+                                                                                            // tryRunWithVideoView has
+                                                                                            // already rejected the
+                                                                                            // promise.
   }
 
-  // Note that setStatusUpdateCallback happens in the JS for video via onParamsUpdate
+  // Note that setStatusUpdateCallback happens in the JS for video via
+  // onParamsUpdate
 
   // Recording API
 
   private boolean isMissingAudioRecordingPermissions() {
-    return mModuleRegistry.getModule(Permissions.class).getPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED;
+    return mModuleRegistry.getModule(Permissions.class)
+        .getPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED;
   }
 
   // Rejects the promise and returns false if the MediaRecorder is not found.
@@ -416,16 +443,16 @@ public class AVManager implements LifecycleEventListener, MediaRecorder.OnInfoLi
   @Override
   public void onInfo(final MediaRecorder mr, final int what, final int extra) {
     switch (what) {
-      case MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED:
-        removeAudioRecorder();
-        if (mModuleRegistry != null) {
-          EventEmitter eventEmitter = mModuleRegistry.getModule(EventEmitter.class);
-          if (eventEmitter != null) {
-            eventEmitter.emit("Expo.Recording.recorderUnloaded", new Bundle());
-          }
+    case MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED:
+      removeAudioRecorder();
+      if (mModuleRegistry != null) {
+        EventEmitter eventEmitter = mModuleRegistry.getModule(EventEmitter.class);
+        if (eventEmitter != null) {
+          eventEmitter.emit("Expo.Recording.recorderUnloaded", new Bundle());
         }
-      default:
-        // Do nothing
+      }
+    default:
+      // Do nothing
     }
   }
 
@@ -447,7 +474,8 @@ public class AVManager implements LifecycleEventListener, MediaRecorder.OnInfoLi
       ensureDirExists(directory);
       mAudioRecordingFilePath = directory + File.separator + filename;
     } catch (final IOException e) {
-      // This only occurs in the case that the scoped path is not in this experience's scope,
+      // This only occurs in the case that the scoped path is not in this experience's
+      // scope,
       // which is never true.
     }
 
@@ -518,8 +546,8 @@ public class AVManager implements LifecycleEventListener, MediaRecorder.OnInfoLi
   public void pauseAudioRecording(final Promise promise) {
     if (checkAudioRecorderExistsOrReject(promise)) {
       if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-        promise.reject("E_AUDIO_VERSIONINCOMPATIBLE", "Pausing an audio recording is unsupported on" +
-            " Android devices running SDK < 24.");
+        promise.reject("E_AUDIO_VERSIONINCOMPATIBLE",
+            "Pausing an audio recording is unsupported on" + " Android devices running SDK < 24.");
       } else {
         try {
           mAudioRecorder.pause();

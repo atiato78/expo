@@ -47,7 +47,6 @@ export declare type PlaybackStatus = {
     isPlaying: boolean;
     isLoading: boolean;
     isBuffering: boolean;
-    didJustFinish: boolean;
 };
 export declare const _DEFAULT_PROGRESS_UPDATE_INTERVAL_MILLIS: number;
 export declare const _DEFAULT_INITIAL_PLAYBACK_PARAMS: PlaybackParams;

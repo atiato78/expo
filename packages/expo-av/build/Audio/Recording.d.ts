@@ -116,11 +116,11 @@ export declare class Recording {
     pauseAsync(): Promise<RecordingStatus>;
     stopAndUnloadAsync(): Promise<RecordingStatus>;
     getURI(): string | null;
-    createNewLoadedSound(initialStatus?: PlaybackParams, onPlaybackStatusUpdate?: ((status: PlaybackStatus) => void) | null): Promise<{
+    createNewLoadedSound(initialStatus?: PlaybackParams, onPlaybackStatusUpdate?: (status: PlaybackStatus) => void): Promise<{
         sound: Sound;
         status: PlaybackStatus;
     }>;
-    createNewLoadedSoundAsync(initialStatus?: PlaybackParams, onPlaybackStatusUpdate?: ((status: PlaybackStatus) => void) | null): Promise<{
+    createNewLoadedSoundAsync(initialStatus?: PlaybackParams, onPlaybackStatusUpdate?: (status: PlaybackStatus) => void, onPlaybackCompleted?: () => void): Promise<{
         sound: Sound;
         status: PlaybackStatus;
     }>;

@@ -353,7 +353,7 @@ export class Recording {
 
   async createNewLoadedSound(
     initialStatus: PlaybackParams = {},
-    onPlaybackStatusUpdate: ((status: PlaybackStatus) => void) | null = null
+    onPlaybackStatusUpdate?: (status: PlaybackStatus) => void
   ): Promise<{ sound: Sound; status: PlaybackStatus }> {
     console.warn(
       `createNewLoadedSound is deprecated in favor of createNewLoadedSoundAsync, which has the same API aside from the method name`
@@ -363,7 +363,8 @@ export class Recording {
 
   async createNewLoadedSoundAsync(
     initialStatus: PlaybackParams = {},
-    onPlaybackStatusUpdate: ((status: PlaybackStatus) => void) | null = null
+    onPlaybackStatusUpdate?: (status: PlaybackStatus) => void,
+    onPlaybackCompleted?: () => void
   ): Promise<{ sound: Sound; status: PlaybackStatus }> {
     if (this._uri == null || !this._isDoneRecording) {
       throw new Error('Cannot create sound when the Recording has not finished!');
@@ -373,6 +374,7 @@ export class Recording {
       { uri: this._uri },
       initialStatus,
       onPlaybackStatusUpdate,
+      onPlaybackCompleted,
       false
     );
   }

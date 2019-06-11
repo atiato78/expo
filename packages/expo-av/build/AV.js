@@ -121,7 +121,6 @@ export function getUnloadedStatus(error = null) {
         isPlaying: false,
         isLoading: false,
         isBuffering: false,
-        didJustFinish: false,
     };
 }
 /**
