@@ -1,22 +1,15 @@
-import React from 'react';
-import { Alert, StyleSheet, Text, View, TouchableOpacity, Platform } from 'react-native';
-import * as FaceDetector from 'expo-face-detector';
-import { BarCodeScanner } from 'expo-barcode-scanner';
-import * as Permissions from 'expo-permissions';
-import * as FileSystem from 'expo-file-system';
+import { Ionicons, MaterialIcons, Octicons } from '@expo/vector-icons';
 import { Camera } from 'expo-camera';
 import Constants from 'expo-constants';
+import * as FileSystem from 'expo-file-system';
+import * as Permissions from 'expo-permissions';
+import React from 'react';
+import { Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import isIPhoneX from 'react-native-is-iphonex';
 import { withNavigation } from 'react-navigation';
-import Store from '../redux/Store';
+
 import ProfileActions from '../redux/ProfileActions';
-import {
-  Ionicons,
-  MaterialIcons,
-  Foundation,
-  MaterialCommunityIcons,
-  Octicons,
-} from '@expo/vector-icons';
+import Store from '../redux/Store';
 
 interface Picture {
   width: number;
@@ -71,9 +64,6 @@ interface State {
   whiteBalance: string;
   ratio: string;
   ratios: any[];
-  barcodeScanning: boolean;
-  faceDetecting: boolean;
-  faces: any[];
   newPhotos: boolean;
   permissionsGranted: boolean;
   permission?: Permissions.PermissionStatus;
@@ -100,9 +90,6 @@ export default class CameraScreen extends React.Component {
     whiteBalance: 'auto',
     ratio: '16:9',
     ratios: [],
-    barcodeScanning: false,
-    faceDetecting: false,
-    faces: [],
     newPhotos: false,
     permissionsGranted: false,
     pictureSizes: [],
@@ -152,10 +139,6 @@ export default class CameraScreen extends React.Component {
 
   setFocusDepth = (depth: number) => this.setState({ depth });
 
-  toggleBarcodeScanning = () => this.setState({ barcodeScanning: !this.state.barcodeScanning });
-
-  toggleFaceDetection = () => this.setState({ faceDetecting: !this.state.faceDetecting });
-
   takePicture = () => {
     if (this.camera) {
       this.camera.takePictureAsync({ onPictureSaved: this.onPictureSaved });
@@ -180,14 +163,6 @@ export default class CameraScreen extends React.Component {
     this.props.navigation.goBack();
     this.setState({ newPhotos: true });
   };
-
-  onBarCodeScanned = (code: { type: string, data: string }) => {
-    this.setState({ barcodeScanning: !this.state.barcodeScanning }, () =>
-      Alert.alert(`Barcode found: ${code.data}`)
-    );
-  };
-
-  onFacesDetected = ({ faces }: { faces: any }) => this.setState({ faces });
 
   collectPictureSizes = async () => {
     if (this.camera) {
@@ -216,72 +191,6 @@ export default class CameraScreen extends React.Component {
     }
     this.setState({ pictureSize: this.state.pictureSizes[newId], pictureSizeId: newId });
   };
-
-  renderFace({ bounds, faceID, rollAngle, yawAngle }: FaceDetector.FaceFeature) {
-    return (
-      <View
-        key={faceID}
-        style={[
-          styles.face,
-          {
-            ...bounds.size,
-            left: bounds.origin.x,
-            top: bounds.origin.y,
-            transform: [
-              { perspective: 600 },
-              { rotateZ: `${rollAngle.toFixed(0)}deg` },
-              { rotateY: `${yawAngle.toFixed(0)}deg` },
-            ],
-          },
-        ]}>
-        <Text style={styles.faceText}>ID: {faceID}</Text>
-        <Text style={styles.faceText}>rollAngle: {rollAngle.toFixed(0)}</Text>
-        <Text style={styles.faceText}>yawAngle: {yawAngle.toFixed(0)}</Text>
-      </View>
-    );
-  }
-
-  renderLandmarksOfFace(face: FaceDetector.FaceFeature) {
-    const renderLandmark = (position?: { x: number, y: number }) =>
-      position && (
-        <View
-          style={[
-            styles.landmark,
-            {
-              left: position.x - landmarkSize / 2,
-              top: position.y - landmarkSize / 2,
-            },
-          ]}
-        />
-      );
-    return (
-      <View key={`landmarks-${face.faceID}`}>
-        {renderLandmark(face.leftEyePosition)}
-        {renderLandmark(face.rightEyePosition)}
-        {renderLandmark(face.leftEarPosition)}
-        {renderLandmark(face.rightEarPosition)}
-        {renderLandmark(face.leftCheekPosition)}
-        {renderLandmark(face.rightCheekPosition)}
-        {renderLandmark(face.leftMouthPosition)}
-        {renderLandmark(face.mouthPosition)}
-        {renderLandmark(face.rightMouthPosition)}
-        {renderLandmark(face.noseBasePosition)}
-        {renderLandmark(face.bottomMouthPosition)}
-      </View>
-    );
-  }
-
-  renderFaces = () => (
-    <View style={styles.facesContainer} pointerEvents="none">
-      {this.state.faces.map(this.renderFace)}
-    </View>
-  );
-
-  renderLandmarks = () => (
-    <View style={styles.facesContainer} pointerEvents="none">
-      {this.state.faces.map(this.renderLandmarksOfFace)}
-    </View>
-  );
 
   renderNoPermissions = () => (
     <View style={styles.noPermissions}>
@@ -338,23 +247,6 @@ export default class CameraScreen extends React.Component {
 
   renderMoreOptions = () => (
     <View style={styles.options}>
-      <View style={styles.detectors}>
-        <TouchableOpacity onPress={this.toggleFaceDetection}>
-          <MaterialIcons
-            name="tag-faces"
-            size={32}
-            color={this.state.faceDetecting ? 'white' : '#858585'}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={this.toggleBarcodeScanning}>
-          <MaterialCommunityIcons
-            name="barcode-scan"
-            size={32}
-            color={this.state.barcodeScanning ? 'white' : '#858585'}
-          />
-        </TouchableOpacity>
-      </View>
-
       <View style={styles.pictureSizeContainer}>
         <Text style={styles.pictureQualityLabel}>Picture quality</Text>
         <View style={styles.pictureSizeChooser}>
@@ -385,20 +277,10 @@ export default class CameraScreen extends React.Component {
         whiteBalance={this.state.whiteBalance}
         ratio={this.state.ratio}
         pictureSize={this.state.pictureSize}
-        onMountError={this.handleMountError}
-        onFacesDetected={this.state.faceDetecting ? this.onFacesDetected : undefined}
-        barCodeScannerSettings={{
-          barCodeTypes: [
-            BarCodeScanner.Constants.BarCodeType.qr,
-            BarCodeScanner.Constants.BarCodeType.pdf417,
-          ],
-        }}
-        onBarCodeScanned={this.state.barcodeScanning ? this.onBarCodeScanned : undefined}>
+        onMountError={this.handleMountError}>
         {this.renderTopBar()}
         {this.renderBottomBar()}
       </Camera>
-      {this.state.faceDetecting && this.renderFaces()}
-      {this.state.faceDetecting && this.renderLandmarks()}
       {this.state.showMoreOptions && this.renderMoreOptions()}
     </View>
   );
@@ -509,35 +391,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  facesContainer: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    left: 0,
-    top: 0,
-  },
-  face: {
-    padding: 10,
-    borderWidth: 2,
-    borderRadius: 2,
-    position: 'absolute',
-    borderColor: '#FFD700',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  landmark: {
-    width: landmarkSize,
-    height: landmarkSize,
-    position: 'absolute',
-    backgroundColor: 'red',
-  },
-  faceText: {
-    color: '#FFD700',
-    fontWeight: 'bold',
-    textAlign: 'center',
-    margin: 10,
-    backgroundColor: 'transparent',
   },
   row: {
     flexDirection: 'row',
