@@ -56,3 +56,42 @@ If at some point you want to reset these files to their initial values simply ru
 - Customizing the favicon icon
 - Adding third-party API code to the `<head/>` in your `index.html`
 - Changing the caching policy in the `serve.json` file
+
+# Third-party packages
+
+By default many OSS community packages are not compiled to ES5 before being published. At the moment this is the best way to ensure that tree-shaking can remove the maximum amount of platform-specific code. However to run in the browser the packages must be compiled to "Common JS". To do this, we use `babel-preset-expo` in the `@expo/webpack-config`. This will compile all of your project code, and any of the `node_modules` that start with: `react-native`, `react-navigation`, `expo`, `unimodules`, `@react`, `@expo`, `@unimodules`.
+
+If you want to use a React Native library that follows a non-standard naming convention, you can add it to the `app.json`. In the following example we're going to add support for any module that starts with the name **"native-base-shoutem-theme"** or **"glamorous-native"**.
+
+**`app.json`**
+
+```js
+"expo": {
+  ...
+  "web": {
+    "build": {
+      "babel": {
+        "include": [
+          "native-base-shoutem-theme",
+          "glamorous-native"
+        ]
+      }
+    }
+  }
+}
+```
+
+If you forget to do this you'll get an error that looks something like this:
+
+```jsx
+/**
+ * Failed to compile.
+ * `/node_modules/<MISSED_NODE_MODULE>/<SOME_UNCOMPILED_FILE>.js 10:19`
+ * Module parse failed: Unexpected token (10:19)
+ * You may need an appropriate loader to handle this file type.
+|*/
+| export default class StyleProvider extends React.Component {
+>   static propTypes = {
+|     children: PropTypes.element.isRequired,
+|     style: PropTypes.object,
+```
