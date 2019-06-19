@@ -17,6 +17,7 @@ import expo.modules.barcodescanner.BarCodeScannerPackage;
 import expo.modules.brightness.BrightnessPackage;
 import expo.modules.calendar.CalendarPackage;
 import expo.modules.camera.CameraPackage;
+import expo.modules.ota.UpdatesPackage;
 import expo.modules.sharing.SharingPackage;
 import expo.modules.constants.ConstantsPackage;
 import expo.modules.contacts.ContactsPackage;
@@ -88,6 +89,7 @@ public class ExperiencePackagePicker {
       new PermissionsPackage(),
       new PrintPackage(),
       new RandomPackage(),
+      new UpdatesPackage(),
       new SMSPackage(),
       new SQLitePackage(),
       new SecureStorePackage(),

@@ -45,7 +45,7 @@ android {
 
   defaultConfig {
     minSdkVersion 21
-    targetSdkVersion 26
+    targetSdkVersion 28
     versionCode 1
     versionName '1.0.0'
   }
@@ -64,4 +64,5 @@ if (new File(rootProject.projectDir.parentFile, 'package.json').exists()) {
 
 dependencies {
   unimodule 'unimodules-core'
+  unimodule 'unimodules-update-interface'
 }

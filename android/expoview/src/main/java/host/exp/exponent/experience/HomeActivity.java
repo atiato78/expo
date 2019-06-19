@@ -25,6 +25,7 @@ import expo.modules.constants.ConstantsPackage;
 import expo.modules.filesystem.FileSystemPackage;
 import expo.modules.font.FontLoaderPackage;
 import expo.modules.keepawake.KeepAwakePackage;
+import expo.modules.ota.UpdatesPackage;
 import expo.modules.permissions.PermissionsPackage;
 import expo.modules.taskManager.TaskManagerPackage;
 import host.exp.exponent.Constants;
@@ -103,6 +104,7 @@ public class HomeActivity extends BaseExperienceActivity {
     return Arrays.<Package>asList(
         new ConstantsPackage(),
         new PermissionsPackage(),
+        new UpdatesPackage(),
         new FileSystemPackage(),
         new FontLoaderPackage(),
         new BarCodeScannerPackage(),

@@ -37,7 +37,6 @@ import versioned.host.exp.exponent.modules.api.ScreenOrientationModule;
 import versioned.host.exp.exponent.modules.api.ShakeModule;
 import versioned.host.exp.exponent.modules.api.SplashScreenModule;
 import versioned.host.exp.exponent.modules.api.URLHandlerModule;
-import versioned.host.exp.exponent.modules.api.UpdatesModule;
 import versioned.host.exp.exponent.modules.api.cognito.RNAWSCognitoModule;
 import versioned.host.exp.exponent.modules.api.components.gesturehandler.react.RNGestureHandlerModule;
 import versioned.host.exp.exponent.modules.api.components.gesturehandler.react.RNGestureHandlerPackage;
@@ -148,7 +147,6 @@ public class ExponentPackage implements ReactPackage {
         new URLHandlerModule(reactContext),
         new ShakeModule(reactContext),
         new KeyboardModule(reactContext),
-        new UpdatesModule(reactContext, mExperienceProperties, mManifest),
         new ExponentIntentModule(reactContext, mExperienceProperties)
     ));
 

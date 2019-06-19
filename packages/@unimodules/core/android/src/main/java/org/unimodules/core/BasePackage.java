@@ -13,22 +13,22 @@ import java.util.List;
 // Remove once no one extends it.
 public class BasePackage implements Package {
   @Override
-  public List<InternalModule> createInternalModules(Context context) {
+  public List<? extends InternalModule> createInternalModules(Context context) {
     return Collections.emptyList();
   }
 
   @Override
-  public List<ExportedModule> createExportedModules(Context context) {
+  public List<? extends ExportedModule> createExportedModules(Context context) {
     return Collections.emptyList();
   }
 
   @Override
-  public List<ViewManager> createViewManagers(Context context) {
+  public List<? extends ViewManager> createViewManagers(Context context) {
     return Collections.emptyList();
   }
 
   @Override
-  public List<SingletonModule> createSingletonModules(Context context) {
+  public List<? extends SingletonModule> createSingletonModules(Context context) {
     return Collections.emptyList();
   }
 }

@@ -20,6 +20,7 @@ import org.unimodules.core.interfaces.InternalModule;
 import host.exp.exponent.ExponentManifest;
 import host.exp.exponent.kernel.ExperienceId;
 import host.exp.exponent.utils.ScopedContext;
+import versioned.host.exp.exponent.modules.api.ExpoUpdatesService;
 import versioned.host.exp.exponent.modules.universal.av.SharedCookiesDataSourceFactoryProvider;
 import versioned.host.exp.exponent.modules.universal.sensors.ScopedAccelerometerService;
 import versioned.host.exp.exponent.modules.universal.sensors.ScopedGravitySensorService;
@@ -49,6 +50,8 @@ public class ExpoModuleRegistryAdapter extends ModuleRegistryAdapter implements 
 
     // Overriding expo-permissions/PermissionsService -- binding checks with kernel services
     moduleRegistry.registerInternalModule(new PermissionsServiceBinding(scopedContext, experienceId));
+
+    moduleRegistry.registerInternalModule(new ExpoUpdatesService(scopedContext, experienceProperties, manifest));
 
     // Overriding expo-constants/ConstantsService -- binding provides manifest and other expo-related constants
     moduleRegistry.registerInternalModule(new ConstantsBinding(scopedContext, experienceProperties, manifest));
