@@ -14,9 +14,4 @@ public class BatteryPackage extends BasePackage {
   public List<ExportedModule> createExportedModules(Context context) {
     return Collections.singletonList((ExportedModule) new BatteryModule(context));
   }
-
-  @Override
-  public List<ViewManager> createViewManagers(Context context) {
-    return Collections.singletonList((ViewManager) new BatteryViewManager());
-  }
 }
