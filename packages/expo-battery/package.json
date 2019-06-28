@@ -2,9 +2,16 @@
   "name": "expo-battery",
   "version": "1.0.0",
   "description": "ExpoBattery standalone module",
-  "main": "build/index.js",
-  "types": "build/index.d.ts",
-  "scripts": {},
+  "main": "build/Battery.js",
+  "types": "build/Battery.d.ts",
+  "scripts": {
+    "build": "expo-module build",
+    "clean": "expo-module clean",
+    "test": "expo-module test",
+    "prepare": "expo-module prepare",
+    "prepublishOnly": "expo-module prepublishOnly",
+    "expo-module": "expo-module"
+  },
   "keywords": [
     "react-native",
     "expo",

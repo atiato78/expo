@@ -1,0 +1,1 @@
+{"version":3,"file":"Battery.types.js","sourceRoot":"","sources":["../src/Battery.types.ts"],"names":[],"mappings":"","sourcesContent":["export type PowerState = {\n  batteryLevel?: number;\n  isCharging?: boolean;\n  lowPowerMode?: boolean;\n};\n"]}
