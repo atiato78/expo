@@ -7,6 +7,7 @@ import org.unimodules.core.ModuleRegistry;
 import org.unimodules.core.Promise;
 import org.unimodules.core.interfaces.ExpoMethod;
 import org.unimodules.core.interfaces.RegistryLifecycleListener;
+import org.unimodules.core.interfaces.services.EventEmitter;
 
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -17,9 +18,13 @@ import android.os.PowerManager;
 public class BatteryModule extends ExportedModule implements RegistryLifecycleListener {
   private static final String NAME = "ExpoBattery";
   private static final String TAG = BatteryModule.class.getSimpleName();
+  private static final String BATTERY_LEVEL_EVENT_NAME = "Expo.BatteryLevelDidChange";
+  private static final String BATTERY_CHARGED_EVENT_NAME = "Expo.IsChargingDidChange";
+  private static final String POWERSTATE_EVENT_NAME = "Expo.PowerStateDidChange";
 
   private ModuleRegistry mModuleRegistry;
-  private Context mContext;
+  static protected Context mContext;
+  static private EventEmitter mEventEmitter;
 
   public BatteryModule(Context context) {
     super(context);
@@ -34,7 +39,25 @@ public class BatteryModule extends ExportedModule implements RegistryLifecycleLi
   @Override
   public void onCreate(ModuleRegistry moduleRegistry) {
     mModuleRegistry = moduleRegistry;
+    mEventEmitter = moduleRegistry.getModule(EventEmitter.class);
+    this.mContext.registerReceiver(new BatteryChargingBroadcastReceiver(), new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+    this.mContext.registerReceiver(new PowerSaverBroadcastReceiver(), new IntentFilter("android.os.action.POWER_SAVE_MODE_CHANGED"));
   }
+
+  static protected void onIsChargingChange(boolean isCharing){
+    Bundle result = new Bundle();
+    result.putBoolean("isCharing", isCharing);
+    mEventEmitter.emit(BATTERY_CHARGED_EVENT_NAME,result);
+  }
+
+  static protected void onPowerStateChange(float batteryLevel, boolean isCharging, boolean lowPowerMode){
+    Bundle result = new Bundle();
+    result.putFloat("batteryLevel", batteryLevel);
+    result.putBoolean("isCharging", isCharging);
+    result.putBoolean("lowPowerMode", lowPowerMode);
+    mEventEmitter.emit(POWERSTATE_EVENT_NAME,result);
+  }
+
 
   @ExpoMethod
   public void getBatteryLevelAsync(Promise promise) {

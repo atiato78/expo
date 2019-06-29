@@ -1,2 +1,19 @@
-<manifest package="expo.modules.template">
+<manifest package="expo.modules.battery"
+          xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <receiver android:name=".BatteryChargingBroadcastReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".PowerSaverBroadcastReceiver">
+            <intent-filter>
+                <action android:name="android.os.action.POWER_SAVE_MODE_CHANGED"/>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
+            </intent-filter>
+        </receiver>
+    </application>
 </manifest>
