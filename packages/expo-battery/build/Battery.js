@@ -1,4 +1,6 @@
 import ExpoBattery from './ExpoBattery';
+import { EventEmitter } from '@unimodules/core';
+const BatteryEventEmitter = new EventEmitter(ExpoBattery);
 export async function getBatteryLevelAsync() {
     return await ExpoBattery.getBatteryLevelAsync();
 }
@@ -7,5 +9,14 @@ export async function isBatteryChargingAsync() {
 }
 export async function getPowerStateAsync() {
     return await ExpoBattery.getPowerStateAsync();
+}
+export function watchBatteryLevelChange(callback) {
+    return BatteryEventEmitter.addListener('Expo.BatteryLevelDidChange', callback);
+}
+export function watchBatteryChargingChange(callback) {
+    return BatteryEventEmitter.addListener('Expo.IsChargingDidChange', callback);
+}
+export function watchPowerStateChange(callback) {
+    return BatteryEventEmitter.addListener('Expo.PowerStateDidChange', callback);
 }
 //# sourceMappingURL=Battery.js.map
