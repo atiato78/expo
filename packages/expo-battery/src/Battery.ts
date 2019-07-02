@@ -24,13 +24,16 @@ export async function getPowerStateAsync(): Promise<PowerState> {
 }
 
 export function watchBatteryLevelChange(callback: BatteryLevelUpdateCallback): BatteryListener {
-  return BatteryEventEmitter.addListener('Expo.BatteryLevelDidChange', callback);
+  return BatteryEventEmitter.addListener('Expo.batteryLevelDidChange', callback);
 }
 
 export function watchBatteryChargingChange(callback: BatteryChargingUpdateCallback): BatteryListener {
-  return BatteryEventEmitter.addListener('Expo.IsChargingDidChange', callback);
+  return BatteryEventEmitter.addListener('Expo.isChargingDidChange', callback);
 }
 
 export function watchLowPowerModeChange(callback: LowPowerModeUpdateCallback): BatteryListener {
   return BatteryEventEmitter.addListener('Expo.LowPowerModeDidChange', callback);
+  
+export function watchPowerStateChange(callback: PowerStateUpdateCallback): BatteryListener {
+  return BatteryEventEmitter.addListener('Expo.powerStateDidChange', callback);
 }
