@@ -159,11 +159,10 @@ UM_EXPORT_METHOD_AS(getBatteryLevelAsync,
   resolve(@([[self getPowerState][@"batteryLevel"] floatValue]));
 }
 
-UM_EXPORT_METHOD_AS(isBatteryChargingAsync,
-                    isBatteryCharingAsyncWithResolver:(UMPromiseResolveBlock)resolve rejecter:(UMPromiseRejectBlock)reject)
+UM_EXPORT_METHOD_AS(getBatteryStateAsync,
+                    getBatteryStateAsyncWithResolver:(UMPromiseResolveBlock)resolve rejecter:(UMPromiseRejectBlock)reject)
 {
-  BOOL isCharging = [[self getPowerState][@"batteryState"] isEqualToString:@"charging"];
-  resolve(@(isCharging));
+  resolve([self getPowerState][@"batteryState"]);
 }
 
 
