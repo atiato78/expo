@@ -5,9 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.BatteryManager;
 
-public class BatteryChargingBroadcastReceiver extends BroadcastReceiver {
-  public static String INTENT_ACTION = "expo.modules.battery.BatteryChargingBroadcastReceiver";
-  public BatteryChargingBroadcastReceiver(){}
+public class BatteryChargingReceiver extends BroadcastReceiver {
+  public static String INTENT_ACTION = "expo.modules.battery.BatteryChargingReceiver";
+  public BatteryChargingReceiver(){}
 
   @Override
   public void onReceive(Context context, Intent intent) {

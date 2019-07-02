@@ -20,7 +20,7 @@ public class BatteryModule extends ExportedModule implements RegistryLifecycleLi
   private static final String TAG = BatteryModule.class.getSimpleName();
   private static final String BATTERY_LEVEL_EVENT_NAME = "Expo.BatteryLevelDidChange";
   private static final String BATTERY_CHARGED_EVENT_NAME = "Expo.IsChargingDidChange";
-  private static final String POWERSTATE_EVENT_NAME = "Expo.PowerStateDidChange";
+  private static final String POWERMODE_EVENT_NAME = "Expo.LowPowerModeDidChange";
 
   private ModuleRegistry mModuleRegistry;
   static protected Context mContext;
@@ -40,22 +40,30 @@ public class BatteryModule extends ExportedModule implements RegistryLifecycleLi
   public void onCreate(ModuleRegistry moduleRegistry) {
     mModuleRegistry = moduleRegistry;
     mEventEmitter = moduleRegistry.getModule(EventEmitter.class);
-    this.mContext.registerReceiver(new BatteryChargingBroadcastReceiver(), new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-    this.mContext.registerReceiver(new PowerSaverBroadcastReceiver(), new IntentFilter("android.os.action.POWER_SAVE_MODE_CHANGED"));
+    mContext.registerReceiver(new BatteryChargingReceiver(), new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+    mContext.registerReceiver(new PowerSaverReceiver(), new IntentFilter("android.os.action.POWER_SAVE_MODE_CHANGED"));
+    IntentFilter ifilter = new IntentFilter();
+    ifilter.addAction(Intent.ACTION_BATTERY_LOW);
+    ifilter.addAction(Intent.ACTION_BATTERY_OKAY);
+    mContext.registerReceiver(new BatteryLevelReceiver(), ifilter);
   }
 
-  static protected void onIsChargingChange(boolean isCharing){
+  static protected void onIsChargingChange(boolean isCharging){
     Bundle result = new Bundle();
-    result.putBoolean("isCharing", isCharing);
+    result.putBoolean("isCharging", isCharging);
     mEventEmitter.emit(BATTERY_CHARGED_EVENT_NAME,result);
   }
 
-  static protected void onPowerStateChange(float batteryLevel, boolean isCharging, boolean lowPowerMode){
+  static protected void onLowPowerModeChange(boolean lowPowerMode){
     Bundle result = new Bundle();
-    result.putFloat("batteryLevel", batteryLevel);
-    result.putBoolean("isCharging", isCharging);
     result.putBoolean("lowPowerMode", lowPowerMode);
-    mEventEmitter.emit(POWERSTATE_EVENT_NAME,result);
+    mEventEmitter.emit(POWERMODE_EVENT_NAME,result);
+  }
+
+  static protected void onBatteryLevelChange(float BatteryLevel){
+    Bundle result = new Bundle();
+    result.putFloat("BatteryLevel", BatteryLevel);
+    mEventEmitter.emit(BATTERY_LEVEL_EVENT_NAME,result);
   }
 
 
