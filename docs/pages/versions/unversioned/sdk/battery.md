@@ -14,12 +14,6 @@ This API is pre-installed in [managed](../../introduction/managed-vs-bare/#manag
 import * as Battery from 'expo-battery';
 ```
 
-### Methods
-
-- `Device.getBatteryStateAsync()`
-- `Device.getBatteryLevelAsync()`
-- `Device.getPowerStateAsync()`
-
 ## Methods
 
 ### `Device.getBatteryLevelAsync()`
@@ -82,5 +76,106 @@ Returns a promise that resolves the `string` value for whether the device is any
 ```js
 Device.isBatteryChargingAsync().then(isCharging => {
   // 'charging'
+});
+```
+
+### `Device.watchBatteryLevelChange(callback)`
+
+Subscribe to the battery level change updates.
+
+On iOS devices, the event would be fired when the battery level drop up to 1 percent, but once per minute at maximum.
+
+On Android devices, the event would be fired only when significant changes happens. When battery level dropped below `"android.intent.action.BATTERY_LOW"` or up to `"android.intent.action.BATTERY_OKAY"` from low battery level. Click [ here ](https://developer.android.com/training/monitoring-device-state/battery-monitoring) to view more explanation on the official docs.
+
+#### Arguments
+
+- **callback (_function_)** A callback that is invoked when battery level changes. The callback is provided a single argument that is an object with a `batteryLevel` key.
+
+#### Returns
+
+- An EventSubscription object that you can call remove() on when you would like to unsubscribe the listener.
+
+### `Device.watchBatteryStateChange(callback)`
+
+Subscribe to the battery state change updates. One of the four, `unplugged`, `full`, `unkown`, `charging` battery state will be returned.
+
+#### Arguments
+
+- **callback (_function_)** A callback that is invoked when battery state changes. The callback is provided a single argument that is an object with a `batteryState` key.
+
+#### Returns
+
+- An EventSubscription object that you can call remove() on when you would like to unsubscribe the listener.
+
+### `Device.watchPowerModeChange(callback)`
+
+Subscribe to the low power mode ( power saver ) updates.
+
+#### Arguments
+
+- **callback (_function_)** A callback that is invoked when battery state changes. The callback is provided a single argument that is an object with a `isLowPowerMode` key.
+
+#### Returns
+
+- An EventSubscription object that you can call remove() on when you would like to unsubscribe the listener.
+
+**Examples**
+
+```js
+import Expo from "expo";
+import React from "react";
+import * as Battery from "expo-battery";
+import { StyleSheet, Text, View } from "react-native";
+
+export default class App extends React.Component {
+  state = {
+    batteryLevel: null
+  };
+
+  componentDidMount() {
+    this._subscribe();
+  }
+
+  componentWillUnmount() {
+    this._unsubscribe();
+  }
+
+  _subscribe = () => {
+    this._subscription = Battery.watchBatteryLevelChange(result => {
+      this.setState({
+        batteryLevel: result.batteryLevel
+      });
+    });
+    Battery.getBatteryLevelAsync()
+    .then(level => {
+      this.setState({
+        batteryLevel: level
+      })
+    })
+  }
+
+  _unsubscribe = () => {
+    this._subscription && this._subscription.remove();
+    this._subscription = null;
+  };
+
+  render() {
+    return (
+      <View style={styles.container}>
+        <Text>
+          Current Battery Level: {this.state.batteryLevel}
+        </Text>
+      </View>
+    );
+  }
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    marginTop: 15,
+    alignItems: "center",
+    justifyContent: "center"
+  }
 });
 ```
