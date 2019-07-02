@@ -12,7 +12,6 @@ export declare type isLowPowerMode = {
     isLowPowerMode: boolean;
 };
 export declare type PowerModeUpdateCallback = (isLowPowerMode: boolean) => void;
-export declare type PowerStateUpdateCallback = (PowerState: PowerState) => void;
 export declare type BatteryListener = {
     remove: () => void;
 };

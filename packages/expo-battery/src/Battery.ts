@@ -6,8 +6,7 @@ import {
   BatteryLevelUpdateCallback,
   BatteryListener,
   BatteryStateUpdateCallback,
-  PowerModeUpdateCallback, 
-  PowerStateUpdateCallback
+  PowerModeUpdateCallback
 } from './Battery.types';
 
 const BatteryEventEmitter = new EventEmitter(ExpoBattery);
