@@ -107,10 +107,10 @@ public class BatteryModule extends ExportedModule implements RegistryLifecycleLi
       IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
       Intent batteryStatus = this.mContext.getApplicationContext().registerReceiver(null, ifilter);
       int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-      if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
-        promise.resolve(BatteryState.CHARGING.getValue());
-      } else if (status == BatteryManager.BATTERY_STATUS_FULL) {
+      if (status == BatteryManager.BATTERY_STATUS_FULL) {
         promise.resolve(BatteryState.FULL.getValue());
+      } else if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
+        promise.resolve(BatteryState.CHARGING.getValue());
       } else if (status == BatteryManager.BATTERY_STATUS_NOT_CHARGING) {
         promise.resolve(BatteryState.UNPLUGGED.getValue());
       }
@@ -137,10 +137,10 @@ public class BatteryModule extends ExportedModule implements RegistryLifecycleLi
 
       Intent batteryStatus = this.mContext.getApplicationContext().registerReceiver(null, ifilter);
       int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-      if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
-        result.putString("batteryState", BatteryState.CHARGING.getValue());
-      } else if (status == BatteryManager.BATTERY_STATUS_FULL) {
+      if (status == BatteryManager.BATTERY_STATUS_FULL) {
         result.putString("batteryState", BatteryState.FULL.getValue());
+      } else if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
+        result.putString("batteryState", BatteryState.CHARGING.getValue());
       } else if (status == BatteryManager.BATTERY_STATUS_NOT_CHARGING) {
         result.putString("batteryState", BatteryState.UNPLUGGED.getValue());
       }
