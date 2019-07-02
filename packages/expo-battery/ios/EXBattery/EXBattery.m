@@ -101,7 +101,7 @@ UM_EXPORT_MODULE(ExpoBattery);
     return;
   }
   
-  [_eventEmitter sendEventWithName:@"Expo.batteryStateDidChange" body:[self getPowerState]];
+  [_eventEmitter sendEventWithName:@"Expo.batteryStateDidChange" body:[self getPowerState][@"batteryState"]];
 }
 
 + (NSString *)valueForIsLowPowerModeEnabled:(BOOL)isLowPowerModeEnabled
