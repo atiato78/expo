@@ -28,7 +28,7 @@ UM_EXPORT_MODULE(ExpoBattery);
 
 - (NSArray<NSString *> *)supportedEvents
 {
-  return @[@"Expo.batteryLevelDidChange", @"Expo.powerStateDidChange", @"Expo.powerModeDidChange"];
+  return @[@"Expo.batteryLevelDidChange", @"Expo.batteryStateDidChange", @"Expo.powerModeDidChange"];
 }
 
 - (void)startObserving {
@@ -49,7 +49,7 @@ UM_EXPORT_MODULE(ExpoBattery);
                                                  name:UIDeviceBatteryLevelDidChangeNotification
                                                object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(powerStateDidChange:)
+                                             selector:@selector(batteryStateDidChange:)
                                                  name:UIDeviceBatteryStateDidChangeNotification
                                                object:nil];
     
@@ -93,15 +93,15 @@ UM_EXPORT_MODULE(ExpoBattery);
   [_eventEmitter sendEventWithName:@"Expo.batteryLevelDidChange" body:@(batteryLevel)];
 }
 
-- (void)powerStateDidChange:(NSNotification *)notification
+- (void)batteryStateDidChange:(NSNotification *)notification
 {
-  NSLog(@"powerStateDidChange was called");
+  NSLog(@"batteryStateDidChange was called");
   if (!_hasListeners) {
     NSLog(@"and hasListeners was false");
     return;
   }
   
-  [_eventEmitter sendEventWithName:@"Expo.powerStateDidChange" body:[self getPowerState]];
+  [_eventEmitter sendEventWithName:@"Expo.batteryStateDidChange" body:[self getPowerState]];
 }
 
 + (NSString *)valueForIsLowPowerModeEnabled:(BOOL)isLowPowerModeEnabled

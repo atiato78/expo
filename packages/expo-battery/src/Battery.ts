@@ -5,8 +5,9 @@ import {
   PowerState,
   BatteryLevelUpdateCallback,
   BatteryListener,
-  BatteryChargingUpdateCallback,
-  LowPowerModeUpdateCallback
+  BatteryStateUpdateCallback,
+  PowerModeUpdateCallback, 
+  PowerStateUpdateCallback
 } from './Battery.types';
 
 const BatteryEventEmitter = new EventEmitter(ExpoBattery);
@@ -27,13 +28,14 @@ export function watchBatteryLevelChange(callback: BatteryLevelUpdateCallback): B
   return BatteryEventEmitter.addListener('Expo.batteryLevelDidChange', callback);
 }
 
-export function watchBatteryChargingChange(callback: BatteryChargingUpdateCallback): BatteryListener {
-  return BatteryEventEmitter.addListener('Expo.isChargingDidChange', callback);
+export function watchBatteryStateChange(callback: BatteryStateUpdateCallback): BatteryListener {
+  return BatteryEventEmitter.addListener('Expo.batteryStateDidChange', callback);
 }
 
-export function watchLowPowerModeChange(callback: LowPowerModeUpdateCallback): BatteryListener {
-  return BatteryEventEmitter.addListener('Expo.LowPowerModeDidChange', callback);
-  
+export function watchPowerModeChange(callback: PowerModeUpdateCallback): BatteryListener {
+  return BatteryEventEmitter.addListener('Expo.powerModeDidChange', callback);
+}
+
 export function watchPowerStateChange(callback: PowerStateUpdateCallback): BatteryListener {
   return BatteryEventEmitter.addListener('Expo.powerStateDidChange', callback);
 }
