@@ -42,9 +42,29 @@ class GetQueryInfo {
     mLimit = mInput.containsKey("first") ? ((Double) mInput.get("first")).intValue() : 20;
 
     mSelection = new StringBuilder();
+
     if (mInput.containsKey("album")) {
-      mSelection.append(MediaStore.Images.Media.BUCKET_ID).append(" = ").append(mInput.get("album"));
-      mSelection.append(" AND ");
+      mSelection
+        .append(MediaStore.Images.Media.BUCKET_ID)
+        .append(" = ")
+        .append(mInput.get("album"))
+        .append(" AND ");
+    }
+
+    if (mInput.containsKey("createdBefore")) {
+      mSelection
+        .append(MediaStore.Images.Media.DATE_TAKEN)
+        .append(" < ")
+        .append(mInput.get("createdBefore"))
+        .append(" AND ");
+    }
+
+    if (mInput.containsKey("createdAfter")) {
+      mSelection
+        .append(MediaStore.Images.Media.DATE_TAKEN)
+        .append(" > ")
+        .append(mInput.get("createdAfter"))
+        .append(" AND ");
     }
 
     List<Object> mediaType = mInput.containsKey("mediaType") ? (List<Object>) mInput.get("mediaType") : null;

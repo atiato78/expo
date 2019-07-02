@@ -84,6 +84,8 @@ export type AssetsOptions = {
   album?: AlbumRef;
   sortBy?: Array<SortByValue> | SortByValue;
   mediaType?: Array<MediaTypeValue> | MediaTypeValue;
+  createdAfter?: Date | number;
+  createdBefore?: Date | number;
 };
 
 export type PagedInfo<T> = {
@@ -144,6 +146,10 @@ function checkSortByKey(sortBy: any): void {
   if (Object.values(SortBy).indexOf(sortBy) === -1) {
     throw new Error(`Invalid sortBy key: ${sortBy}`);
   }
+}
+
+function convertDateToNumber(date: any): any {
+  return date instanceof Date ? date.getTime() : date;
 }
 
 // export constants
@@ -304,7 +310,15 @@ export async function getAssetsAsync(assetsOptions: AssetsOptions = {}): Promise
     throw new UnavailabilityError('MediaLibrary', 'getAssetsAsync');
   }
 
-  const { first, after, album, sortBy, mediaType } = assetsOptions;
+  const {
+    first,
+    after,
+    album,
+    sortBy,
+    mediaType,
+    createdAfter,
+    createdBefore,
+  } = assetsOptions;
 
   const options = {
     first: first == null ? 20 : first,
@@ -312,6 +326,8 @@ export async function getAssetsAsync(assetsOptions: AssetsOptions = {}): Promise
     album: getId(album),
     sortBy: arrayize(sortBy),
     mediaType: arrayize(mediaType || [MediaType.photo]),
+    createdAfter: convertDateToNumber(createdAfter),
+    createdBefore: convertDateToNumber(createdBefore),
   };
 
   if (first != null && typeof options.first !== 'number') {
@@ -322,6 +338,12 @@ export async function getAssetsAsync(assetsOptions: AssetsOptions = {}): Promise
   }
   if (album != null && typeof options.album !== 'string') {
     throw new Error('Option "album" must be a string!');
+  }
+  if (createdAfter != null && typeof options.createdAfter !== 'number') {
+    throw new Error('Option "createdAfter" must be a Date object or a timestamp!');
+  }
+  if (createdBefore != null && typeof options.createdBefore !== 'number') {
+    throw new Error('Option "createdBefore" must be a Date object or a timestamp!');
   }
 
   options.sortBy.forEach(checkSortBy);

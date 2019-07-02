@@ -59,6 +59,8 @@ export declare type AssetsOptions = {
     album?: AlbumRef;
     sortBy?: Array<SortByValue> | SortByValue;
     mediaType?: Array<MediaTypeValue> | MediaTypeValue;
+    createdAfter?: Date | number;
+    createdBefore?: Date | number;
 };
 export declare type PagedInfo<T> = {
     assets: Array<T>;

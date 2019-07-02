@@ -46,6 +46,9 @@ function checkSortByKey(sortBy) {
         throw new Error(`Invalid sortBy key: ${sortBy}`);
     }
 }
+function convertDateToNumber(date) {
+    return date instanceof Date ? date.getTime() : date;
+}
 // export constants
 export const MediaType = MediaLibrary.MediaType;
 export const SortBy = MediaLibrary.SortBy;
@@ -158,13 +161,15 @@ export async function getAssetsAsync(assetsOptions = {}) {
     if (!MediaLibrary.getAssetsAsync) {
         throw new UnavailabilityError('MediaLibrary', 'getAssetsAsync');
     }
-    const { first, after, album, sortBy, mediaType } = assetsOptions;
+    const { first, after, album, sortBy, mediaType, createdAfter, createdBefore, } = assetsOptions;
     const options = {
         first: first == null ? 20 : first,
         after: getId(after),
         album: getId(album),
         sortBy: arrayize(sortBy),
         mediaType: arrayize(mediaType || [MediaType.photo]),
+        createdAfter: convertDateToNumber(createdAfter),
+        createdBefore: convertDateToNumber(createdBefore),
     };
     if (first != null && typeof options.first !== 'number') {
         throw new Error('Option "first" must be a number!');
@@ -174,6 +179,12 @@ export async function getAssetsAsync(assetsOptions = {}) {
     }
     if (album != null && typeof options.album !== 'string') {
         throw new Error('Option "album" must be a string!');
+    }
+    if (createdAfter != null && typeof options.createdAfter !== 'number') {
+        throw new Error('Option "createdAfter" must be a Date object or a timestamp!');
+    }
+    if (createdBefore != null && typeof options.createdBefore !== 'number') {
+        throw new Error('Option "createdBefore" must be a Date object or a timestamp!');
     }
     options.sortBy.forEach(checkSortBy);
     options.mediaType.forEach(checkMediaType);

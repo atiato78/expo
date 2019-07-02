@@ -205,6 +205,53 @@ export async function test(t) {
         t.expect(assets.length).toBe(IMG_NUMBER);
         assets.forEach(asset => t.expect(asset.mediaType).toBe(mediaType));
       });
+
+      t.it('returns assets created before given date', async () => {
+        // Sort test assets from oldest to newest.
+        const sortedAssets = [...testAssets].sort((a, b) => a.creationTime - b.creationTime);
+
+        // Pick `createdBefore` so it matches only the oldest asset.
+        const createdBefore = sortedAssets[0].creationTime + 0.001;
+
+        const { assets } = await MediaLibrary.getAssetsAsync({ album, createdBefore });
+
+        t.expect(assets.length).toBe(1);
+        t.expect(assets[0].id).toBe(sortedAssets[0]);
+      });
+
+      t.it('returns assets created after given date', async () => {
+        // Sort test assets from newest to oldest.
+        const sortedAssets = [...testAssets].sort((a, b) => b.creationTime - a.creationTime);
+
+        // Pick `createdAfter` so it matches only the newest asset.
+        const createdAfter = sortedAssets[0].creationTime - 0.001;
+
+        const { assets } = await MediaLibrary.getAssetsAsync({ album, createdAfter });
+
+        t.expect(assets.length).toBe(1);
+        t.expect(assets[0].id).toBe(sortedAssets[0].id);
+      });
+
+      t.it('returns assets created between two dates', async () => {
+        // Sort test assets from oldest to newest.
+        const sortedAssets = [...testAssets].sort((a, b) => a.creationTime - b.creationTime);
+        const sortedAssetsIds = sortedAssets.map(asset => asset.id);
+
+        // Pick `createdBefore` and `createdAfter` that match all test assets except the oldest and newest ones.
+        const createdAfter = sortedAssets[0].creationTime;
+        const createdBefore = sortedAssets[sortedAssets.length - 1].creationTime;
+
+        const { assets } = await MediaLibrary.getAssetsAsync({
+          album,
+          createdBefore,
+          createdAfter,
+        });
+
+        t.expect(assets.length).toBe(sortedAssets.length - 2);
+        t.expect(assets.every(asset => asset.creationTime > createdAfter)).toBe(true);
+        t.expect(assets.every(asset => asset.creationTime < createdBefore)).toBe(true);
+        t.expect(assets.every(asset => sortedAssetsIds.includes(asset.id))).toBe(true);
+      });
     });
 
     t.describe('Delete tests', async () => {

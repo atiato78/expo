@@ -6,6 +6,7 @@
 #import <EXMediaLibrary/EXMediaLibrary.h>
 
 #import <UMCore/UMDefines.h>
+#import <UMCore/UMUtilities.h>
 #import <UMCore/UMEventEmitterService.h>
 #import <UMFileSystemInterface/UMFileSystemInterface.h>
 #import <UMPermissionsInterface/UMPermissionsInterface.h>
@@ -357,6 +358,8 @@ UM_EXPORT_METHOD_AS(getAssetsAsync,
   NSArray<NSString *> *mediaType = options[@"mediaType"];
   NSArray *sortBy = options[@"sortBy"];
   NSString *albumId = options[@"album"];
+  NSDate *createdAfter = [UMUtilities NSDate:options[@"createdAfter"]];
+  NSDate *createdBefore = [UMUtilities NSDate:options[@"createdBefore"]];
   
   PHAssetCollection *collection;
   PHAsset *cursor;
@@ -390,6 +393,16 @@ UM_EXPORT_METHOD_AS(getAssetsAsync,
   
   if (sortBy && sortBy.count > 0) {
     fetchOptions.sortDescriptors = [EXMediaLibrary _prepareSortDescriptors:sortBy];
+  }
+
+  if (createdAfter) {
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"creationDate > %@", createdAfter];
+    [predicates addObject:predicate];
+  }
+
+  if (createdBefore) {
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"creationDate < %@", createdBefore];
+    [predicates addObject:predicate];
   }
   
   if (predicates.count > 0) {
