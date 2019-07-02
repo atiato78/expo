@@ -16,7 +16,7 @@ export function watchBatteryLevelChange(callback) {
 export function watchBatteryChargingChange(callback) {
     return BatteryEventEmitter.addListener('Expo.IsChargingDidChange', callback);
 }
-export function watchPowerStateChange(callback) {
-    return BatteryEventEmitter.addListener('Expo.PowerStateDidChange', callback);
+export function watchLowPowerModeChange(callback) {
+    return BatteryEventEmitter.addListener('Expo.LowPowerModeDidChange', callback);
 }
 //# sourceMappingURL=Battery.js.map
