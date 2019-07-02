@@ -2,7 +2,7 @@
           xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application>
-        <receiver android:name=".BatteryChargingReceiver">
+        <receiver android:name=".BatteryStateReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
                 <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
