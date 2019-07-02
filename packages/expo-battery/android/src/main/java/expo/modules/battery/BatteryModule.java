@@ -20,8 +20,8 @@ public class BatteryModule extends ExportedModule implements RegistryLifecycleLi
   private static final String NAME = "ExpoBattery";
   private static final String TAG = BatteryModule.class.getSimpleName();
   private static final String BATTERY_LEVEL_EVENT_NAME = "Expo.batteryLevelDidChange";
-  private static final String BATTERY_CHARGED_EVENT_NAME = "Expo.isChargingDidChange";
-  private static final String POWERMODE_EVENT_NAME = "Expo.lowPowerModeDidChange";
+  private static final String BATTERY_CHARGED_EVENT_NAME = "Expo.batteryStateDidChange";
+  private static final String POWERMODE_EVENT_NAME = "Expo.powerModeDidChange";
 
   private ModuleRegistry mModuleRegistry;
   static protected Context mContext;
@@ -137,8 +137,16 @@ public class BatteryModule extends ExportedModule implements RegistryLifecycleLi
 
       Intent batteryStatus = this.mContext.getApplicationContext().registerReceiver(null, ifilter);
       int status = batteryStatus.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-      boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING;
-      result.putBoolean("isCharging", isCharging);
+      if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
+        result.putString("batteryState", BatteryState.CHARGING.getValue());
+      } else if (status == BatteryManager.BATTERY_STATUS_FULL) {
+        result.putString("batteryState", BatteryState.FULL.getValue());
+      } else if (status == BatteryManager.BATTERY_STATUS_NOT_CHARGING) {
+        result.putString("batteryState", BatteryState.UNPLUGGED.getValue());
+      }
+      else{
+        result.putString("batteryState", BatteryState.UNKNOWN.getValue());
+      }
 
       PowerManager powerManager = (PowerManager) mContext.getApplicationContext().getSystemService(Context.POWER_SERVICE);
       boolean lowPowerMode = powerManager.isPowerSaveMode();
