@@ -1,1 +1,0 @@
-../../../../../packages/expo-battery/ios/EXBattery/EXBatteryViewManager.h
