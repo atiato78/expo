@@ -16,8 +16,8 @@ export async function getBatteryLevelAsync(): Promise<number> {
   return await ExpoBattery.getBatteryLevelAsync();
 }
 
-export async function isBatteryChargingAsync(): Promise<boolean> {
-  return await ExpoBattery.isBatteryChargingAsync();
+export async function getBatteryStateAsync(): Promise<string> {
+  return await ExpoBattery.getBatteryStateAsync();
 }
 
 export async function getPowerStateAsync(): Promise<PowerState> {
@@ -34,8 +34,4 @@ export function watchBatteryStateChange(callback: BatteryStateUpdateCallback): B
 
 export function watchPowerModeChange(callback: PowerModeUpdateCallback): BatteryListener {
   return BatteryEventEmitter.addListener('Expo.powerModeDidChange', callback);
-}
-
-export function watchPowerStateChange(callback: PowerStateUpdateCallback): BatteryListener {
-  return BatteryEventEmitter.addListener('Expo.powerStateDidChange', callback);
 }

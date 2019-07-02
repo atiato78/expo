@@ -4,8 +4,8 @@ const BatteryEventEmitter = new EventEmitter(ExpoBattery);
 export async function getBatteryLevelAsync() {
     return await ExpoBattery.getBatteryLevelAsync();
 }
-export async function isBatteryChargingAsync() {
-    return await ExpoBattery.isBatteryChargingAsync();
+export async function getBatteryStateAsync() {
+    return await ExpoBattery.getBatteryStateAsync();
 }
 export async function getPowerStateAsync() {
     return await ExpoBattery.getPowerStateAsync();
@@ -18,8 +18,5 @@ export function watchBatteryStateChange(callback) {
 }
 export function watchPowerModeChange(callback) {
     return BatteryEventEmitter.addListener('Expo.powerModeDidChange', callback);
-}
-export function watchPowerStateChange(callback) {
-    return BatteryEventEmitter.addListener('Expo.powerStateDidChange', callback);
 }
 //# sourceMappingURL=Battery.js.map
