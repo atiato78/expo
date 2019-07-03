@@ -5,6 +5,7 @@ import semver from 'semver';
 import JsonFile from '@expo/json-file';
 
 import * as Directories from './Directories';
+import { Platform } from './utils/platform';
 
 interface ProjectVersions {
   sdkVersion: string;
@@ -48,25 +49,53 @@ export async function getProjectVersionsAsync(): Promise<ProjectVersions> {
   };
 }
 
-export async function getSDKVersionsAsync(platform: string): Promise<string[]> {
-  if (platform === 'ios') {
-    const sdkVersionsPath = path.join(EXPO_DIR, 'exponent-view-template', 'ios', 'exponent-view-template', 'Supporting', 'sdkVersions.json');
+/**
+ * Looks for supported SDK versions by reading some project files.
+ * @Android reads `android/app/build.gradle`
+ * @iOS reads `exponent-view-template/ios/exponent-view-template/Supporting/sdkVersions.json`
+ * @returns array of strings, each in semver format (X.X.X).
+ */
+export async function getSDKVersionsAsync(platform: Platform): Promise<string[]> {
+  switch (platform) {
+    case Platform.IOS:
+      const sdkVersionsPath = path.join(EXPO_DIR, 'exponent-view-template', 'ios', 'exponent-view-template', 'Supporting', 'sdkVersions.json');
 
-    if (await fs.exists(sdkVersionsPath)) {
+      if (!await fs.pathExists(sdkVersionsPath)) {
+        throw new Error(`File ${sdkVersionsPath} does not exist. It's needed for extracting available SDK versions on iOS.`);
+      }
+
       const { sdkVersions } = await JsonFile.readAsync(sdkVersionsPath) as { sdkVersions: string[] };
       return sdkVersions;
+
+    case Platform.Android: {
+      const buildGradlePath = path.join(EXPO_DIR, 'android', 'app', 'build.gradle');
+
+      if (!await fs.pathExists(buildGradlePath)) {
+        throw new Error(`File ${buildGradlePath} does not exists. It's neede for reading available SDK version on Android.`);
+      }
+
+      function nonNullPredicate<T>(value: T | null): value is T {
+        return value !== null;
+      }
+
+      const buildGradleContent = await fs.readFile(buildGradlePath, 'utf-8');
+      const matches = buildGradleContent.match(/project\(["']:expoview-abi((\d)+_(\d)+_(\d)+)['"]\)/g) || [];
+      const versions = matches
+        .map(match => /\d+_\d+_\d+/.exec(match))
+        .map(matched => matched && matched[0].replace('_', '.'))
+        .filter(nonNullPredicate);
+
+      return versions;
     }
   }
-  // TODO: implementation for Android
-  throw new Error(`This task isn't supported on ${platform} yet.`);
 }
 
-export async function getOldestSDKVersionAsync(platform: string): Promise<string | undefined> {
+export async function getOldestSDKVersionAsync(platform: Platform): Promise<string | undefined> {
   const sdkVersions = await getSDKVersionsAsync(platform);
   return sdkVersions.sort(semver.compare)[0];
 }
 
-export async function getNextSDKVersionAsync(platform: string): Promise<string | undefined> {
+export async function getNextSDKVersionAsync(platform: Platform): Promise<string | undefined> {
   const sdkVersions = await getSDKVersionsAsync(platform);
   const newestVersion = sdkVersions.sort(semver.rcompare)[0];
 

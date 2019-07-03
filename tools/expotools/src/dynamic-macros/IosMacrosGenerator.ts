@@ -61,7 +61,7 @@ async function generateBuildConstantsFromMacrosAsync(
   const plistPath = path.dirname(buildConfigPlistPath);
   const plistName = path.basename(buildConfigPlistPath);
 
-  if (!await fs.exists(buildConfigPlistPath)) {
+  if (!await fs.pathExists(buildConfigPlistPath)) {
     await IosPlist.createBlankAsync(plistPath, plistName);
   }
 

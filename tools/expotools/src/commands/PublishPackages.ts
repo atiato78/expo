@@ -656,7 +656,7 @@ async function _gitCommitAsync(allConfigs: Map<string, PipelineConfig>): Promise
         // Add to git index.
         for (const file of files) {
           const fullPath = path.join(pkg.path, file);
-          if (await fs.exists(fullPath)) {
+          if (await fs.pathExists(fullPath)) {
             await _gitAddAsync(fullPath);
           }
         }

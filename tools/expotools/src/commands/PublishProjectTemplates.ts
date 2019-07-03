@@ -21,6 +21,7 @@ async function getAvailableProjectTemplatesAsync(): Promise<Template[]> {
   const templates = await fs.readdir(templatesPath);
 
   return Promise.all<Template>(
+    // @ts-ignore
     templates.map(async (template) => {
       const packageJson = await JsonFile.readAsync(path.join(templatesPath, template, 'package.json'));
 
@@ -113,7 +114,7 @@ async function action(options) {
     );
 
     const appJsonPath = path.join(template.path, 'app.json');
-    if (await fs.exists(appJsonPath) && await JsonFile.getAsync(appJsonPath, 'expo.sdkVersion', null)) {
+    if (await fs.pathExists(appJsonPath) && await JsonFile.getAsync(appJsonPath, 'expo.sdkVersion', null)) {
       // Make sure SDK version in `app.json` is correct
       console.log(`Setting ${chalk.magenta('expo.sdkVersion')} to ${chalk.green(options.sdkVersion)} in template's app.json...`);
 

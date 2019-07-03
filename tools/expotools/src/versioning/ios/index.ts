@@ -580,7 +580,7 @@ async function removePodfileDepsAsync(templatesPath, versionedPodNames) {
     let filesToRemove = [depFilename, postinstallFilename];
     filesToRemove.forEach(fileToRemove => {
       try {
-        fs.accessSync(fileToRemove, fs.F_OK);
+        fs.accessSync(fileToRemove, fs.constants.F_OK);
         fs.removeSync(fileToRemove);
       } catch (e) {}
     });
@@ -631,7 +631,7 @@ function validateAddVersionDirectories(rootPath, newVersionPath) {
   let isValid = true;
   relativePathsToCheck.forEach(path => {
     try {
-      fs.accessSync(`${rootPath}/${path}`, fs.F_OK);
+      fs.accessSync(`${rootPath}/${path}`, fs.constants.F_OK);
     } catch (e) {
       console.log(
         `${rootPath}/${path} does not exist or is otherwise inaccessible`
@@ -642,7 +642,7 @@ function validateAddVersionDirectories(rootPath, newVersionPath) {
   // Also, make sure the version we're about to write doesn't already exist
   try {
     // we want this to fail
-    fs.accessSync(newVersionPath, fs.F_OK);
+    fs.accessSync(newVersionPath, fs.constants.F_OK);
     console.log(`${newVersionPath} already exists, will not overwrite`);
     isValid = false;
   } catch (e) {}
@@ -660,7 +660,7 @@ function validateRemoveVersionDirectories(rootPath, newVersionPath) {
   let isValid = true;
   pathsToCheck.forEach(path => {
     try {
-      fs.accessSync(path, fs.F_OK);
+      fs.accessSync(path, fs.constants.F_OK);
     } catch (e) {
       console.log(`${path} does not exist or is otherwise inaccessible`);
       isValid = false;
@@ -777,7 +777,7 @@ export async function addVersionAsync(
   console.log(`Removing unnecessary ${chalk.magenta('*.js')} files ...`);
 
   const jsFiles = await glob(path.join(newVersionPath, '**', '*.js')) as string[];
-  
+
   for (const jsFile of jsFiles) {
     await fs.remove(jsFile);
   }
@@ -800,7 +800,7 @@ export async function addVersionAsync(
     const optionalPath = path.join(newVersionPath, 'Expo', 'Optional', dir);
 
     try {
-      await fs.access(optionalPath, fs.F_OK);
+      await fs.access(optionalPath, fs.constants.F_OK);
       await fs.remove(optionalPath);
     } catch (e) {
       console.warn(`Expected ${optionalPath} to be accessible for removal, but it wasn't`);
@@ -815,7 +815,7 @@ export async function addVersionAsync(
     const modulePath = path.join(rootPath, RELATIVE_UNIVERSAL_MODULES_PATH, pkg.packageName);
     const podName = pkg.podspecName;
 
-    if (podName && await fs.exists(modulePath) && pkg.isVersionableOnPlatform('ios')) {
+    if (podName && await fs.pathExists(modulePath) && pkg.isVersionableOnPlatform('ios')) {
       await fs.copy(
         path.join(modulePath, 'ios'),
         path.join(newVersionPath, podName),
@@ -835,7 +835,7 @@ export async function addVersionAsync(
     `Copying cpp libraries from ${chalk.magenta(path.join(RELATIVE_RN_PATH, 'ReactCommon'))} ...`
   );
   const cppLibraries = getCppLibrariesToVersion();
-  
+
   await fs.mkdirs(path.join(newVersionPath, 'ReactCommon'));
 
   for (const library of cppLibraries) {

@@ -29,6 +29,7 @@
     "@types/base-64": "^0.1.2",
     "@types/concat-stream": "^1.6.0",
     "@types/connect": "^3.4.32",
+    "@types/fs-extra": "^8.0.0",
     "@types/globby": "^8.0.0",
     "@types/http-proxy": "^1.16.2",
     "@types/indent-string": "^3.0.0",

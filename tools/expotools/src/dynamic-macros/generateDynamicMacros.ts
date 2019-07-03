@@ -97,15 +97,15 @@ async function cleanupDynamicMacrosAsync(args) {
   }
 }
 
-async function readExistingSourceAsync(filepath) {
+async function readExistingSourceAsync(filepath: string) {
   try {
     return await fs.readFile(filepath, 'utf8');
   } catch (e) {
-    return null;
+    throw new Error(e);
   }
 }
 
-async function copyTemplateFileAsync(source, dest, templateSubstitutions, configuration): Promise<void> {
+async function copyTemplateFileAsync(source, dest, templateSubstitutions: { [key: string]: any }, configuration): Promise<void> {
   let [currentSourceFile, currentDestFile] = await Promise.all([
     readExistingSourceAsync(source),
     readExistingSourceAsync(dest),
@@ -132,7 +132,7 @@ async function copyTemplateFileAsync(source, dest, templateSubstitutions, config
   }
 }
 
-async function copyTemplateFilesAsync(platform, args, templateSubstitutions) {
+async function copyTemplateFilesAsync(platform, args, templateSubstitutions: { [key: string]: any }) {
   const templateFilesPath = args.templateFilesPath || path.join(EXPO_DIR, 'template-files');
   const templatePaths = await new JsonFile(path.join(templateFilesPath, `${platform}-paths.json`)).readAsync();
   const promises: Promise<any>[] = [];

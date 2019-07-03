@@ -98,7 +98,7 @@ async function getListOfPackagesAsync(dir: string = PACKAGES_DIR, packages: Pack
     if (!(await fs.lstat(packagePath)).isDirectory()) {
       continue;
     }
-    if (await fs.exists(packageJsonPath)) {
+    if (await fs.pathExists(packageJsonPath)) {
       const packageJson = require(packageJsonPath);
       packages.push(new Package(packagePath, packageJson));
     } else {

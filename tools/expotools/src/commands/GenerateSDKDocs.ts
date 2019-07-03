@@ -60,7 +60,7 @@ async function action(options) {
     sdk,
   );
 
-  if (await fs.exists(targetSdkDirectory)) {
+  if (await fs.pathExists(targetSdkDirectory)) {
     console.log(chalk.magenta(`v${sdk}`), 'directory already exists. Skipping copy operation.');
   } else {
     console.log(`Copying ${chalk.yellow('unversioned')} docs to ${chalk.yellow(`v${sdk}`)} directory...`);

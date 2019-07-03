@@ -4,17 +4,21 @@ import inquirer from 'inquirer';
 import { Command } from '@expo/commander/typings';
 
 import * as IosVersioning from '../versioning/ios';
+import * as AndroidVersioning from '../versioning/android';
 import { getExpoRepositoryRootDir } from '../Directories';
 import { getOldestSDKVersionAsync } from '../ProjectVersions';
+import { Platform } from '../utils/platform';
 
 interface ActionOptions {
-  platform: string;
-  sdkVersion?: string;
+  platform: Platform;
+  sdkVersion: string;
 }
+
+type InputActionOptions = Partial<ActionOptions>
 
 const EXPO_DIR = getExpoRepositoryRootDir();
 
-async function getOldestOrAskForSDKVersionAsync(platform: string): Promise<string | undefined> {
+async function getOldestOrAskForSDKVersionAsync(platform: Platform): Promise<string | undefined> {
   const defaultSdkVersion = await getOldestSDKVersionAsync(platform);
 
   if (defaultSdkVersion && process.env.CI) {
@@ -39,9 +43,15 @@ async function getOldestOrAskForSDKVersionAsync(platform: string): Promise<strin
   return sdkVersion;
 }
 
-async function action(options: ActionOptions) {
+/**
+ * Validates InputActionOptions and throws Error upon wrong option passed in.
+ */
+async function validateActionOptions(options: InputActionOptions): Promise<ActionOptions> {
   if (!options.platform) {
-    throw new Error('Run with `--platform <ios | android>`.');
+    throw new Error(`Run with \`--platform <${Object.values(Platform).join(' | ')}>\`.`);
+  }
+  if (!Object.values(Platform).includes(options.platform)) {
+    throw new Error(`Platform '${options.platform}' is not supported. Use one of <${Object.values(Platform).join(' | ')}>`);
   }
 
   const sdkVersion = options.sdkVersion || await getOldestOrAskForSDKVersionAsync(options.platform);
@@ -50,11 +60,20 @@ async function action(options: ActionOptions) {
     throw new Error('Oldest SDK version not found. Try to run with `--sdkVersion <SDK version>`.');
   }
 
+  return {
+    sdkVersion,
+    platform: options.platform,
+  };
+}
+
+async function action(inputOptions: InputActionOptions) {
+  const options = await validateActionOptions(inputOptions);
+
   switch (options.platform) {
-    case 'ios':
-      return IosVersioning.removeVersionAsync(sdkVersion, EXPO_DIR);
-    default:
-      throw new Error(`Platform '${options.platform}' is not supported.`);
+    case Platform.IOS:
+      return IosVersioning.removeVersionAsync(options.sdkVersion, EXPO_DIR);
+    case Platform.Android:
+      return AndroidVersioning.removeVersionAsync(options.sdkVersion, EXPO_DIR);
   }
 }
 
@@ -64,11 +83,11 @@ export default (program: Command) => {
     .alias('remove-sdk', 'rm-sdk')
     .description('Removes SDK version.')
     .usage(`
-    
+
 To remove versioned code for the oldest supported SDK on iOS, run:
 ${chalk.gray('>')} ${chalk.italic.cyan('et remove-sdk-version --platform ios')}`
     )
-    .option('-p, --platform <string>', `Specifies a platform for which the SDK code should be removed. Supported platforms: ${chalk.cyan('ios')}.`)
+    .option('-p, --platform <string>', `Specifies a platform for which the SDK code should be removed. Supported platforms: ${chalk.cyan('ios')}, ${chalk.cyan('android')}.`)
     .option('-s, --sdkVersion [string]', 'SDK version to remove. Defaults to the oldest supported SDK version.')
     .asyncAction(action);
 };
