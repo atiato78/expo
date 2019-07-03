@@ -5,7 +5,6 @@
 	};
 	objectVersion = 46;
 	objects = {
-
 /* Begin PBXBuildFile section */
 		0726F0592007E438004992E7 /* EXKernelAppRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 0726F0582007E438004992E7 /* EXKernelAppRecord.m */; };
 		0726F05C2007E446004992E7 /* EXKernelAppRegistry.m in Sources */ = {isa = PBXBuildFile; fileRef = 0726F05B2007E446004992E7 /* EXKernelAppRegistry.m */; };
@@ -319,6 +318,8 @@
 		F1545BF920877E39002DAC67 /* EXMenuWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = F1545BF820877E39002DAC67 /* EXMenuWindow.m */; };
 		F167C43B209C7EE600F01382 /* EXUtilService.m in Sources */ = {isa = PBXBuildFile; fileRef = F167C43A209C7EE600F01382 /* EXUtilService.m */; };
 		F77DDB931E04AC1100624CA2 /* SafariServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F77DDB921E04AC1100624CA2 /* SafariServices.framework */; };
+		8C6B800854FF4CC8BD49B92B /* RNDateTimePicker.m in Sources */ = {isa = PBXBuildFile; fileRef = BE138FB13A7C4F40BED897D7 /* RNDateTimePicker.m */; settings = {COMPILER_FLAGS = "-w"; }; };
+		3E92F845585A41D4BCB23CC6 /* RNDateTimePickerManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 923E3FFF60404C308703A138 /* RNDateTimePickerManager.m */; settings = {COMPILER_FLAGS = "-w"; }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -965,6 +966,10 @@
 		F167C43A209C7EE600F01382 /* EXUtilService.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EXUtilService.m; sourceTree = "<group>"; };
 		F77DDB921E04AC1100624CA2 /* SafariServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SafariServices.framework; path = System/Library/Frameworks/SafariServices.framework; sourceTree = SDKROOT; };
 		FDC01B7874B93745E639DFA6 /* libPods-Tests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Tests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		9BFC884203AB40149BA745E4 /* RNDateTimePicker.h */ = {isa = PBXFileReference; name = "RNDateTimePicker.h"; path = "RNDateTimePicker.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
+		BE138FB13A7C4F40BED897D7 /* RNDateTimePicker.m */ = {isa = PBXFileReference; name = "RNDateTimePicker.m"; path = "RNDateTimePicker.m"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; explicitFileType = undefined; includeInIndex = 0; };
+		55699C6E082343CFBD160B6F /* RNDateTimePickerManager.h */ = {isa = PBXFileReference; name = "RNDateTimePickerManager.h"; path = "RNDateTimePickerManager.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
+		923E3FFF60404C308703A138 /* RNDateTimePickerManager.m */ = {isa = PBXFileReference; name = "RNDateTimePickerManager.m"; path = "RNDateTimePickerManager.m"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1783,6 +1788,7 @@
 				B5FB72E11FF6DADB001C764B /* Lottie */,
 				B5FB72E61FF6DADB001C764B /* Maps */,
 				314410BF223BF50E00310599 /* WebView */,
+				AF478E49A28F4515901917DE /* DateTimePicker */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -2166,6 +2172,18 @@
 				F12A1ABC22ABE400008542C6 /* run-fabric.sh */,
 			);
 			path = "Build-Phases";
+			sourceTree = "<group>";
+		};
+		AF478E49A28F4515901917DE /* DateTimePicker */ = {
+			isa = PBXGroup;
+			children = (
+				9BFC884203AB40149BA745E4 /* RNDateTimePicker.h */,
+				BE138FB13A7C4F40BED897D7 /* RNDateTimePicker.m */,
+				55699C6E082343CFBD160B6F /* RNDateTimePickerManager.h */,
+				923E3FFF60404C308703A138 /* RNDateTimePickerManager.m */,
+			);
+			name = DateTimePicker;
+			path = DateTimePicker;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -2754,6 +2772,8 @@
 				B5FB74EA1FF6DADC001C764B /* EXScopedModuleRegistry.m in Sources */,
 				7043DF932283303800272D74 /* RCTConvert+RNSVG.m in Sources */,
 				BB50E89420B9C0D3003C752D /* RNPinchHandler.m in Sources */,
+				8C6B800854FF4CC8BD49B92B /* RNDateTimePicker.m in Sources */,
+				3E92F845585A41D4BCB23CC6 /* RNDateTimePickerManager.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

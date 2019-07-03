@@ -4,7 +4,6 @@ import {
   ActivityIndicator,
   Alert,
   AlertIOS,
-  DatePickerIOS,
   Image,
   Picker,
   ProgressViewIOS,
@@ -28,6 +27,8 @@ import {
 import TouchableBounce from 'react-native/Libraries/Components/Touchable/TouchableBounce';
 // @ts-ignore
 import { ScrollView as NavigationScrollView, NavigationScreenProps } from 'react-navigation';
+
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
@@ -54,7 +55,7 @@ export default class ReactNativeCoreScreen extends React.Component<NavigationScr
       'ActionSheetIOS': [this._renderActionSheet],
       'ActivityIndicator': [this._renderActivityIndicator],
       'Alert': [this._renderAlert],
-      'DatePickerIOS': [this._renderDatePicker],
+      'DateTimePicker': [this._renderDatePicker],
       'Horizontal ScrollView': [this._renderHorizontalScrollView],
       'MaskView': [this._renderMaskView],
       'Modal': [this._renderModal],
@@ -419,16 +420,16 @@ class DatePickerExample extends React.Component {
 
   render() {
     return (
-      <DatePickerIOS
-        date={this.state.date}
+      <DateTimePicker
+        value={this.state.date}
         mode="datetime"
         timeZoneOffsetInMinutes={this.state.timeZoneOffsetInHours * 60}
-        onDateChange={this._onDateChange}
+        onChange={this._onDateChange}
       />
     );
   }
 
-  _onDateChange = (date: Date) => {
+  _onDateChange = (event: any, date: Date) => {
     this.setState({ date });
   }
 }

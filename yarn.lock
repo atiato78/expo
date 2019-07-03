@@ -2238,6 +2238,13 @@
     xcode "^2.0.0"
     xmldoc "^0.4.0"
 
+"@react-native-community/datetimepicker@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@react-native-community/datetimepicker/-/datetimepicker-1.0.0.tgz#6e8550702bdb840b8dfb55d2e2d3638cabc815e3"
+  integrity sha512-DcD7kn0JIUNR3DKT9Sn4btuJmHffLuXm4/WeYj66y+bGc75eBLOtuuZ7/jQUoWpXFEy9UcnP0EMIoWSBP6ngpg==
+  dependencies:
+    invariant "^2.2.4"
+
 "@react-native-community/netinfo@3.2.1":
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/@react-native-community/netinfo/-/netinfo-3.2.1.tgz#cd073b81a4b978f7f55f1a960a0b56c462813e02"
