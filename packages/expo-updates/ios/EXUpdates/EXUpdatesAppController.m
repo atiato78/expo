@@ -40,12 +40,9 @@ NS_ASSUME_NONNULL_BEGIN
   return self;
 }
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+- (NSURL *)launchAssetUrl
 {
-  RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
-  RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge moduleName:@"updatesrn" initialProperties:nil];
-  [UIApplication sharedApplication].keyWindow.rootViewController.view = rootView;
-  return YES;
+  return [_database launchAssetUrlWithUpdateId:[_launcher launchedUpdateId]];
 }
 
 - (void)handleErrorWithDomain:(NSString *)errorDomain
@@ -54,21 +51,6 @@ NS_ASSUME_NONNULL_BEGIN
                       isFatal:(BOOL)isFatal
 {
   // do something!!!!
-}
-
-# pragma mark - RCTBridgeDelegate
-
-- (NSURL *)sourceURLForBridge:(RCTBridge *)bridge {
-#if DEBUG
-  return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
-#else
-  return [_database launchAssetUrlWithUpdateId:[_launcher launchedUpdateId]];
-#endif
-}
-
-- (NSArray<id<RCTBridgeModule>> *)extraModulesForBridge:(RCTBridge *)bridge
-{
-  return [_delegate extraModulesForBridge:bridge];
 }
 
 @end
