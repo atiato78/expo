@@ -82,7 +82,7 @@ export async function getSDKVersionsAsync(platform: Platform): Promise<string[]>
       const matches = buildGradleContent.match(/project\(["']:expoview-abi((\d)+_(\d)+_(\d)+)['"]\)/g) || [];
       const versions = matches
         .map(match => /\d+_\d+_\d+/.exec(match))
-        .map(matched => matched && matched[0].replace('_', '.'))
+        .map(matched => matched && matched[0].replace(/_/g, '.'))
         .filter(nonNullPredicate);
 
       return versions;
