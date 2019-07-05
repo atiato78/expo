@@ -27,7 +27,7 @@ static const int kEXUpdatesDatabaseStatusPending = 2;
 - (void)openDatabase
 {
   sqlite3 *db;
-  NSURL *dbUrl = [[[self class] applicationDocumentsDirectory] URLByAppendingPathComponent:kEXUpdatesDatabaseFilename];
+  NSURL *dbUrl = [[EXUpdatesAppController updatesDirectory] URLByAppendingPathComponent:kEXUpdatesDatabaseFilename];
   BOOL shouldInitializeDatabase = ![[NSFileManager defaultManager] fileExistsAtPath:[dbUrl path]];
   if (sqlite3_open([[dbUrl absoluteString] UTF8String], &db) != SQLITE_OK) {
     sqlite3_close(db);
@@ -209,7 +209,7 @@ static const int kEXUpdatesDatabaseStatusPending = 2;
   NSArray <NSDictionary *>* rows = [self _executeSql:sql withArgs:@[ updateId ]];
   
   NSString *path = rows[0][@"relative_path"];
-  return [NSURL URLWithString:path relativeToURL:[[self class] applicationDocumentsDirectory]];
+  return [NSURL URLWithString:path relativeToURL:[EXUpdatesAppController updatesDirectory]];
 }
 
 - (NSArray <NSDictionary *>*)assetsWithUpdateId:(NSUUID *)updateId
@@ -230,7 +230,7 @@ static const int kEXUpdatesDatabaseStatusPending = 2;
   NSMutableArray *assets = [NSMutableArray arrayWithCapacity:rows.count];
   
   for (NSDictionary *row in rows) {
-    NSURL *localUri = [NSURL URLWithString:row[@"relative_path"] relativeToURL:[[self class] applicationDocumentsDirectory]];
+    NSURL *localUri = [NSURL URLWithString:row[@"relative_path"] relativeToURL:[EXUpdatesAppController updatesDirectory]];
     [assets addObject:@{
                         @"localUri": [localUri absoluteString],
                         @"hash": row[@"hash_content"]
@@ -364,11 +364,6 @@ static const int kEXUpdatesDatabaseStatusPending = 2;
   int code = sqlite3_errcode(db);
   NSString *message = [NSString stringWithUTF8String:sqlite3_errmsg(db)];
   return [NSString stringWithFormat:@"Error code %i: %@", code, message];
-}
-
-+ (NSURL *)applicationDocumentsDirectory
-{
-  return [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
 }
 
 @end

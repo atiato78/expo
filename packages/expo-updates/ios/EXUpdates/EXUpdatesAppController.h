@@ -13,6 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)sharedInstance;
 
 - (NSURL *)launchAssetUrl;
++ (NSURL *)updatesDirectory;
 
 - (void)handleErrorWithDomain:(NSString *)errorDomain
                   description:(NSString *)description

@@ -4,9 +4,6 @@
 
 #import <EXUpdates/EXUpdatesAppController.h>
 
-#import <React/RCTBundleURLProvider.h>
-#import <React/RCTRootView.h>
-
 NS_ASSUME_NONNULL_BEGIN
 
 @interface EXUpdatesAppController ()
@@ -51,6 +48,32 @@ NS_ASSUME_NONNULL_BEGIN
                       isFatal:(BOOL)isFatal
 {
   // do something!!!!
+}
+
++ (NSURL *)updatesDirectory
+{
+  NSFileManager *fileManager = NSFileManager.defaultManager;
+  NSURL *applicationDocumentsDirectory = [[fileManager URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject];
+  NSURL *updatesDirectory = [applicationDocumentsDirectory URLByAppendingPathComponent:@".expo-updates"];
+  NSString *updatesDirectoryPath = [updatesDirectory path];
+
+  BOOL isDir;
+  BOOL exists = [fileManager fileExistsAtPath:updatesDirectoryPath isDirectory:&isDir];
+  if (!exists || !isDir) {
+    if (!isDir) {
+      NSError *err;
+      BOOL wasRemoved = [fileManager removeItemAtPath:updatesDirectoryPath error:&err];
+      if (!wasRemoved) {
+        // TODO: handle error
+      }
+    }
+    NSError *err;
+    BOOL wasCreated = [fileManager createDirectoryAtPath:updatesDirectoryPath withIntermediateDirectories:YES attributes:nil error:&err];
+    if (!wasCreated) {
+      // TODO: handle error
+    }
+  }
+  return updatesDirectory;
 }
 
 @end
