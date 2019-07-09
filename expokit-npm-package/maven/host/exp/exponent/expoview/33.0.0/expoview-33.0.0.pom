@@ -16,7 +16,7 @@
     <dependency>
       <groupId>org.webkit</groupId>
       <artifactId>android-jsc</artifactId>
-      <version>r245459</version>
+      <version>r241213</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
