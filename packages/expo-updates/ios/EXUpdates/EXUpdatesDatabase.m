@@ -19,6 +19,7 @@ static NSString* kEXUpdatesDatabaseFilename = @"updates.db";
 static const int kEXUpdatesDatabaseStatusFailed = 0;
 static const int kEXUpdatesDatabaseStatusReady = 1;
 static const int kEXUpdatesDatabaseStatusPending = 2;
+static const int kEXUpdatesDatabaseStatusUnused = 3;
 
 @implementation EXUpdatesDatabase
 
@@ -91,7 +92,8 @@ static const int kEXUpdatesDatabaseStatusPending = 2;
    \"relative_path\"  TEXT NOT NULL,\
    \"hash_atomic\"  BLOB NOT NULL,\
    \"hash_content\"  BLOB NOT NULL,\
-   \"hash_type\"  INTEGER NOT NULL\
+   \"hash_type\"  INTEGER NOT NULL,\
+   \"marked_for_deletion\"  INTEGER NOT NULL\
    );\
   CREATE TABLE \"updates_assets\" (\
    \"update_id\"  BLOB NOT NULL,\
@@ -146,8 +148,8 @@ static const int kEXUpdatesDatabaseStatusPending = 2;
     return;
   }
   
-  [self _executeSql:@"INSERT INTO \"assets\" (\"url\", \"headers\", \"type\", \"metadata\", \"download_time\", \"relative_path\", \"hash_atomic\", \"hash_content\" , \"hash_type\")\
-   VALUES (?1, ?2, ?3, ?4, ?4, 0);"
+  [self _executeSql:@"INSERT INTO \"assets\" (\"url\", \"headers\", \"type\", \"metadata\", \"download_time\", \"relative_path\", \"hash_atomic\", \"hash_content\" , \"hash_type\", \"marked_for_deletion\")\
+   VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 0);"
            withArgs:@[
                       url,
                       headers ?: [NSNull null],
@@ -176,6 +178,59 @@ static const int kEXUpdatesDatabaseStatusPending = 2;
                         updateId
                         ]];
   }
+}
+
+- (void)markUpdatesForDeletion
+{
+  // mark currently running update as keep: true
+  // and mark all updates with earlier commitTimes as keep: false, status unavailable
+  NSUUID *launchedUpdateId = [EXUpdatesAppController sharedInstance].launcher.launchedUpdateId;
+  NSAssert(launchedUpdateId, @"launchedUpdateId should be nonnull");
+
+  NSString *sql = [NSString stringWithFormat:@"UPDATE updates SET keep = 1 WHERE id = ?1;\
+  UPDATE updates SET keep = 0, status = %i WHERE commit_time < (SELECT commit_time FROM updates WHERE id = ?1);", kEXUpdatesDatabaseStatusUnused];
+
+  [self _executeSql:sql withArgs:@[ launchedUpdateId ]];
+}
+
+- (NSArray<NSDictionary *>*)markAssetsForDeletion
+{
+  // the simplest way to mark the assets we want to delete
+  // is to mark all assets for deletion, then go back and unmark
+  // those assets in updates we want to keep
+  // this is safe as long as we have a lock and nothing else is happening
+  // in the database during the execution of this method
+
+  return [self _executeSql:@"BEGIN TRANSACTION;\
+   UPDATE assets SET marked_for_deletion = 1;\
+   UPDATE assets SET marked_for_deletion = 0 WHERE id IN (\
+     SELECT asset_id \
+     FROM updates_assets \
+     INNER JOIN updates ON updates_assets.update_id = updates.id\
+     WHERE updates.keep = 1\
+   );\
+   COMMIT;\
+   SELECT * FROM assets WHERE marked_for_deletion = 1;"
+           withArgs:nil];
+}
+
+- (void)deleteAssetsWithIds:(NSArray<NSNumber *>*)assetIds
+{
+  NSMutableArray<NSString *>*assetIdStrings = [NSMutableArray new];
+  for (NSNumber *assetId in assetIds) {
+    [assetIdStrings addObject:[assetId stringValue]];
+  }
+
+  NSString *sql = [NSString stringWithFormat:@"DELETE FROM assets WHERE id IN (%@);",
+                   [assetIdStrings componentsJoinedByString:@", "]];
+  [self _executeSql:sql withArgs:nil];
+}
+
+- (void)deleteUnusedUpdates
+{
+  [self _executeSql:@"DELETE FROM updates_assets WHERE update_id IN (SELECT id FROM updates WHERE keep = 0);\
+   DELETE FROM updates WHERE keep = 0;"
+           withArgs:nil];
 }
 
 # pragma mark - select

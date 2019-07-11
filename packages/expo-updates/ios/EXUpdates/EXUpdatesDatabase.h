@@ -24,6 +24,11 @@ NS_ASSUME_NONNULL_BEGIN
                updateId:(NSUUID *)updateId
           isLaunchAsset:(BOOL)isLaunchAsset;
 
+- (void)markUpdatesForDeletion;
+- (NSArray<NSDictionary *>*)markAssetsForDeletion;
+- (void)deleteAssetsWithIds:(NSArray<NSNumber *>*)assetIds;
+- (void)deleteUnusedUpdates;
+
 - (NSArray <NSDictionary *>*)launchableUpdates;
 - (NSURL * _Nullable)launchAssetUrlWithUpdateId:(NSUUID *)updateId;
 - (NSArray <NSDictionary *>*)assetsWithUpdateId:(NSUUID *)updateId;
