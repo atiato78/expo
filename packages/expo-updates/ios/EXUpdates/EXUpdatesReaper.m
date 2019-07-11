@@ -11,6 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)reapUnusedUpdates
 {
   EXUpdatesDatabase *database = [EXUpdatesAppController sharedInstance].database;
+  [database.lock lock];
   NSFileManager *fileManager = [NSFileManager defaultManager];
   NSURL *updatesDirectory = [EXUpdatesAppController updatesDirectory];
 
@@ -62,6 +63,8 @@ NS_ASSUME_NONNULL_BEGIN
   [database deleteAssetsWithIds:deletedAssets];
   [database deleteUnusedUpdates];
   NSLog(@"Deleted assets and updates from SQLite in %f ms",[beginDeleteFromDatabase timeIntervalSinceNow] * -1000);
+
+  [database.lock unlock];
 }
 
 @end

@@ -4,6 +4,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface EXUpdatesDatabase : NSObject
 
+@property (nonatomic, readonly) NSLock *lock;
+
 - (void)openDatabase;
 - (void)closeDatabase;
 

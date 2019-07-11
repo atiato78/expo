@@ -10,6 +10,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface EXUpdatesDatabase ()
 
 @property (nonatomic, assign) sqlite3 *db;
+@property (nonatomic, readwrite, strong) NSLock *lock;
 
 @end
 
@@ -24,6 +25,14 @@ static const int kEXUpdatesDatabaseStatusUnused = 3;
 @implementation EXUpdatesDatabase
 
 # pragma mark - lifecycle
+
+- (instancetype)init
+{
+  if (self = [super init]) {
+    _lock = [[NSLock alloc] init];
+  }
+  return self;
+}
 
 - (void)openDatabase
 {

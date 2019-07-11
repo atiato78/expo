@@ -48,6 +48,7 @@ NS_ASSUME_NONNULL_BEGIN
     NSAssert(!err && manifest && [manifest isKindOfClass:[NSDictionary class]], @"manifest should be a valid JSON object");
 
     self->_manifest = (NSDictionary *)manifest;
+    [self _lockDatabase];
     [self _writeManifestToDatabase];
     [self _loadBundle];
     [self _addAllAssetTasksToQueues];
@@ -107,6 +108,7 @@ NS_ASSUME_NONNULL_BEGIN
                          isLaunchAsset:YES];
     if (![self->_assetQueue count]) {
       // call some delegate method ready to launch!
+      [self _unlockDatabase];
     }
   } errorBlock:^(NSError * error, NSURLResponse * response) {
     // TODO: retry. for now log an error
@@ -139,12 +141,13 @@ NS_ASSUME_NONNULL_BEGIN
     // TODO: check database to make sure we don't already have this downloaded
     NSString *url = asset[@"url"];
     NSAssert(url && [url isKindOfClass:[NSString class]], @"task url should be a string");
-    NSString *filename = [self sha1WithData:[url dataUsingEncoding:NSUTF8StringEncoding]];
+    NSString *filename = [self _sha1WithData:[url dataUsingEncoding:NSUTF8StringEncoding]];
     [_downloader downloadFileFromURL:[NSURL URLWithString:url] toPath:[[directory URLByAppendingPathComponent:filename] path] successBlock:^(NSData * data, NSURLResponse * response) {
       [self _handleAssetDownloadWithData:data response:response asset:asset filename:filename isLaunchAsset:NO];
     } errorBlock:^(NSError * error, NSURLResponse * response) {
       // TODO: retry. for now log an error
       NSLog(@"error downloading file: %@: %@", url, [error localizedDescription]);
+      [self->_assetQueue removeObject:asset];
     }];
   }
 }
@@ -152,7 +155,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)_handleAssetDownloadWithData:(NSData *)data response:(NSURLResponse *)response asset:(NSDictionary *)asset filename:(NSString *)filename isLaunchAsset:(BOOL)isLaunchAsset
 {
   [self->_assetQueue removeObject:asset];
-  NSString *contentHash = [self sha1WithData:data];
+  NSString *contentHash = [self _sha1WithData:data];
 
   NSDictionary *metadata = asset[@"metadata"];
   NSAssert(!metadata || [metadata isKindOfClass:[NSDictionary class]], @"if asset metadata is nonnull, it should be an object");
@@ -162,7 +165,7 @@ NS_ASSUME_NONNULL_BEGIN
   NSAssert (!err, @"asset metadata should be a valid object");
   NSString *atomicHashString = [NSString stringWithFormat:@"%@-%@-%@",
                                 (NSString *)asset[@"type"], [[NSString alloc] initWithData:metadataJson encoding:NSUTF8StringEncoding], contentHash];
-  NSString *atomicHash = [self sha1WithData:[atomicHashString dataUsingEncoding:NSUTF8StringEncoding]];
+  NSString *atomicHash = [self _sha1WithData:[atomicHashString dataUsingEncoding:NSUTF8StringEncoding]];
 
   NSDictionary *headers;
   if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
@@ -184,11 +187,12 @@ NS_ASSUME_NONNULL_BEGIN
   if (![self->_assetQueue count]) {
     if (self->_isBundleLoaded) {
       // call some delegate method ready to launch!
+      [self _unlockDatabase];
     }
   }
 }
 
-- (NSString *)sha1WithData:(NSData *)data
+- (NSString *)_sha1WithData:(NSData *)data
 {
   uint8_t digest[CC_SHA1_DIGEST_LENGTH];
   CC_SHA1(data.bytes, (CC_LONG)data.length, digest);
@@ -200,6 +204,16 @@ NS_ASSUME_NONNULL_BEGIN
   }
 
   return output;
+}
+
+- (void)_lockDatabase
+{
+  [[EXUpdatesAppController sharedInstance].database.lock lock];
+}
+
+- (void)_unlockDatabase
+{
+  [[EXUpdatesAppController sharedInstance].database.lock unlock];
 }
 
 @end
