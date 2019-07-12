@@ -17,7 +17,7 @@ static NSString* kEXUpdatesAppLauncherErrorDomain = @"AppLauncher";
 
 @implementation EXUpdatesAppLauncher
 
-- (NSDictionary *)launchedUpdate
+- (NSDictionary *)launchUpdate
 {
   if (!_launchedUpdate) {
     EXUpdatesDatabase *database = [EXUpdatesAppController sharedInstance].database;

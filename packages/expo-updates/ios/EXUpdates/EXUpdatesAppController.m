@@ -2,8 +2,10 @@
 
 #import <UIKit/UIKit.h>
 
+#import <EXUpdates/EXUpdatesConfig.h>
 #import <EXUpdates/EXUpdatesAppController.h>
 #import <EXUpdates/EXUpdatesAppLoaderEmbedded.h>
+#import <EXUpdates/EXUpdatesAppLoaderRemote.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -11,6 +13,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, readwrite, strong) EXUpdatesAppLauncher *launcher;
 @property (nonatomic, readwrite, strong) EXUpdatesDatabase *database;
+
+@property (nonatomic, readonly, strong) EXUpdatesAppLoaderRemote *remoteAppLoader;
 
 @end
 
@@ -41,12 +45,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)start
 {
   [self _copyEmbeddedAssets];
-}
+  [_launcher launchUpdate];
 
-- (void)_copyEmbeddedAssets
-{
-  EXUpdatesAppLoaderEmbedded *appLoader = [[EXUpdatesAppLoaderEmbedded alloc] init];
-  [appLoader loadUpdateFromEmbeddedManifest];
+  _remoteAppLoader = [[EXUpdatesAppLoaderRemote alloc] init];
+  _remoteAppLoader.delegate = self;
+  [_remoteAppLoader loadUpdateFromUrl:[EXUpdatesConfig sharedInstance].remoteUrl];
 }
 
 - (NSURL *)launchAssetUrl
@@ -61,6 +64,36 @@ NS_ASSUME_NONNULL_BEGIN
 {
   // do something!!!!
 }
+
+# pragma mark - internal
+
+- (void)_copyEmbeddedAssets
+{
+  EXUpdatesAppLoaderEmbedded *embeddedAppLoader = [[EXUpdatesAppLoaderEmbedded alloc] init];
+  [embeddedAppLoader loadUpdateFromEmbeddedManifest];
+}
+
+# pragma mark - EXUpdatesAppLoaderDelegate
+
+- (void)appLoader:(EXUpdatesAppLoader *)appLoader didStartLoadingUpdateWithMetadata:(NSDictionary * _Nullable)metadata
+{
+  // maybe do something?
+  NSLog(@"update started loading");
+}
+
+- (void)appLoader:(EXUpdatesAppLoader *)appLoader didFinishLoadingUpdateWithId:(NSUUID *)updateId
+{
+  // maybe do something?
+  NSLog(@"update with UUID %@ finished loading", [updateId UUIDString]);
+}
+
+- (void)appLoader:(EXUpdatesAppLoader *)appLoader didFailWithError:(NSError *)error
+{
+  // probably do something
+  NSLog(@"update failed to load: %@", [error localizedDescription]);
+}
+
+# pragma mark - utils
 
 + (NSURL *)updatesDirectory
 {

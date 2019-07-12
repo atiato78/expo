@@ -1,11 +1,12 @@
 //  Copyright © 2018 650 Industries. All rights reserved.
 
 #import <EXUpdates/EXUpdatesAppLauncher.h>
+#import <EXUpdates/EXUpdatesAppLoader.h>
 #import <EXUpdates/EXUpdatesDatabase.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface EXUpdatesAppController : NSObject
+@interface EXUpdatesAppController : NSObject <EXUpdatesAppLoaderDelegate>
 
 @property (nonatomic, readonly) EXUpdatesAppLauncher *launcher;
 @property (nonatomic, readonly) EXUpdatesDatabase *database;

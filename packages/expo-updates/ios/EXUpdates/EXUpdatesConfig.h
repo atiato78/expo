@@ -4,6 +4,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface EXUpdatesConfig : NSObject
 
+@property (nonatomic, strong) NSURL *remoteUrl;
 @property (nonatomic, strong) NSString *releaseChannel;
 
 + (instancetype)sharedInstance;
