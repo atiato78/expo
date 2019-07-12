@@ -48,7 +48,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)downloadAsset:(EXUpdatesAsset *)asset
 {
-  NSURL *updatesDirectory = [EXUpdatesAppController updatesDirectory];
+  NSURL *updatesDirectory = [EXUpdatesAppController sharedInstance].updatesDirectory;
   NSURL *urlOnDisk = [updatesDirectory URLByAppendingPathComponent:asset.filename];
   [_downloader downloadFileFromURL:asset.url toPath:[urlOnDisk path] successBlock:^(NSData * data, NSURLResponse * response) {
     [self handleAssetDownloadWithData:data response:response asset:asset];

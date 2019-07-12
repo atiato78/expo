@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
   EXUpdatesDatabase *database = [EXUpdatesAppController sharedInstance].database;
   [database.lock lock];
   NSFileManager *fileManager = [NSFileManager defaultManager];
-  NSURL *updatesDirectory = [EXUpdatesAppController updatesDirectory];
+  NSURL *updatesDirectory = [EXUpdatesAppController sharedInstance].updatesDirectory;
 
   NSDate *beginMarkForDeletion = [NSDate date];
   [database markUpdatesForDeletion];

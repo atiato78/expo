@@ -37,7 +37,7 @@ static const int kEXUpdatesDatabaseStatusUnused = 3;
 - (void)openDatabase
 {
   sqlite3 *db;
-  NSURL *dbUrl = [[EXUpdatesAppController updatesDirectory] URLByAppendingPathComponent:kEXUpdatesDatabaseFilename];
+  NSURL *dbUrl = [[EXUpdatesAppController sharedInstance].updatesDirectory URLByAppendingPathComponent:kEXUpdatesDatabaseFilename];
   BOOL shouldInitializeDatabase = ![[NSFileManager defaultManager] fileExistsAtPath:[dbUrl path]];
   if (sqlite3_open([[dbUrl absoluteString] UTF8String], &db) != SQLITE_OK) {
     sqlite3_close(db);
@@ -273,7 +273,7 @@ static const int kEXUpdatesDatabaseStatusUnused = 3;
   NSArray <NSDictionary *>* rows = [self _executeSql:sql withArgs:@[ updateId ]];
   
   NSString *path = rows[0][@"relative_path"];
-  return [NSURL URLWithString:path relativeToURL:[EXUpdatesAppController updatesDirectory]];
+  return [NSURL URLWithString:path relativeToURL:[EXUpdatesAppController sharedInstance].updatesDirectory];
 }
 
 - (NSArray <NSDictionary *>*)assetsWithUpdateId:(NSUUID *)updateId
@@ -294,7 +294,7 @@ static const int kEXUpdatesDatabaseStatusUnused = 3;
   NSMutableArray *assets = [NSMutableArray arrayWithCapacity:rows.count];
   
   for (NSDictionary *row in rows) {
-    NSURL *localUri = [NSURL URLWithString:row[@"relative_path"] relativeToURL:[EXUpdatesAppController updatesDirectory]];
+    NSURL *localUri = [NSURL URLWithString:row[@"relative_path"] relativeToURL:[EXUpdatesAppController sharedInstance].updatesDirectory];
     [assets addObject:@{
                         @"localUri": [localUri absoluteString],
                         @"hash": row[@"hash_content"]

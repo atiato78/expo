@@ -33,7 +33,7 @@ static NSString* kEXUpdatesEmbeddedManifestType = @"json";
 
 - (void)downloadAsset:(EXUpdatesAsset *)asset
 {
-  NSURL *updatesDirectory = [EXUpdatesAppController updatesDirectory];
+  NSURL *updatesDirectory = [EXUpdatesAppController sharedInstance].updatesDirectory;
   NSURL *destinationUrl = [updatesDirectory URLByAppendingPathComponent:asset.filename];
 
   NSAssert(asset.nsBundleFilename, @"asset nsBundleFilename must be nonnull");
