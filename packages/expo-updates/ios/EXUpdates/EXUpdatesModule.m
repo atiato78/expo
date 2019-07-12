@@ -51,19 +51,19 @@ UM_EXPORT_METHOD_AS(startTest,
                     startTest:(UMPromiseResolveBlock)resolve
                     reject:(UMPromiseRejectBlock)reject)
 {
-  EXUpdatesDatabase *db = [[EXUpdatesDatabase alloc] init];
-  [db openDatabase];
-  [db addUpdateWithId:[[NSUUID alloc] initWithUUIDString:@"04a72e51-5a37-4b5c-a1c7-0bd028173ef1"] commitTime:@(1558481270941) binaryVersions:@"1.0" metadata:@{}];
-  EXUpdatesFileDownloader *downloader = [[EXUpdatesFileDownloader alloc] init];
-  NSString *destinationPath = @"eric.jsbundle";
-  NSURL *destinationUrl = [[[self class] applicationDocumentsDirectory] URLByAppendingPathComponent:destinationPath];
-  [downloader downloadFileFromURL:[NSURL URLWithString:@"http://localhost:4747/bundle"] toPath:[destinationUrl path] successBlock:^(NSData * _Nonnull data, NSURLResponse * _Nonnull response) {
-    [db addAssetWithUrl:@"http://localhost:4747/bundle" downloadTime:[NSDate date] relativePath:destinationPath hash:@"blah" updateId:[[NSUUID alloc] initWithUUIDString:@"04a72e51-5a37-4b5c-a1c7-0bd028173ef1"] isLaunchAsset:YES];
-    [db closeDatabase];
-  } errorBlock:^(NSError * _Nonnull error, NSURLResponse * _Nonnull response) {
-    NSLog(@"Error downloading file");
-    [db closeDatabase];
-  }];
+//  EXUpdatesDatabase *db = [[EXUpdatesDatabase alloc] init];
+//  [db openDatabase];
+//  [db addUpdateWithId:[[NSUUID alloc] initWithUUIDString:@"04a72e51-5a37-4b5c-a1c7-0bd028173ef1"] commitTime:@(1558481270941) binaryVersions:@"1.0" metadata:@{}];
+//  EXUpdatesFileDownloader *downloader = [[EXUpdatesFileDownloader alloc] init];
+//  NSString *destinationPath = @"eric.jsbundle";
+//  NSURL *destinationUrl = [[[self class] applicationDocumentsDirectory] URLByAppendingPathComponent:destinationPath];
+//  [downloader downloadFileFromURL:[NSURL URLWithString:@"http://localhost:4747/bundle"] toPath:[destinationUrl path] successBlock:^(NSData * _Nonnull data, NSURLResponse * _Nonnull response) {
+//    [db addAssetWithUrl:@"http://localhost:4747/bundle" downloadTime:[NSDate date] relativePath:destinationPath hash:@"blah" updateId:[[NSUUID alloc] initWithUUIDString:@"04a72e51-5a37-4b5c-a1c7-0bd028173ef1"] isLaunchAsset:YES];
+//    [db closeDatabase];
+//  } errorBlock:^(NSError * _Nonnull error, NSURLResponse * _Nonnull response) {
+//    NSLog(@"Error downloading file");
+//    [db closeDatabase];
+//  }];
 //  NSLog(@"path is %@", [[db launchAssetUrl] absoluteString]);
 //  [db closeDatabase];
 }
