@@ -27,8 +27,7 @@ static NSString* kEXUpdatesEmbeddedManifestType = @"json";
   } else {
     NSAssert([manifest isKindOfClass:[NSDictionary class]], @"embedded manifest should be a valid JSON file");
     self.manifest = (NSDictionary *)manifest;
-    [self writeManifestToDatabase];
-    [self startAssetDownloads];
+    [self startLoadingFromManifest];
   }
 }
 

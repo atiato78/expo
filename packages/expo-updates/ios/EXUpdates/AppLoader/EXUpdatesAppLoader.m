@@ -12,8 +12,11 @@ NS_ASSUME_NONNULL_BEGIN
 @interface EXUpdatesAppLoader ()
 
 @property (nonatomic, strong) NSMutableArray<EXUpdatesAsset *>* assetQueue;
+@property (nonatomic, strong) NSMutableArray<EXUpdatesAsset *>* erroredAssets;
 
 @end
+
+static NSString* kEXUpdatesAppLoaderErrorDomain = @"EXUpdatesAppLoader";
 
 @implementation EXUpdatesAppLoader
 
@@ -26,6 +29,15 @@ NS_ASSUME_NONNULL_BEGIN
  * metadata (arbitrary object)
  * assets (array of asset objects with `url` and `type` keys)
  */
+
+- (instancetype)init
+{
+  if (self = [super init]) {
+    _assetQueue = [NSMutableArray new];
+    _erroredAssets = [NSMutableArray new];
+  }
+  return self;
+}
 
 # pragma mark - subclass methods
 
@@ -41,26 +53,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 # pragma mark - loading and database logic
 
-- (void)writeManifestToDatabase
+- (void)startLoadingFromManifest
 {
-  [self _lockDatabase];
-  id commitTime = _manifest[@"commitTime"];
-  id binaryVersions = _manifest[@"binaryVersions"];
-  id metadata = _manifest[@"metadata"];
+  [self _writeManifestToDatabase];
 
-  NSAssert([commitTime isKindOfClass:[NSNumber class]], @"commitTime should be a number");
-  NSAssert([binaryVersions isKindOfClass:[NSString class]], @"binaryVersions should be a string");
-  NSAssert(!metadata || [metadata isKindOfClass:[NSDictionary class]], @"metadata should be null or an object");
+  if (_delegate) {
+    [_delegate appLoader:self didStartLoadingUpdateWithMetadata:_manifest[@"metadata"]];
+  }
 
-  EXUpdatesDatabase *database = [EXUpdatesAppController sharedInstance].database;
-  [database addUpdateWithId:[self _updateId]
-                 commitTime:(NSNumber *)commitTime
-             binaryVersions:(NSString *)binaryVersions
-                   metadata:(NSDictionary *)metadata];
-}
-
-- (void)startAssetDownloads
-{
   [self _addBundleTaskToQueue];
   [self _addAllAssetTasksToQueues];
 
@@ -75,9 +75,9 @@ NS_ASSUME_NONNULL_BEGIN
   // TODO: retry. for now log an error
   NSLog(@"error downloading file: %@: %@", [asset.url absoluteString], [error localizedDescription]);
   [_assetQueue removeObject:asset];
+  [_erroredAssets addObject:asset];
   if (![self->_assetQueue count]) {
-    // call error method
-    [self _unlockDatabase];
+    [self _finish];
   }
 }
 
@@ -115,12 +115,45 @@ NS_ASSUME_NONNULL_BEGIN
                                                       isLaunchAsset:asset.isLaunchAsset];
 
   if (![self->_assetQueue count]) {
-    // call some delegate method ready to launch!
-    [self _unlockDatabase];
+    [self _finish];
   }
 }
 
 # pragma mark - internal
+
+- (void)_finish
+{
+  [self _unlockDatabase];
+  if (_delegate) {
+    if ([_erroredAssets count]) {
+      [_delegate appLoader:self didFailWithError:[NSError errorWithDomain:kEXUpdatesAppLoaderErrorDomain
+                                                                     code:-1
+                                                                 userInfo:@{
+                                                                            NSLocalizedDescriptionKey: @"Failed to download all assets"
+                                                                            }]];
+    } else {
+      [_delegate appLoader:self didFinishLoadingUpdateWithId:[self _updateId]];
+    }
+  }
+}
+
+- (void)_writeManifestToDatabase
+{
+  [self _lockDatabase];
+  id commitTime = _manifest[@"commitTime"];
+  id binaryVersions = _manifest[@"binaryVersions"];
+  id metadata = _manifest[@"metadata"];
+
+  NSAssert([commitTime isKindOfClass:[NSNumber class]], @"commitTime should be a number");
+  NSAssert([binaryVersions isKindOfClass:[NSString class]], @"binaryVersions should be a string");
+  NSAssert(!metadata || [metadata isKindOfClass:[NSDictionary class]], @"metadata should be null or an object");
+
+  EXUpdatesDatabase *database = [EXUpdatesAppController sharedInstance].database;
+  [database addUpdateWithId:[self _updateId]
+                 commitTime:(NSNumber *)commitTime
+             binaryVersions:(NSString *)binaryVersions
+                   metadata:(NSDictionary *)metadata];
+}
 
 - (void)_addBundleTaskToQueue
 {

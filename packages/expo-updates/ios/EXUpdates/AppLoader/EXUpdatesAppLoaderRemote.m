@@ -40,8 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
     NSAssert(!err && manifest && [manifest isKindOfClass:[NSDictionary class]], @"manifest should be a valid JSON object");
     
     self.manifest = (NSDictionary *)manifest;
-    [self writeManifestToDatabase];
-    [self startAssetDownloads];
+    [self startLoadingFromManifest];
   } errorBlock:^(NSError * error, NSURLResponse * response) {
     // TODO: handle error
   }];

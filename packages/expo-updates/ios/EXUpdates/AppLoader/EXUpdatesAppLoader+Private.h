@@ -9,8 +9,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, strong) NSDictionary *manifest;
 
-- (void)writeManifestToDatabase;
-- (void)startAssetDownloads;
+- (void)startLoadingFromManifest;
 - (void)handleAssetDownloadWithData:(NSData *)data response:(NSURLResponse * _Nullable)response asset:(EXUpdatesAsset *)asset;
 - (void)handleAssetDownloadWithError:(NSError *)error asset:(EXUpdatesAsset *)asset;
 

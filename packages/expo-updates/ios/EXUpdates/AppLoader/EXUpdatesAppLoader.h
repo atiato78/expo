@@ -6,7 +6,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol EXUpdatesAppLoaderDelegate <NSObject>
 
-- (void)appLoader:(EXUpdatesAppLoader *)appLoader didStartLoadingUpdateWithMetadata:(NSDictionary *)metadata;
+- (void)appLoader:(EXUpdatesAppLoader *)appLoader didStartLoadingUpdateWithMetadata:(NSDictionary * _Nullable)metadata;
 - (void)appLoader:(EXUpdatesAppLoader *)appLoader didFinishLoadingUpdateWithId:(NSUUID *)updateId;
 - (void)appLoader:(EXUpdatesAppLoader *)appLoader didFailWithError:(NSError *)error;
 
