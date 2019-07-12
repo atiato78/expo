@@ -81,7 +81,7 @@ NS_ASSUME_NONNULL_BEGIN
   }
 }
 
-- (void)handleAssetDownloadWithData:(NSData *)data response:(NSURLResponse *)response asset:(EXUpdatesAsset *)asset
+- (void)handleAssetDownloadWithData:(NSData *)data response:(NSURLResponse * _Nullable)response asset:(EXUpdatesAsset *)asset
 {
   [self->_assetQueue removeObject:asset];
   NSString *contentHash = [self _sha1WithData:data];
@@ -98,7 +98,7 @@ NS_ASSUME_NONNULL_BEGIN
   NSString *atomicHash = [self _sha1WithData:[atomicHashString dataUsingEncoding:NSUTF8StringEncoding]];
 
   NSDictionary *headers;
-  if ([response isKindOfClass:[NSHTTPURLResponse class]]) {
+  if (response && [response isKindOfClass:[NSHTTPURLResponse class]]) {
     headers = [(NSHTTPURLResponse *)response allHeaderFields];
   }
 
@@ -149,6 +149,7 @@ NS_ASSUME_NONNULL_BEGIN
     id url = asset[@"url"];
     id type = asset[@"type"];
     id metadata = asset[@"metadata"];
+    id nsBundleFilename = asset[@"nsBundleFilename"];
     NSAssert(url && [url isKindOfClass:[NSString class]], @"asset url should be a nonnull string");
     NSAssert(type && [type isKindOfClass:[NSString class]], @"asset type should be a nonnull string");
     
@@ -159,6 +160,11 @@ NS_ASSUME_NONNULL_BEGIN
     if (metadata) {
       NSAssert([metadata isKindOfClass:[NSDictionary class]], @"asset metadata should be an object");
       asset.metadata = (NSDictionary *)metadata;
+    }
+
+    if (nsBundleFilename) {
+      NSAssert([nsBundleFilename isKindOfClass:[NSString class]], @"asset localPath should be a string");
+      asset.nsBundleFilename = (NSString *)nsBundleFilename;
     }
 
     NSString *filename = [self _sha1WithData:[(NSString *)url dataUsingEncoding:NSUTF8StringEncoding]];

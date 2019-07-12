@@ -11,7 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)writeManifestToDatabase;
 - (void)startAssetDownloads;
-- (void)handleAssetDownloadWithData:(NSData *)data response:(NSURLResponse *)response asset:(EXUpdatesAsset *)asset;
+- (void)handleAssetDownloadWithData:(NSData *)data response:(NSURLResponse * _Nullable)response asset:(EXUpdatesAsset *)asset;
 - (void)handleAssetDownloadWithError:(NSError *)error asset:(EXUpdatesAsset *)asset;
 
 - (void)downloadAsset:(EXUpdatesAsset *)asset;
