@@ -15,7 +15,7 @@ static NSString* kEXUpdatesEmbeddedManifestType = @"json";
 // property such that [[NSBundle mainBundle] pathForResource:asset.nsBundleFilename ofType:asset.type]
 // returns the correct path
 
-- (void)loadUpdateFromUrl:(NSURL *)url
+- (void)loadUpdateFromEmbeddedManifest
 {
   NSString *path = [[NSBundle mainBundle] pathForResource:kEXUpdatesEmbeddedManifestName ofType:kEXUpdatesEmbeddedManifestType];
   NSData *manifestData = [NSData dataWithContentsOfFile:path];
@@ -46,6 +46,11 @@ static NSString* kEXUpdatesEmbeddedManifestType = @"json";
   } else {
     [self handleAssetDownloadWithError:err asset:asset];
   }
+}
+
+- (void)loadUpdateFromUrl:(NSURL *)url
+{
+  @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:@"Should not call EXUpdatesAppLoaderEmbedded#loadUpdateFromUrl" userInfo:nil];
 }
 
 @end

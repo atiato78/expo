@@ -3,6 +3,7 @@
 #import <UIKit/UIKit.h>
 
 #import <EXUpdates/EXUpdatesAppController.h>
+#import <EXUpdates/EXUpdatesAppLoaderEmbedded.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -35,6 +36,17 @@ NS_ASSUME_NONNULL_BEGIN
     [_database openDatabase];
   }
   return self;
+}
+
+- (void)start
+{
+  [self _copyEmbeddedAssets];
+}
+
+- (void)_copyEmbeddedAssets
+{
+  EXUpdatesAppLoaderEmbedded *appLoader = [[EXUpdatesAppLoaderEmbedded alloc] init];
+  [appLoader loadUpdateFromEmbeddedManifest];
 }
 
 - (NSURL *)launchAssetUrl

@@ -6,6 +6,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface EXUpdatesAppLoaderEmbedded : EXUpdatesAppLoader
 
+- (void)loadUpdateFromEmbeddedManifest;
+
 @end
 
 NS_ASSUME_NONNULL_END

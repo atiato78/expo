@@ -12,6 +12,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (instancetype)sharedInstance;
 
+- (void)start;
+
 - (NSURL *)launchAssetUrl;
 + (NSURL *)updatesDirectory;
 
