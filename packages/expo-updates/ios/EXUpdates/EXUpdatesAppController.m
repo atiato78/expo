@@ -1,4 +1,4 @@
-//  Copyright © 2018 650 Industries. All rights reserved.
+//  Copyright © 2019 650 Industries. All rights reserved.
 
 #import <UIKit/UIKit.h>
 
@@ -93,6 +93,7 @@ NS_ASSUME_NONNULL_BEGIN
                       isFatal:(BOOL)isFatal
 {
   // do something!!!!
+  NSLog(@"EXUpdates error: %@", description);
 }
 
 # pragma mark - internal
