@@ -6,12 +6,12 @@ NS_ASSUME_NONNULL_BEGIN
 
 @implementation EXUpdatesSelectionPolicy
 
-+ (NSDictionary * _Nullable)runnableUpdateFromUpdates:(NSArray <NSDictionary *>*)updates
++ (NSDictionary * _Nullable)runnableUpdateFromUpdates:(NSArray<NSDictionary *>*)updates
 {
   NSDictionary *runnableUpdate;
   NSNumber *runnableUpdateCommitTime;
   for (NSDictionary *update in updates) {
-    NSArray <NSString *>*compatibleBinaryVersions = [(NSString *)update[@"binary_versions"] componentsSeparatedByString:@","];
+    NSArray<NSString *>*compatibleBinaryVersions = [(NSString *)update[@"binary_versions"] componentsSeparatedByString:@","];
     if ([compatibleBinaryVersions containsObject:[[self class] binaryVersion]]) {
       break;
     }

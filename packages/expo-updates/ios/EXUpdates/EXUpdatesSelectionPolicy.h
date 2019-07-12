@@ -4,7 +4,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface EXUpdatesSelectionPolicy : NSObject
 
-+ (NSDictionary * _Nullable)runnableUpdateFromUpdates:(NSArray <NSDictionary *>*)updates;
++ (NSDictionary * _Nullable)runnableUpdateFromUpdates:(NSArray<NSDictionary *>*)updates;
 
 @end
 

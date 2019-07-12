@@ -5,8 +5,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-static NSString* kEXUpdatesEmbeddedManifestName = @"manifest";
-static NSString* kEXUpdatesEmbeddedManifestType = @"json";
+static NSString * const kEXUpdatesEmbeddedManifestName = @"manifest";
+static NSString * const kEXUpdatesEmbeddedManifestType = @"json";
 
 @implementation EXUpdatesAppLoaderEmbedded
 

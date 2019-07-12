@@ -28,7 +28,7 @@ UM_EXPORT_MODULE(ExpoUpdates);
 {
   EXUpdatesAppController *controller = [EXUpdatesAppController sharedInstance];
   return @{
-           @"assets": [controller.database assetsWithUpdateId:[controller.launcher launchedUpdateId]]
+           @"assets": [controller.database assetsForUpdateId:[controller.launcher launchedUpdateId]]
            };
 }
 
@@ -37,7 +37,7 @@ UM_EXPORT_METHOD_AS(getAssetsAsync,
                             reject:(UMPromiseRejectBlock)reject)
 {
   EXUpdatesAppController *controller = [EXUpdatesAppController sharedInstance];
-  resolve([controller.database assetsWithUpdateId:[controller.launcher launchedUpdateId]]);
+  resolve([controller.database assetsForUpdateId:[controller.launcher launchedUpdateId]]);
 }
 
 UM_EXPORT_METHOD_AS(someGreatMethodAsync,

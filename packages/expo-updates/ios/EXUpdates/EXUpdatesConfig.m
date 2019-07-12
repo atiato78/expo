@@ -11,8 +11,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-static NSString *kEXUpdatesConfigPlistName = @"expo-updates";
-static NSString *kEXUpdatesDefaultReleaseChannelName = @"default";
+static NSString * const kEXUpdatesConfigPlistName = @"expo-updates";
+static NSString * const kEXUpdatesDefaultReleaseChannelName = @"default";
 
 @implementation EXUpdatesConfig
 

@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-static NSString* kEXUpdatesAppLoaderErrorDomain = @"EXUpdatesAppLoader";
+static NSString * const kEXUpdatesAppLoaderErrorDomain = @"EXUpdatesAppLoader";
 
 @implementation EXUpdatesAppLoader
 
@@ -110,7 +110,7 @@ static NSString* kEXUpdatesAppLoaderErrorDomain = @"EXUpdatesAppLoader";
                                                        relativePath:asset.filename
                                                          hashAtomic:atomicHash
                                                         hashContent:contentHash
-                                                           hashType:0
+                                                           hashType:EXUpdatesDatabaseHashTypeSha1
                                                            updateId:[self _updateId]
                                                       isLaunchAsset:asset.isLaunchAsset];
 

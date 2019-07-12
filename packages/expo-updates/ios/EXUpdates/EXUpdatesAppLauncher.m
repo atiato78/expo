@@ -13,7 +13,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-static NSString* kEXUpdatesAppLauncherErrorDomain = @"AppLauncher";
+static NSString * const kEXUpdatesAppLauncherErrorDomain = @"AppLauncher";
 
 @implementation EXUpdatesAppLauncher
 
@@ -21,7 +21,7 @@ static NSString* kEXUpdatesAppLauncherErrorDomain = @"AppLauncher";
 {
   if (!_launchedUpdate) {
     EXUpdatesDatabase *database = [EXUpdatesAppController sharedInstance].database;
-    NSArray <NSDictionary *>* launchableUpdates = [database launchableUpdates];
+    NSArray<NSDictionary *>* launchableUpdates = [database launchableUpdates];
     _launchedUpdate = [EXUpdatesSelectionPolicy runnableUpdateFromUpdates:launchableUpdates];
     if (!_launchedUpdate) {
       [[EXUpdatesAppController sharedInstance] handleErrorWithDomain:kEXUpdatesAppLauncherErrorDomain description:@"No runnable update found" info:nil isFatal:YES];

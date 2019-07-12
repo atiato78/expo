@@ -2,6 +2,17 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NS_ENUM(NSInteger, EXUpdatesDatabaseStatus) {
+  EXUpdatesDatabaseStatusFailed = 0,
+  EXUpdatesDatabaseStatusReady = 1,
+  EXUpdatesDatabaseStatusPending = 2,
+  EXUpdatesDatabaseStatusUnused = 3
+};
+
+typedef NS_ENUM(NSInteger, EXUpdatesDatabaseHashType) {
+  EXUpdatesDatabaseHashTypeSha1 = 0
+};
+
 @interface EXUpdatesDatabase : NSObject
 
 @property (nonatomic, readonly) NSLock *lock;
@@ -22,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
            relativePath:(NSString *)relativePath
              hashAtomic:(NSString *)hashAtomic
             hashContent:(NSString *)hashContent
-               hashType:(int)hashType
+               hashType:(EXUpdatesDatabaseHashType)hashType
                updateId:(NSUUID *)updateId
           isLaunchAsset:(BOOL)isLaunchAsset;
 
@@ -31,9 +42,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)deleteAssetsWithIds:(NSArray<NSNumber *>*)assetIds;
 - (void)deleteUnusedUpdates;
 
-- (NSArray <NSDictionary *>*)launchableUpdates;
+- (NSArray<NSDictionary *>*)launchableUpdates;
 - (NSURL * _Nullable)launchAssetUrlWithUpdateId:(NSUUID *)updateId;
-- (NSArray <NSDictionary *>*)assetsWithUpdateId:(NSUUID *)updateId;
+- (NSArray<NSDictionary *>*)assetsForUpdateId:(NSUUID *)updateId;
 
 @end
 
