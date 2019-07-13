@@ -30,7 +30,7 @@ static NSString * const kEXUpdatesAppLauncherErrorDomain = @"AppLauncher";
   return _launchedUpdate;
 }
 
-- (NSUUID *)launchedUpdateId
+- (NSUUID * _Nullable)launchedUpdateId
 {
   if (!_launchedUpdate) {
     [self launchedUpdate];

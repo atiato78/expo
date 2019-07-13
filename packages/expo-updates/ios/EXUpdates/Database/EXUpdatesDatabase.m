@@ -166,17 +166,11 @@ static NSString * const kEXUpdatesDatabaseFilename = @"updates.db";
     return;
   }
 
+  sqlite3_exec(_db, "BEGIN;", NULL, NULL, NULL);
+
   NSString * const assetInsertSql = @"INSERT INTO \"assets\" (\"url\", \"headers\", \"type\", \"metadata\", \"download_time\", \"relative_path\", \"hash_atomic\", \"hash_content\" , \"hash_type\", \"marked_for_deletion\")\
   VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 0);";
-  NSString * const updateSql = @"UPDATE updates SET launch_asset_id = last_insert_rowid(), status = ?10 WHERE id = ?11;";
-  NSString * const updateInsertSql = @"INSERT INTO updates_assets (\"update_id\", \"asset_id\") VALUES (?11, last_insert_rowid());";
-
-  NSString *sql = isLaunchAsset
-    // statements must stay in exactly this order in order for last_insert_rowid() to work properly
-    ? [NSString stringWithFormat:@"BEGIN TRANSACTION; %@ %@ %@ COMMIT;", assetInsertSql, updateSql, updateInsertSql]
-    : [NSString stringWithFormat:@"BEGIN TRANSACTION; %@ %@ COMMIT;", assetInsertSql, updateInsertSql];
-
-  [self _executeSql:sql
+  [self _executeSql:assetInsertSql
            withArgs:@[
                       url,
                       headers ?: [NSNull null],
@@ -186,10 +180,25 @@ static NSString * const kEXUpdatesDatabaseFilename = @"updates.db";
                       relativePath,
                       hashAtomic,
                       hashContent,
-                      @(hashType),
-                      @(EXUpdatesDatabaseStatusReady),
+                      @(hashType)
+                      ]];
+
+  if (isLaunchAsset) {
+    NSString * const updateSql = @"UPDATE updates SET launch_asset_id = last_insert_rowid(), status = ?1 WHERE id = ?2;";
+    [self _executeSql:updateSql
+             withArgs:@[
+                        @(EXUpdatesDatabaseStatusReady),
+                        updateId
+                        ]];
+  }
+
+  NSString * const updateInsertSql = @"INSERT INTO updates_assets (\"update_id\", \"asset_id\") VALUES (?1, last_insert_rowid());";
+  [self _executeSql:updateInsertSql
+           withArgs:@[
                       updateId
                       ]];
+
+  sqlite3_exec(_db, "COMMIT;", NULL, NULL, NULL);
 }
 
 - (void)markUpdatesForDeletion
@@ -213,17 +222,23 @@ static NSString * const kEXUpdatesDatabaseFilename = @"updates.db";
   // this is safe as long as we have a lock and nothing else is happening
   // in the database during the execution of this method
 
-  NSString * const sql = @"BEGIN TRANSACTION;\
-  UPDATE assets SET marked_for_deletion = 1;\
-  UPDATE assets SET marked_for_deletion = 0 WHERE id IN (\
+  sqlite3_exec(_db, "BEGIN;", NULL, NULL, NULL);
+
+  NSString * const update1Sql = @"UPDATE assets SET marked_for_deletion = 1;";
+  [self _executeSql:update1Sql withArgs:nil];
+
+  NSString * const update2Sql = @"UPDATE assets SET marked_for_deletion = 0 WHERE id IN (\
   SELECT asset_id \
   FROM updates_assets \
   INNER JOIN updates ON updates_assets.update_id = updates.id\
   WHERE updates.keep = 1\
-  );\
-  COMMIT;\
-  SELECT * FROM assets WHERE marked_for_deletion = 1;";
-  return [self _executeSql:sql withArgs:nil];
+  );";
+  [self _executeSql:update2Sql withArgs:nil];
+
+  sqlite3_exec(_db, "COMMIT;", NULL, NULL, NULL);
+
+  NSString * const selectSql = @"SELECT * FROM assets WHERE marked_for_deletion = 1;";
+  return [self _executeSql:selectSql withArgs:nil];
 }
 
 - (void)deleteAssetsWithIds:(NSArray<NSNumber *>*)assetIds

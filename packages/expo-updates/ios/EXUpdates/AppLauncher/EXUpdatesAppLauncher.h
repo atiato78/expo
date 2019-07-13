@@ -5,7 +5,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface EXUpdatesAppLauncher : NSObject
 
 - (NSDictionary *)launchUpdate;
-- (NSUUID *)launchedUpdateId;
+- (NSUUID * _Nullable)launchedUpdateId;
 
 @end
 

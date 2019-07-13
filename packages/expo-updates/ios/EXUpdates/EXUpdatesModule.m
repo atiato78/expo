@@ -5,12 +5,9 @@
 #import <EXUpdates/EXUpdatesDatabase.h>
 #import <EXUpdates/EXUpdatesModule.h>
 
-#import <sqlite3.h>
-
 @interface EXUpdatesModule ()
 
 @property (nonatomic, weak) UMModuleRegistry *moduleRegistry;
-@property (nonatomic, assign) sqlite3 *db;
 
 @end
 

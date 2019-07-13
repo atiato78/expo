@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)start;
 
-- (NSURL *)launchAssetUrl;
+- (NSURL * _Nullable)launchAssetUrl;
 - (NSURL *)updatesDirectory;
 
 - (void)handleErrorWithDomain:(NSString *)errorDomain

@@ -39,13 +39,13 @@ NS_ASSUME_NONNULL_BEGIN
   if (self = [super init]) {
     _launcher = [[EXUpdatesAppLauncher alloc] init];
     _database = [[EXUpdatesDatabase alloc] init];
-    [_database openDatabase];
   }
   return self;
 }
 
 - (void)start
 {
+  [_database openDatabase];
   [self _copyEmbeddedAssets];
   [_launcher launchUpdate];
 
@@ -54,9 +54,14 @@ NS_ASSUME_NONNULL_BEGIN
   [_remoteAppLoader loadUpdateFromUrl:[EXUpdatesConfig sharedInstance].remoteUrl];
 }
 
-- (NSURL *)launchAssetUrl
+- (NSURL * _Nullable)launchAssetUrl
 {
-  return [_database launchAssetUrlWithUpdateId:[_launcher launchedUpdateId]];
+  NSUUID *launchedUpdateId = [_launcher launchedUpdateId];
+  if (launchedUpdateId) {
+    return [_database launchAssetUrlWithUpdateId:[_launcher launchedUpdateId]];
+  } else {
+    return nil;
+  }
 }
 
 - (NSURL *)updatesDirectory
@@ -94,6 +99,7 @@ NS_ASSUME_NONNULL_BEGIN
 {
   // do something!!!!
   NSLog(@"EXUpdates error: %@", description);
+  NSLog(@"%@", [NSThread callStackSymbols]);
 }
 
 # pragma mark - internal

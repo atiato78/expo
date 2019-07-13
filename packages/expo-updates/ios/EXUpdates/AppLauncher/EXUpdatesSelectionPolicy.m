@@ -12,8 +12,8 @@ NS_ASSUME_NONNULL_BEGIN
   NSNumber *runnableUpdateCommitTime;
   for (NSDictionary *update in updates) {
     NSArray<NSString *>*compatibleBinaryVersions = [(NSString *)update[@"binary_versions"] componentsSeparatedByString:@","];
-    if ([compatibleBinaryVersions containsObject:[[self class] binaryVersion]]) {
-      break;
+    if (![compatibleBinaryVersions containsObject:[[self class] binaryVersion]]) {
+      continue;
     }
     NSNumber *commitTime = update[@"commit_time"];
     if (!runnableUpdateCommitTime || [runnableUpdateCommitTime compare:commitTime] == NSOrderedAscending) {
