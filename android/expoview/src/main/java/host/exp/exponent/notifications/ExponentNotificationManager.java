@@ -26,8 +26,10 @@ import javax.inject.Inject;
 import host.exp.exponent.storage.ExponentSharedPreferences;
 import host.exp.expoview.R;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class ExponentNotificationManager {
@@ -243,7 +245,7 @@ public class ExponentNotificationManager {
     }
   }
 
-  public void schedule(String experienceId, int id, Bundle notification, long time, Long interval) throws ClassNotFoundException {
+  public void schedule(String experienceId, int id, HashMap<String, Serializable> notification, long time, Long interval) throws ClassNotFoundException {
     Intent notificationIntent = new Intent(mContext, ScheduledNotificationReceiver.class);
 
     notificationIntent.setType(experienceId);

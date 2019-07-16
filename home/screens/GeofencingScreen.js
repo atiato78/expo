@@ -235,8 +235,13 @@ if (Platform.OS !== 'android') {
   });
 }
 
-Notifications.addListener(({ data, remote }) => {
-  if (!remote && data.notificationType === GEOFENCING_TASK) {
+if (!Notifications) {
+  console.log("adfajnfs");
+  console.log(JSON.stringify(Notifications));
+}
+
+Notifications.addOnForegroundNotificationListener('geofencing', (notification: LocalNotification) => {
+  if (notification.notificationType === GEOFENCING_TASK) {
     alert(data.notificationBody);
   }
 });

@@ -27,36 +27,38 @@ public class UserInteractionReceiver {
   public static boolean onIntent(Intent intent, Context context) {
     Bundle bundle = intent.getExtras();
     Bundle notification = bundle.getBundle(KernelConstants.NOTIFICATION_OBJECT_KEY);
+
+    if (notification == null) {
+      return false;
+    }
+
     String experienceId = notification.getString("experienceId");
     Integer notificationIntId = notification.getInt("notificationIntId");
 
-    if (notification != null) {
-      // Add action type
-      if (bundle.containsKey(KernelConstants.NOTIFICATION_ACTION_TYPE_KEY)) {
-        notification.putString(
-            NotificationConstants.NOTIFICATION_ACTION_TYPE,
-            bundle.getString(KernelConstants.NOTIFICATION_ACTION_TYPE_KEY)
-        );
-        ExponentNotificationManager manager = new ExponentNotificationManager(context);
-        manager.cancel(experienceId, notificationIntId);
-      }
-      // Add remote input
-      Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
-      if (remoteInput != null) {
-        notification.putString(
-            NotificationConstants.NOTIFICATION_INPUT_TEXT,
-            remoteInput.getString(NotificationActionCenter.KEY_TEXT_REPLY)
-        );
-      }
-
-      PostOfficeProxy.getInstance().notifyAboutUserInteraction(
-          experienceId,
-          notification
+    // Add action type
+    if (bundle.containsKey(KernelConstants.NOTIFICATION_ACTION_TYPE_KEY)) {
+      notification.putString(
+          NotificationConstants.NOTIFICATION_ACTION_TYPE,
+          bundle.getString(KernelConstants.NOTIFICATION_ACTION_TYPE_KEY)
       );
-
-      return true;
+      ExponentNotificationManager manager = new ExponentNotificationManager(context);
+      manager.cancel(experienceId, notificationIntId);
     }
-    return false;
+    // Add remote input
+    Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);
+    if (remoteInput != null) {
+      notification.putString(
+          NotificationConstants.NOTIFICATION_INPUT_TEXT,
+          remoteInput.getString(NotificationActionCenter.KEY_TEXT_REPLY)
+      );
+    }
+
+    PostOfficeProxy.getInstance().notifyAboutUserInteraction(
+        experienceId,
+        notification
+    );
+
+    return true;
   }
 
 }

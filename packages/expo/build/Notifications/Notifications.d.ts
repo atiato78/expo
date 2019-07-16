@@ -1,44 +1,42 @@
-import { EventSubscription } from 'fbemitter';
-import { Notification, LocalNotification, Channel, ActionType } from './Notifications.types';
-declare const _default: {
-    _setInitialNotification(notification: Notification): void;
-    createCategoryAsync(categoryId: string, actions: ActionType[]): Promise<void>;
-    deleteCategoryAsync(categoryId: string): Promise<void>;
-    getExpoPushTokenAsync(): Promise<string>;
-    getDevicePushTokenAsync: (config: {
-        gcmSenderId?: string | undefined;
-    }) => Promise<{
-        type: string;
-        data: string;
-    }>;
-    createChannelAndroidAsync(id: string, channel: Channel): Promise<void>;
-    deleteChannelAndroidAsync(id: string): Promise<void>;
-    presentLocalNotificationAsync(notification: LocalNotification): Promise<import("react").ReactText>;
-    scheduleLocalNotificationAsync(notification: LocalNotification, options?: {
-        time?: number | Date | undefined;
-        repeat?: "minute" | "hour" | "day" | "week" | "month" | "year" | undefined;
-        intervalMs?: number | undefined;
-    }): Promise<import("react").ReactText>;
-    dismissNotificationAsync(notificationId: import("react").ReactText): Promise<void>;
-    dismissAllNotificationsAsync(): Promise<void>;
-    cancelScheduledNotificationAsync(notificationId: import("react").ReactText): Promise<void>;
-    cancelAllScheduledNotificationsAsync(): Promise<void>;
-    addListener(listener: (notification: Notification) => unknown): EventSubscription;
-    getBadgeNumberAsync(): Promise<number>;
-    setBadgeNumberAsync(number: number): Promise<void>;
-    scheduleNotificationWithCalendarAsync(notification: LocalNotification, options?: {
-        year?: number | undefined;
-        month?: number | undefined;
-        hour?: number | undefined;
-        day?: number | undefined;
-        minute?: number | undefined;
-        second?: number | undefined;
-        weekDay?: number | undefined;
-        repeat?: boolean | undefined;
-    }): Promise<string>;
-    scheduleNotificationWithTimerAsync(notification: LocalNotification, options: {
-        interval: number;
-        repeat?: boolean | undefined;
-    }): Promise<string>;
-};
-export default _default;
+import { OnUserInteractionListener, OnForegroundNotificationListener } from './Mailbox';
+import { LocalNotification, Channel, ActionType, LocalNotificationId } from './Notifications.types';
+export declare function createCategoryAsync(categoryId: string, actions: ActionType[]): Promise<void>;
+export declare function deleteCategoryAsync(categoryId: string): Promise<void>;
+export declare function getExpoPushTokenAsync(): Promise<string>;
+export declare function getDevicePushTokenAsync(config: {
+    gcmSenderId?: string;
+}): Promise<{
+    type: string;
+    data: string;
+}>;
+export declare function createChannelAndroidAsync(id: string, channel: Channel): Promise<void>;
+export declare function deleteChannelAndroidAsync(id: string): Promise<void>;
+export declare function presentLocalNotificationAsync(notification: LocalNotification): Promise<LocalNotificationId>;
+export declare function scheduleLocalNotificationAsync(notification: LocalNotification, options?: {
+    time?: Date | number;
+    repeat?: 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
+    intervalMs?: number;
+}): Promise<LocalNotificationId>;
+export declare function dismissNotificationAsync(notificationId: LocalNotificationId): Promise<void>;
+export declare function dismissAllNotificationsAsync(): Promise<void>;
+export declare function cancelScheduledNotificationAsync(notificationId: LocalNotificationId): Promise<void>;
+export declare function cancelAllScheduledNotificationsAsync(): Promise<void>;
+export declare function setBadgeNumberAsync(number: number): Promise<void>;
+export declare function addOnUserInteractionListener(listenerName: string, listener: OnUserInteractionListener): void;
+export declare function addOnForegroundNotificationListener(listenerName: string, listener: OnForegroundNotificationListener): void;
+export declare function removeOnUserInteractionListener(listenerName: string): void;
+export declare function removeOnForegroundNotificationListener(listenerName: string): void;
+scheduleNotificationWithCalendarAsync(notification: LocalNotification, options?: {
+    year?: number | undefined;
+    month?: number | undefined;
+    hour?: number | undefined;
+    day?: number | undefined;
+    minute?: number | undefined;
+    second?: number | undefined;
+    weekDay?: number | undefined;
+    repeat?: boolean | undefined;
+}): Promise<string>;
+scheduleNotificationWithTimerAsync(notification: LocalNotification, options: {
+    interval: number;
+    repeat?: boolean | undefined;
+}): Promise<string>;

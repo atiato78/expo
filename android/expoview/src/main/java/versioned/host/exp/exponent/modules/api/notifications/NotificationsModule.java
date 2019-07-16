@@ -7,11 +7,13 @@ import android.os.Bundle;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
 import com.google.firebase.iid.FirebaseInstanceId;
@@ -68,11 +70,17 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements M
 
   private final JSONObject mManifest;
 
+  private ReactContext mReactContext;
+
+  private static final String ON_USER_INTERACTION_EVENT = "Exponent.onUserInteraction";
+  private static final String ON_FOREGROUND_NOTIFICATION_EVENT = "Exponent.onForegroundNotification";
+
   public NotificationsModule(ReactApplicationContext reactContext,
                              JSONObject manifest, Map<String, Object> experienceProperties) {
     super(reactContext);
     NativeModuleDepsProvider.getInstance().inject(NotificationsModule.class, this);
     mManifest = manifest;
+    mReactContext = reactContext;
   }
 
   @Override
@@ -457,14 +465,14 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements M
 
   @Override
   public void onUserInteraction(Bundle userInteraction) {
-    // ToDo
-    // Send event to js
+    mReactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+        .emit(ON_USER_INTERACTION_EVENT, Arguments.fromBundle(userInteraction));
   }
 
   @Override
   public void onForegroundNotification(Bundle notification) {
-    // ToDo
-    // Send event to js
+    mReactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+        .emit(ON_FOREGROUND_NOTIFICATION_EVENT, Arguments.fromBundle(notification));
   }
 
 }
