@@ -317,6 +317,8 @@ jobs:
 
   client_ios:
     executor: mac
+    environment:
+        FL_OUTPUT_DIR: output
     steps:
       - install_nix
       - setup
@@ -327,6 +329,7 @@ jobs:
       - run: nix run expo.procps --command fastlane ios create_simulator_build
       - store_artifacts:
           path: ~/Library/Logs/fastlane/
+          patk: output
 
   expo_client_build:
     executor: mac
