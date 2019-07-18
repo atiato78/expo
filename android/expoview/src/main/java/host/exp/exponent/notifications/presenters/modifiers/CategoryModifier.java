@@ -5,10 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 
-import org.json.JSONException;
-
 import host.exp.exponent.Constants;
-import host.exp.exponent.ExponentManifest;
 import host.exp.exponent.kernel.KernelConstants;
 import host.exp.exponent.notifications.IntentProvider;
 import host.exp.exponent.notifications.NotificationActionCenter;

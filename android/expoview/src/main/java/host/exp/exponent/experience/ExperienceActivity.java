@@ -59,7 +59,6 @@ import host.exp.exponent.notifications.NotificationConstants;
 import host.exp.exponent.notifications.PushNotificationHelper;
 import host.exp.exponent.notifications.ReceivedNotificationEvent;
 import host.exp.exponent.notifications.presenters.SmartNotificationPresenter;
-import host.exp.exponent.notifications.userinteractionreceiver.UserInteractionReceiver;
 import host.exp.exponent.storage.ExponentSharedPreferences;
 import host.exp.exponent.utils.AsyncCondition;
 import host.exp.exponent.utils.ExperienceActivityUtils;
@@ -243,16 +242,12 @@ public class ExperienceActivity extends BaseExperienceActivity implements Expone
       }.start();
     }
 
-    UserInteractionReceiver.getInstance().onIntent(getIntent(), this);
-
     mKernel.setOptimisticActivity(this, getTaskId());
   }
 
   @Override
   protected void onResume() {
     super.onResume();
-
-    SmartNotificationPresenter.toggleState();
 
     soloaderInit();
 
@@ -278,8 +273,6 @@ public class ExperienceActivity extends BaseExperienceActivity implements Expone
   protected void onPause() {
     super.onPause();
 
-    SmartNotificationPresenter.toggleState();
-
     removeNotification();
     Analytics.clearTimedEvents();
   }
@@ -294,9 +287,6 @@ public class ExperienceActivity extends BaseExperienceActivity implements Expone
   @Override
   public void onNewIntent(Intent intent) {
     super.onNewIntent(intent);
-    if (UserInteractionReceiver.getInstance().onIntent(intent, this)) {
-      return;
-    }
 
     Uri uri = intent.getData();
     if (uri != null) {
@@ -817,6 +807,5 @@ public class ExperienceActivity extends BaseExperienceActivity implements Expone
   @Override
   public void onDestroy() {
     super.onDestroy();
-    SmartNotificationPresenter.setBackground();
   }
 }

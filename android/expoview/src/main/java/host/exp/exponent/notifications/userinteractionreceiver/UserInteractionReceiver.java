@@ -4,6 +4,7 @@ import android.app.RemoteInput;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.NotificationManagerCompat;
 
 import host.exp.exponent.kernel.KernelConstants;
 import host.exp.exponent.notifications.ExponentNotificationManager;
@@ -34,6 +35,9 @@ public class UserInteractionReceiver {
 
     String experienceId = notification.getString("experienceId");
     Integer notificationIntId = notification.getInt("notificationIntId");
+
+    NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
+    notificationManagerCompat.cancel(notificationIntId);
 
     // Add action type
     if (bundle.containsKey(KernelConstants.NOTIFICATION_ACTION_TYPE_KEY)) {

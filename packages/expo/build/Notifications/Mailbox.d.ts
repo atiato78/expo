@@ -14,5 +14,5 @@ export declare class Mailbox {
     removeOnUserInteractionListener(listenerName: string): void;
     removeOnForegroundNotificationListener(listenerName: string): void;
     _onForegroundNotification(notification: any): void;
-    _onUserInteractionListener(userInteraction: any): void;
+    _onUserInteraction(userInteraction: any): void;
 }

@@ -72,9 +72,6 @@ function _validateNotification(notification) {
 }
 
 let ASYNC_STORAGE_PREFIX = '__expo_internal_channel_';
-// TODO: remove this before releasing
-// this will always be `true` for SDK 28+
-let IS_USING_NEW_BINARY = typeof ExponentNotifications.createChannel === 'function';
 
 async function _legacyReadChannel(id: string): Promise<Channel | null> {
   try {
@@ -167,23 +164,12 @@ export async function presentLocalNotificationAsync(
       _channel = await _legacyReadChannel(nativeNotification.channelId);
     }
 
-    if (IS_USING_NEW_BINARY) {
-      // delete the legacy channel from AsyncStorage so this codepath isn't triggered anymore
-      _legacyDeleteChannel(nativeNotification.channelId);
-      return ExponentNotifications.presentLocalNotificationWithChannel(
-        nativeNotification,
-        _channel
-      );
-    } else {
-      // TODO: remove this codepath before releasing, it will never be triggered on SDK 28+
-      // channel does not actually exist, so add its settings to the individual notification
-      if (_channel) {
-        nativeNotification.sound = _channel.sound;
-        nativeNotification.priority = _channel.priority;
-        nativeNotification.vibrate = _channel.vibrate;
-      }
-      return ExponentNotifications.presentLocalNotification(nativeNotification);
-    }
+    // delete the legacy channel from AsyncStorage so this codepath isn't triggered anymore
+    _legacyDeleteChannel(nativeNotification.channelId);
+    return ExponentNotifications.presentLocalNotificationWithChannel(
+      nativeNotification,
+      _channel
+    );
   }
 }
 
@@ -281,24 +267,13 @@ export async function scheduleLocalNotificationAsync(
       _channel = await _legacyReadChannel(nativeNotification.channelId);
     }
 
-    if (IS_USING_NEW_BINARY) {
-      // delete the legacy channel from AsyncStorage so this codepath isn't triggered anymore
-      _legacyDeleteChannel(nativeNotification.channelId);
-      return ExponentNotifications.scheduleLocalNotificationWithChannel(
-        nativeNotification,
-        options,
-        _channel
-      );
-    } else {
-      // TODO: remove this codepath before releasing, it will never be triggered on SDK 28+
-      // channel does not actually exist, so add its settings to the individual notification
-      if (_channel) {
-        nativeNotification.sound = _channel.sound;
-        nativeNotification.priority = _channel.priority;
-        nativeNotification.vibrate = _channel.vibrate;
-      }
-      return ExponentNotifications.scheduleLocalNotification(nativeNotification, options);
-    }
+    // delete the legacy channel from AsyncStorage so this codepath isn't triggered anymore
+    _legacyDeleteChannel(nativeNotification.channelId);
+    return ExponentNotifications.scheduleLocalNotificationWithChannel(
+      nativeNotification,
+      options,
+      _channel
+    );
   }
 }
 

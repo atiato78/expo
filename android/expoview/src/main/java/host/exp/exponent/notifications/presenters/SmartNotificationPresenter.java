@@ -1,31 +1,31 @@
 package host.exp.exponent.notifications.presenters;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Bundle;
 
 import host.exp.exponent.notifications.postoffice.PostOfficeProxy;
 
-public class SmartNotificationPresenter implements NotificationPresenterInterface {
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
 
-  private static boolean isForeground = false;
+public class SmartNotificationPresenter implements NotificationPresenterInterface {
 
   private NotificationPresenterInterface mNotificationPresenter = new NotificationPresenter();
 
   @Override
   public void presentNotification(Context context, String experienceId, Bundle notification, int notificationId) {
-    if (isForeground) {
+    if (isInForegroundState()) {
       PostOfficeProxy.getInstance().sendForegroundNotification(experienceId, notification);
     } else {
       mNotificationPresenter.presentNotification(context, experienceId, notification, notificationId);
     }
   }
 
-  public static void toggleState() {
-    isForeground = !isForeground;
-  }
-
-  public static void setBackground() {
-    isForeground = false;
+  private boolean isInForegroundState() {
+      ActivityManager.RunningAppProcessInfo appProcessInfo = new ActivityManager.RunningAppProcessInfo();
+      ActivityManager.getMyMemoryState(appProcessInfo);
+      return (appProcessInfo.importance == IMPORTANCE_FOREGROUND || appProcessInfo.importance == IMPORTANCE_VISIBLE);
   }
 
 }

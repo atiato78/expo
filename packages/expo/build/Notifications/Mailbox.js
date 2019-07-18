@@ -3,8 +3,8 @@ export class Mailbox {
     constructor() {
         this.onUserInteractionListeners = new Map();
         this.onForegroundNotificationListeners = new Map();
-        DeviceEventEmitter.addListener('Exponent.onUserInteraction', this._onUserInteractionListener);
-        DeviceEventEmitter.addListener('Exponent.onForegroundNotification', this._onForegroundNotification);
+        DeviceEventEmitter.addListener('Exponent.onUserInteraction', this._onUserInteraction.bind(this));
+        DeviceEventEmitter.addListener('Exponent.onForegroundNotification', this._onForegroundNotification.bind(this));
     }
     addOnUserInteractionListener(listenerName, listener) {
         this.onUserInteractionListeners.set(listenerName, listener);
@@ -19,15 +19,13 @@ export class Mailbox {
         this.onForegroundNotificationListeners.delete(listenerName);
     }
     _onForegroundNotification(notification) {
-        const data = notification.data;
-        for (let listener of this.onUserInteractionListeners.values()) {
-            listener(data);
+        for (let listener of this.onForegroundNotificationListeners.values()) {
+            listener(notification);
         }
     }
-    _onUserInteractionListener(userInteraction) {
-        const data = userInteraction.data;
-        for (let listener of this.onForegroundNotificationListeners.values()) {
-            listener(data);
+    _onUserInteraction(userInteraction) {
+        for (let listener of this.onUserInteractionListeners.values()) {
+            listener(userInteraction);
         }
     }
 }

@@ -15,6 +15,7 @@ import javax.inject.Inject;
 
 import host.exp.exponent.di.NativeModuleDepsProvider;
 import host.exp.exponent.kernel.Kernel;
+import host.exp.exponent.notifications.userinteractionreceiver.UserInteractionReceiver;
 
 // This activity is transparent. It uses android:style/Theme.Translucent.NoTitleBar.
 // Calls finish() once it is done processing Intent.
@@ -42,6 +43,7 @@ public class LauncherActivity extends Activity {
 
     mKernel.setActivityContext(this);
 
+    UserInteractionReceiver.getInstance().onIntent(getIntent(), this);
     mKernel.handleIntent(this, getIntent());
 
     // Start a service to keep our process awake. This isn't necessary most of the time, but
@@ -82,6 +84,7 @@ public class LauncherActivity extends Activity {
 
     // We shouldn't ever get here, since we call finish() in onCreate. Just want to be safe
     // since this Activity is singleTask and there might be some edge case where this is called.
+    UserInteractionReceiver.getInstance().onIntent(getIntent(), this);
     mKernel.handleIntent(this, intent);
   }
 }
