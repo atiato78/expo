@@ -262,26 +262,12 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements M
       return;
     }
 
-    if (legacyChannelData != null) {
-      String channelId = data.getString("channelId");
-      if (channelId == null) {
-        promise.reject("E_FAILED_PRESENTING_NOTIFICATION", "legacyChannelData was nonnull with no channelId");
-        return;
-      }
-      NotificationHelper.maybeCreateLegacyStoredChannel(
-          getReactApplicationContext(),
-          experienceId,
-          channelId,
-          legacyChannelData.toHashMap()
-      );
-    }
-
     Integer notificationId = Math.abs( new Random().nextInt() );
     bundle.putString("notificationId", notificationId.toString());
 
     NotificationPresenterInterface notificationPresenter = new NotificationPresenter();
     notificationPresenter.presentNotification(
-        getReactApplicationContext(),
+        getReactApplicationContext().getApplicationContext(),
         experienceId,
         bundle,
         notificationId
