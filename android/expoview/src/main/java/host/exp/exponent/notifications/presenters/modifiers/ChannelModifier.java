@@ -6,16 +6,15 @@ import android.support.v4.app.NotificationCompat;
 
 import org.json.JSONObject;
 
-import host.exp.exponent.notifications.ExponentNotification;
 import host.exp.exponent.notifications.ExponentNotificationManager;
-import host.exp.exponent.notifications.helpers.Utiles;
+import host.exp.exponent.notifications.helpers.Utils;
 
 import static host.exp.exponent.notifications.NotificationHelper.createChannel;
 
 public class ChannelModifier implements NotificationModifierInterface {
   @Override
   public void modify(NotificationCompat.Builder builder, Bundle notification, Context context, String experienceId) {
-    if (!Utiles.isAndroidVersionBelowOreo()) {
+    if (!Utils.isAndroidVersionBelowOreo()) {
       // if we don't yet have a channel matching this ID, check shared preferences --
       // it's possible this device has just been upgraded to Android 8+ and the channel
       // needs to be created in the system

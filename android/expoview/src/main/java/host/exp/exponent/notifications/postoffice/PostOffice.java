@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import host.exp.exponent.notifications.helpers.Utils;
 import host.exp.exponent.notifications.postoffice.pendingdeliveries.BundleHelper;
 import host.exp.exponent.notifications.postoffice.pendingdeliveries.PendingForegroundNotification;
 import host.exp.exponent.notifications.postoffice.pendingdeliveries.PendingForegroundNotification$Table;
@@ -57,7 +58,7 @@ class PostOffice implements PostOfficeInterface {
     }
 
     for (PendingUserInteraction pendingUserInteraction : pendingUserInteractionList) {
-      mailbox.onForegroundNotification(
+      mailbox.onUserInteraction(
           BundleHelper.jsonStringToBundle(pendingUserInteraction.getUserInteraction())
       );
       pendingUserInteraction.delete();
@@ -72,14 +73,14 @@ class PostOffice implements PostOfficeInterface {
   private void addUserInteractionToDatabase(String experienceId, Bundle userInteraction) {
     PendingUserInteraction pendingUserInteraction = new PendingUserInteraction();
     pendingUserInteraction.setExperienceId(experienceId);
-    pendingUserInteraction.setUserInteraction(userInteraction.toString());
+    pendingUserInteraction.setUserInteraction(Utils.bundleToString(userInteraction));
     pendingUserInteraction.save();
   }
 
   private void addForegroundNotificationToDatabase(String experienceId, Bundle notification) {
     PendingForegroundNotification pendingForegroundNotification = new PendingForegroundNotification();
     pendingForegroundNotification.setExperienceId(experienceId);
-    pendingForegroundNotification.setNotification(notification.toString());
+    pendingForegroundNotification.setNotification(Utils.bundleToString(notification));
   }
 
 }

@@ -10,10 +10,10 @@ import javax.inject.Inject;
 
 import android.os.Bundle;
 import host.exp.exponent.ExponentManifest;
-import host.exp.exponent.analytics.EXL;
 import host.exp.exponent.di.NativeModuleDepsProvider;
 import host.exp.exponent.kernel.KernelConstants;
 import host.exp.exponent.notifications.managers.SchedulersManagerProxy;
+import host.exp.exponent.notifications.helpers.Utils;
 import host.exp.exponent.notifications.presenters.NotificationPresenterProvider;
 
 public class ScheduledNotificationReceiver extends BroadcastReceiver {
@@ -32,6 +32,8 @@ public class ScheduledNotificationReceiver extends BroadcastReceiver {
     String schedulerId = (String) details.get(SchedulersManagerProxy.SCHEDULER_ID);
 
     SchedulersManagerProxy.getInstance(context).rescheduleOrDelete(schedulerId);
+
+    Bundle notification = Utils.convertMapToBundle(details).getBundle("data");
 
     NotificationPresenterProvider.getNotificationPresenter().presentNotification(
         context.getApplicationContext(),

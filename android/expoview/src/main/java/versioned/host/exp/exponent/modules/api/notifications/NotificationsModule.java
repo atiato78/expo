@@ -432,8 +432,8 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
 
   @ReactMethod
   public void scheduleLocalNotificationWithChannel(final ReadableMap data, final ReadableMap options, final ReadableMap legacyChannelData, final Promise promise) {
+    String experienceId = mManifest.optString(ExponentManifest.MANIFEST_ID_KEY, null);
     if (legacyChannelData != null) {
-      String experienceId = mManifest.optString(ExponentManifest.MANIFEST_ID_KEY, null);
       String channelId = data.getString("channelId");
       if (channelId == null || experienceId == null) {
         promise.reject("E_FAILED_PRESENTING_NOTIFICATION", "legacyChannelData was nonnull with no channelId or no experienceId");
@@ -446,14 +446,15 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
           legacyChannelData.toHashMap());
     }
 
-    int notificationId = new Random().nextInt();
+    int notificationId = Math.abs(new Random().nextInt());
 
-    HashMap<String, Object> hashMap = data.toHashMap();
+    HashMap<String, Object> hashMapOfData = data.toHashMap();
+    hashMapOfData.put("experienceId", experienceId);
 
     NotificationHelper.scheduleLocalNotification(
         getReactApplicationContext(),
         notificationId,
-        hashMap,
+        hashMapOfData,
         options.toHashMap(),
         mManifest,
         new NotificationHelper.Listener() {

@@ -40,6 +40,7 @@ public class ExpoFcmMessagingService extends FirebaseMessagingService {
     bundle.putString("priorityBelowOreo", remoteMessage.getData().get("priorityBelowOreo"));
     bundle.putString("color", remoteMessage.getData().get("color"));
     bundle.putString("data", remoteMessage.getData().get("data"));
+    bundle.putBoolean("remote", true);
 
     NotificationPresenterProvider.getNotificationPresenter().presentNotification(
         this.getApplicationContext(),

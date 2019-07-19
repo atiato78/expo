@@ -9,7 +9,7 @@ import host.exp.expoview.R;
 public class IconModifier implements NotificationModifierInterface {
   @Override
   public void modify(NotificationCompat.Builder builder, Bundle notification, Context context, String experienceId) {
-    // only for tests and it should be reimplemented afterwards
-    builder.setSmallIcon(R.drawable.notification_icon);
+    builder.setSmallIcon(R.drawable.shell_notification_icon);
+    // TODO: download from notification.url if possible
   }
 }
