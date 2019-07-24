@@ -13,7 +13,6 @@ export default function withExpoRoot<P extends InitialProps>(
       if (StyleSheet.setStyleAttributePreprocessor) {
         StyleSheet.setStyleAttributePreprocessor('fontFamily', Font.processFontFamily);
       }
-      const { exp } = this.props;
     }
 
     render() {

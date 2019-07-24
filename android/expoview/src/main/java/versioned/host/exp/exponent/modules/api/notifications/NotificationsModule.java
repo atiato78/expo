@@ -44,10 +44,10 @@ import host.exp.exponent.notifications.NotificationConstants;
 import host.exp.exponent.notifications.NotificationHelper;
 import host.exp.exponent.notifications.schedulers.IntervalSchedulerModel;
 import host.exp.exponent.notifications.schedulers.SchedulerImpl;
-import host.exp.exponent.notifications.postoffice.MailboxInterface;
+import host.exp.exponent.notifications.postoffice.Mailbox;
 import host.exp.exponent.notifications.postoffice.PostOfficeProxy;
+import host.exp.exponent.notifications.presenters.NotificationPresenterImpl;
 import host.exp.exponent.notifications.presenters.NotificationPresenter;
-import host.exp.exponent.notifications.presenters.NotificationPresenterInterface;
 import host.exp.exponent.storage.ExponentSharedPreferences;
 import host.exp.exponent.notifications.exceptions.UnableToScheduleException;
 import host.exp.exponent.notifications.managers.SchedulersManagerProxy;
@@ -56,7 +56,7 @@ import host.exp.exponent.notifications.schedulers.CalendarSchedulerModel;
 import static com.cronutils.model.field.expression.FieldExpressionFactory.on;
 import static host.exp.exponent.notifications.helpers.ExpoCronParser.createCronInstance;
 
-public class NotificationsModule extends ReactContextBaseJavaModule implements RegistryLifecycleListener, MailboxInterface {
+public class NotificationsModule extends ReactContextBaseJavaModule implements RegistryLifecycleListener, Mailbox {
 
   private static final String TAG = NotificationsModule.class.getSimpleName();
 
@@ -266,7 +266,7 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
     Integer notificationId = Math.abs( new Random().nextInt() );
     bundle.putString("notificationId", notificationId.toString());
 
-    NotificationPresenterInterface notificationPresenter = new NotificationPresenter();
+    NotificationPresenter notificationPresenter = new NotificationPresenterImpl();
     notificationPresenter.presentNotification(
         getReactApplicationContext().getApplicationContext(),
         experienceId,
@@ -446,7 +446,7 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
           legacyChannelData.toHashMap());
     }
 
-    int notificationId = Math.abs(new Random().nextInt());
+    int notificationId = Math.abs(new Random().nextInt(Integer.MAX_VALUE));
 
     HashMap<String, Object> hashMapOfData = data.toHashMap();
     hashMapOfData.put("experienceId", experienceId);

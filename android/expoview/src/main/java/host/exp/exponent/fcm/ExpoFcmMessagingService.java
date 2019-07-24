@@ -6,8 +6,6 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 import host.exp.exponent.Constants;
-import host.exp.exponent.analytics.EXL;
-import host.exp.exponent.notifications.PushNotificationHelper;
 import host.exp.exponent.notifications.presenters.NotificationPresenterProvider;
 
 public class ExpoFcmMessagingService extends FirebaseMessagingService {

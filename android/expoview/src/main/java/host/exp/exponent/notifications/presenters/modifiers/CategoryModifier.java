@@ -10,7 +10,7 @@ import host.exp.exponent.kernel.KernelConstants;
 import host.exp.exponent.notifications.IntentProvider;
 import host.exp.exponent.notifications.NotificationActionCenter;
 
-public class CategoryModifier implements NotificationModifierInterface {
+public class CategoryModifier implements NotificationModifier {
   @Override
   public void modify(NotificationCompat.Builder builder, Bundle notification, Context context, String experienceId) {
     if (notification.containsKey("categoryId")) {

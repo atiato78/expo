@@ -4,18 +4,16 @@ import invariant from 'invariant';
 import { AsyncStorage, Platform } from 'react-native';
 import { CodedError, RCTDeviceEventEmitter, UnavailabilityError } from '@unimodules/core';
 import ExponentNotifications from './ExponentNotifications';
-import {
-  UserInteraction,
-  OnUserInteractionListener,
-  OnForegroundNotificationListener,
-  Mailbox,
-} from './Mailbox';
+import { Mailbox } from './Mailbox';
 import {
   Notification,
   LocalNotification,
   Channel,
   ActionType,
   LocalNotificationId,
+  UserInteraction,
+  OnUserInteractionListener,
+  OnForegroundNotificationListener,
 } from './Notifications.types';
 
 const _mailbox: Mailbox = new Mailbox();

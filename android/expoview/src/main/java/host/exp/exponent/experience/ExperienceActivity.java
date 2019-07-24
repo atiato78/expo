@@ -58,7 +58,6 @@ import host.exp.exponent.notifications.ExponentNotificationManager;
 import host.exp.exponent.notifications.NotificationConstants;
 import host.exp.exponent.notifications.PushNotificationHelper;
 import host.exp.exponent.notifications.ReceivedNotificationEvent;
-import host.exp.exponent.notifications.presenters.SmartNotificationPresenter;
 import host.exp.exponent.storage.ExponentSharedPreferences;
 import host.exp.exponent.utils.AsyncCondition;
 import host.exp.exponent.utils.ExperienceActivityUtils;
@@ -802,10 +801,5 @@ public class ExperienceActivity extends BaseExperienceActivity implements Expone
 
   public String getExperienceId() {
     return mExperienceIdString;
-  }
-
-  @Override
-  public void onDestroy() {
-    super.onDestroy();
   }
 }

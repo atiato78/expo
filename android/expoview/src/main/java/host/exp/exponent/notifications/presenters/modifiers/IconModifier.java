@@ -6,7 +6,7 @@ import android.support.v4.app.NotificationCompat;
 
 import host.exp.expoview.R;
 
-public class IconModifier implements NotificationModifierInterface {
+public class IconModifier implements NotificationModifier {
   @Override
   public void modify(NotificationCompat.Builder builder, Bundle notification, Context context, String experienceId) {
     builder.setSmallIcon(R.drawable.shell_notification_icon);

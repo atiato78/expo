@@ -2,9 +2,9 @@ package host.exp.exponent.notifications.presenters;
 
 public class NotificationPresenterProvider {
 
-  private static volatile NotificationPresenterInterface instance;
+  private static volatile NotificationPresenter instance;
 
-  public synchronized static NotificationPresenterInterface getNotificationPresenter() {
+  public synchronized static NotificationPresenter getNotificationPresenter() {
     if (instance == null) {
       instance = new SmartNotificationPresenter();
     }

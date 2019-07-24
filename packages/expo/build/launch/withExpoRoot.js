@@ -8,7 +8,6 @@ export default function withExpoRoot(AppRootComponent) {
             if (StyleSheet.setStyleAttributePreprocessor) {
                 StyleSheet.setStyleAttributePreprocessor('fontFamily', Font.processFontFamily);
             }
-            const { exp } = this.props;
         }
         render() {
             if (__DEV__) {

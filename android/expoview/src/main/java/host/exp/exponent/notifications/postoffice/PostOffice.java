@@ -10,15 +10,14 @@ import java.util.List;
 import java.util.Map;
 
 import host.exp.exponent.notifications.helpers.Utils;
-import host.exp.exponent.notifications.postoffice.pendingdeliveries.BundleHelper;
 import host.exp.exponent.notifications.postoffice.pendingdeliveries.PendingForegroundNotification;
 import host.exp.exponent.notifications.postoffice.pendingdeliveries.PendingForegroundNotification$Table;
 import host.exp.exponent.notifications.postoffice.pendingdeliveries.PendingUserInteraction;
 import host.exp.exponent.notifications.postoffice.pendingdeliveries.PendingUserInteraction$Table;
 
-class PostOffice implements PostOfficeInterface {
+class PostOffice implements ExpoPostOffice {
 
-  private Map<String, MailboxInterface> mMailBoxes = new HashMap<>();
+  private Map<String, Mailbox> mMailBoxes = new HashMap<>();
 
   @Override
   public void notifyAboutUserInteraction(String experienceId, Bundle userInteraction) {
@@ -39,7 +38,7 @@ class PostOffice implements PostOfficeInterface {
   }
 
   @Override
-  public void registerModuleAndGetPendingDeliveries(String experienceId, MailboxInterface mailbox) {
+  public void registerModuleAndGetPendingDeliveries(String experienceId, Mailbox mailbox) {
     mMailBoxes.put(experienceId, mailbox);
 
     List<PendingForegroundNotification> pendingForegroundNotificationList = new Select().from(PendingForegroundNotification.class)
@@ -52,14 +51,14 @@ class PostOffice implements PostOfficeInterface {
 
     for (PendingForegroundNotification pendingForegroundNotification : pendingForegroundNotificationList) {
       mailbox.onForegroundNotification(
-          BundleHelper.jsonStringToBundle(pendingForegroundNotification.getNotification())
+          Utils.StringToBundle(pendingForegroundNotification.getNotification())
       );
       pendingForegroundNotification.delete();
     }
 
     for (PendingUserInteraction pendingUserInteraction : pendingUserInteractionList) {
       mailbox.onUserInteraction(
-          BundleHelper.jsonStringToBundle(pendingUserInteraction.getUserInteraction())
+          Utils.StringToBundle(pendingUserInteraction.getUserInteraction())
       );
       pendingUserInteraction.delete();
     }
@@ -81,6 +80,7 @@ class PostOffice implements PostOfficeInterface {
     PendingForegroundNotification pendingForegroundNotification = new PendingForegroundNotification();
     pendingForegroundNotification.setExperienceId(experienceId);
     pendingForegroundNotification.setNotification(Utils.bundleToString(notification));
+    pendingForegroundNotification.save();
   }
 
 }

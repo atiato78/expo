@@ -11,7 +11,7 @@ import host.exp.exponent.notifications.helpers.Utils;
 
 import static host.exp.exponent.notifications.NotificationHelper.createChannel;
 
-public class ChannelModifier implements NotificationModifierInterface {
+public class ChannelModifier implements NotificationModifier {
   @Override
   public void modify(NotificationCompat.Builder builder, Bundle notification, Context context, String experienceId) {
     if (!Utils.isAndroidVersionBelowOreo()) {

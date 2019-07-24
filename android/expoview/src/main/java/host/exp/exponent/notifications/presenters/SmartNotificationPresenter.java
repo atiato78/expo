@@ -9,9 +9,9 @@ import host.exp.exponent.notifications.postoffice.PostOfficeProxy;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
 
-public class SmartNotificationPresenter implements NotificationPresenterInterface {
+public class SmartNotificationPresenter implements NotificationPresenter {
 
-  private NotificationPresenterInterface mNotificationPresenter = new NotificationPresenter();
+  private NotificationPresenter mNotificationPresenter = new NotificationPresenterImpl();
 
   @Override
   public void presentNotification(Context context, String experienceId, Bundle notification, int notificationId) {

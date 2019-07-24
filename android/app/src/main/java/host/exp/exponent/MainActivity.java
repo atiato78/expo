@@ -43,5 +43,4 @@ public class MainActivity extends DetachActivity {
     // Add extra initialProps here
     return expBundle;
   }
-
 }

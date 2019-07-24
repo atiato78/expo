@@ -1,2 +1,2 @@
 export * from './Notifications';
-export { UserInteraction, OnUserInteractionListener, OnForegroundNotificationListener } from './Mailbox';
+export { UserInteraction, OnUserInteractionListener, OnForegroundNotificationListener, LocalNotification } from './Notifications.types';

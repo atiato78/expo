@@ -1,13 +1,7 @@
-import { LocalNotification } from './Notifications.types';
-export declare type UserInteraction = LocalNotification & {
-    actionType?: string;
-    userText?: string;
-};
-export declare type OnUserInteractionListener = (userInteraction: UserInteraction) => void;
-export declare type OnForegroundNotificationListener = (notification: LocalNotification) => void;
+import { OnUserInteractionListener, OnForegroundNotificationListener } from './Notifications.types';
 export declare class Mailbox {
-    onUserInteractionListeners: Map<string, OnUserInteractionListener>;
-    onForegroundNotificationListeners: Map<string, OnForegroundNotificationListener>;
+    private onUserInteractionListeners;
+    private onForegroundNotificationListeners;
     constructor();
     addOnUserInteractionListener(listenerName: string, listener: OnUserInteractionListener): void;
     addOnForegroundNotificationListener(listenerName: string, listener: OnForegroundNotificationListener): void;

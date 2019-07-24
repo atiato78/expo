@@ -2,7 +2,7 @@ package host.exp.exponent.notifications.postoffice;
 
 import android.os.Bundle;
 
-public interface MailboxInterface {
+public interface Mailbox {
 
   void onUserInteraction(Bundle userInteraction);
 

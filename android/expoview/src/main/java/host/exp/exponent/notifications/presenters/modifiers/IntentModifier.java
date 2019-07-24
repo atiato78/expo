@@ -10,7 +10,7 @@ import java.util.UUID;
 
 import host.exp.exponent.kernel.KernelConstants;
 
-public class IntentModifier implements NotificationModifierInterface {
+public class IntentModifier implements NotificationModifier {
   @Override
   public void modify(NotificationCompat.Builder builder, Bundle notification, Context context, String experienceId) {
     Class activityClass = KernelConstants.MAIN_ACTIVITY_CLASS;

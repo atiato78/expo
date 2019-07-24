@@ -5,20 +5,14 @@ import {
   Channel,
   ActionType,
   LocalNotificationId,
+  OnUserInteractionListener,
+  OnForegroundNotificationListener,
+  UserInteraction
 } from './Notifications.types';
 
-export type UserInteraction = LocalNotification & {
-    actionType?: string;
-    userText?: string;
-}
-
-export type OnUserInteractionListener = (userInteraction: UserInteraction) => void;
-
-export type OnForegroundNotificationListener = (notification: LocalNotification) => void;
-
 export class Mailbox {
-  onUserInteractionListeners: Map<string, OnUserInteractionListener>;
-  onForegroundNotificationListeners: Map<string, OnForegroundNotificationListener>;
+  private onUserInteractionListeners: Map<string, OnUserInteractionListener>;
+  private onForegroundNotificationListeners: Map<string, OnForegroundNotificationListener>;
 
   constructor() {
     this.onUserInteractionListeners = new Map();

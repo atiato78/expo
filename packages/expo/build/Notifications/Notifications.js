@@ -3,6 +3,7 @@ import invariant from 'invariant';
 import { AsyncStorage, Platform } from 'react-native';
 import { CodedError, RCTDeviceEventEmitter, UnavailabilityError } from '@unimodules/core';
 import ExponentNotifications from './ExponentNotifications';
+<<<<<<< HEAD
 let _emitter;
 let _initialNotification;
 function _maybeInitEmitter() {
@@ -27,6 +28,13 @@ function _emitNotification(notification) {
     }
     _emitter.emit('notification', notification);
 }
+||||||| merged common ancestors
+import { Mailbox, } from './Mailbox';
+const _mailbox = new Mailbox();
+=======
+import { Mailbox } from './Mailbox';
+const _mailbox = new Mailbox();
+>>>>>>> fixed several bugs
 function _processNotification(notification) {
     notification = Object.assign({}, notification);
     if (!notification.data) {

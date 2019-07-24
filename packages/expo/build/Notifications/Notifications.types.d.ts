@@ -41,4 +41,10 @@ export declare type ActionType = {
         placeholder: string;
     };
 };
+export declare type UserInteraction = LocalNotification & {
+    actionType?: string;
+    userText?: string;
+};
+export declare type OnUserInteractionListener = (userInteraction: UserInteraction) => void;
+export declare type OnForegroundNotificationListener = (notification: LocalNotification) => void;
 export declare type LocalNotificationId = string | number;

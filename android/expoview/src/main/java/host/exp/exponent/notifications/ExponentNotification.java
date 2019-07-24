@@ -67,12 +67,6 @@ public class ExponentNotification {
     return notification;
   }
 
-  public Bundle toBundle() {
-    Bundle notification = new Bundle();
-    // toDo
-    return notification;
-  }
-
   public Object toWriteableMap(String sdkVersion, String origin) {
     RNObject args = new RNObject("com.facebook.react.bridge.Arguments").loadVersion(sdkVersion).callStaticRecursive("createMap");
     if (origin != null) {

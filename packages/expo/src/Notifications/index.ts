@@ -2,5 +2,6 @@ export * from './Notifications';
 export {
   UserInteraction,
   OnUserInteractionListener,
-  OnForegroundNotificationListener
-} from './Mailbox';
+  OnForegroundNotificationListener,
+  LocalNotification
+} from './Notifications.types';
