@@ -8,6 +8,7 @@ import android.support.v4.app.NotificationManagerCompat;
 import java.util.ArrayList;
 import java.util.List;
 
+import host.exp.exponent.notifications.presenters.modifiers.StickyModifier;
 import host.exp.exponent.notifications.presenters.modifiers.BodyModifier;
 import host.exp.exponent.notifications.presenters.modifiers.CategoryModifier;
 import host.exp.exponent.notifications.presenters.modifiers.ChannelModifier;
@@ -50,11 +51,16 @@ public class NotificationPresenterImpl implements NotificationPresenter {
     }
     mModifiers = new ArrayList<>();
 
+    /*
+    The order is important because ChannelModifier adds additional options to the notification bundle
+     */
+
     mModifiers.add(new ExperienceIdModifier());
+    mModifiers.add(new ChannelModifier());
+    mModifiers.add(new StickyModifier());
     mModifiers.add(new TitleModifier());
     mModifiers.add(new BodyModifier());
     mModifiers.add(new SoundModifer());
-    mModifiers.add(new ChannelModifier());
     mModifiers.add(new IconModifier());
     mModifiers.add(new ImportanceModifier());
     mModifiers.add(new ColorModifier());

@@ -381,74 +381,74 @@ public class NotificationHelper {
 
     if (data.containsKey("channelId")) {
       String channelId = (String) data.get("channelId");
-      builder.setChannelId(ExponentNotificationManager.getScopedChannelId(experienceId, channelId));
+    builder.setChannelId(ExponentNotificationManager.getScopedChannelId(experienceId, channelId));
 
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        // if we don't yet have a channel matching this ID, check shared preferences --
-        // it's possible this device has just been upgraded to Android 8+ and the channel
-        // needs to be created in the system
-        if (manager.getNotificationChannel(experienceId, channelId) == null) {
-          JSONObject storedChannelDetails = manager.readChannelSettings(experienceId, channelId);
-          if (storedChannelDetails != null) {
-            createChannel(context, experienceId, channelId, storedChannelDetails);
-          }
-        }
-      } else {
-        // on Android 7.1 and below, read channel settings for sound, priority, and vibrate from shared preferences
-        // and apply these settings to the notification individually, since channels do not exist
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      // if we don't yet have a channel matching this ID, check shared preferences --
+      // it's possible this device has just been upgraded to Android 8+ and the channel
+      // needs to be created in the system
+      if (manager.getNotificationChannel(experienceId, channelId) == null) {
         JSONObject storedChannelDetails = manager.readChannelSettings(experienceId, channelId);
         if (storedChannelDetails != null) {
-          if (storedChannelDetails.optBoolean(NotificationConstants.NOTIFICATION_CHANNEL_SOUND, false)) {
-            builder.setDefaults(NotificationCompat.DEFAULT_SOUND);
-          }
-
-          String priorityString = storedChannelDetails.optString(NotificationConstants.NOTIFICATION_CHANNEL_PRIORITY);
-          int priority;
-          switch (priorityString) {
-            case "max":
-              priority = NotificationCompat.PRIORITY_MAX;
-              break;
-            case "high":
-              priority = NotificationCompat.PRIORITY_HIGH;
-              break;
-            case "low":
-              priority = NotificationCompat.PRIORITY_LOW;
-              break;
-            case "min":
-              priority = NotificationCompat.PRIORITY_MIN;
-              break;
-            default:
-              priority = NotificationCompat.PRIORITY_DEFAULT;
-          }
-          builder.setPriority(priority);
-
-          try {
-            JSONArray vibrateJsonArray = storedChannelDetails.optJSONArray(NotificationConstants.NOTIFICATION_CHANNEL_VIBRATE);
-            if (vibrateJsonArray != null) {
-              long[] pattern = new long[vibrateJsonArray.length()];
-              for (int i = 0; i < vibrateJsonArray.length(); i++) {
-                pattern[i] = ((Double) vibrateJsonArray.getDouble(i)).intValue();
-              }
-              builder.setVibrate(pattern);
-            } else if (storedChannelDetails.optBoolean(NotificationConstants.NOTIFICATION_CHANNEL_VIBRATE, false)) {
-              builder.setVibrate(new long[]{0, 500});
-            }
-          } catch (Exception e) {
-            EXL.e(TAG, "Failed to set vibrate settings on notification from stored channel: " + e.getMessage());
-          }
-        } else {
-          EXL.e(TAG, "No stored channel found for " + experienceId + ": " + channelId);
+          createChannel(context, experienceId, channelId, storedChannelDetails);
         }
       }
     } else {
-      // make a default channel so that people don't have to explicitly create a channel to see notifications
-      createChannel(
-          context,
-          experienceId,
-          NotificationConstants.NOTIFICATION_DEFAULT_CHANNEL_ID,
-          context.getString(R.string.default_notification_channel_group),
-          new HashMap());
+      // on Android 7.1 and below, read channel settings for sound, priority, and vibrate from shared preferences
+      // and apply these settings to the notification individually, since channels do not exist
+      JSONObject storedChannelDetails = manager.readChannelSettings(experienceId, channelId);
+      if (storedChannelDetails != null) {
+        if (storedChannelDetails.optBoolean(NotificationConstants.NOTIFICATION_CHANNEL_SOUND, false)) {
+          builder.setDefaults(NotificationCompat.DEFAULT_SOUND);
+        }
+
+        String priorityString = storedChannelDetails.optString(NotificationConstants.NOTIFICATION_CHANNEL_PRIORITY);
+        int priority;
+        switch (priorityString) {
+          case "max":
+            priority = NotificationCompat.PRIORITY_MAX;
+            break;
+          case "high":
+            priority = NotificationCompat.PRIORITY_HIGH;
+            break;
+          case "low":
+            priority = NotificationCompat.PRIORITY_LOW;
+            break;
+          case "min":
+            priority = NotificationCompat.PRIORITY_MIN;
+            break;
+          default:
+            priority = NotificationCompat.PRIORITY_DEFAULT;
+        }
+        builder.setPriority(priority);
+
+        try {
+          JSONArray vibrateJsonArray = storedChannelDetails.optJSONArray(NotificationConstants.NOTIFICATION_CHANNEL_VIBRATE);
+          if (vibrateJsonArray != null) {
+            long[] pattern = new long[vibrateJsonArray.length()];
+            for (int i = 0; i < vibrateJsonArray.length(); i++) {
+              pattern[i] = ((Double) vibrateJsonArray.getDouble(i)).intValue();
+            }
+            builder.setVibrate(pattern);
+          } else if (storedChannelDetails.optBoolean(NotificationConstants.NOTIFICATION_CHANNEL_VIBRATE, false)) {
+            builder.setVibrate(new long[]{0, 500});
+          }
+        } catch (Exception e) {
+          EXL.e(TAG, "Failed to set vibrate settings on notification from stored channel: " + e.getMessage());
+        }
+      } else {
+        EXL.e(TAG, "No stored channel found for " + experienceId + ": " + channelId);
+      }
     }
+  } else {
+    // make a default channel so that people don't have to explicitly create a channel to see notifications
+    createChannel(
+        context,
+        experienceId,
+        NotificationConstants.NOTIFICATION_DEFAULT_CHANNEL_ID,
+        context.getString(R.string.default_notification_channel_group),
+        new HashMap());
+  }
 
     if (data.containsKey("title")) {
       String title = (String) data.get("title");

@@ -198,8 +198,7 @@ public class ExponentNotificationManager {
   }
 
   public void cancel(String experienceId, int id) {
-    NotificationManagerCompat.from(mContext).cancel(experienceId, id);
-
+    NotificationManagerCompat.from(mContext).cancel(id);
     try {
       JSONObject metadata = mExponentSharedPreferences.getExperienceMetadata(experienceId);
       if (metadata == null) {

@@ -36,8 +36,10 @@ public class UserInteractionReceiver {
     String experienceId = notification.getString("experienceId");
     Integer notificationIntId = notification.getInt("notificationIntId");
 
-    NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
-    notificationManagerCompat.cancel(notificationIntId);
+    if (!notification.getBoolean("sticky")) {
+      ExponentNotificationManager manager = new ExponentNotificationManager(context);
+      manager.cancel(experienceId, notificationIntId);
+    }
 
     // Add action type
     if (bundle.containsKey(KernelConstants.NOTIFICATION_ACTION_TYPE_KEY)) {
@@ -45,8 +47,6 @@ public class UserInteractionReceiver {
           NotificationConstants.NOTIFICATION_ACTION_TYPE,
           bundle.getString(KernelConstants.NOTIFICATION_ACTION_TYPE_KEY)
       );
-      ExponentNotificationManager manager = new ExponentNotificationManager(context);
-      manager.cancel(experienceId, notificationIntId);
     }
     // Add remote input
     Bundle remoteInput = RemoteInput.getResultsFromIntent(intent);

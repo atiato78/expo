@@ -278,12 +278,13 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
   }
 
   @ReactMethod
-  public void dismissNotification(final int notificationId, final Promise promise) {
+  public void dismissNotification(final String notificationId, final Promise promise) {
     try {
+      int id = Integer.parseInt(notificationId);
       ExponentNotificationManager manager = new ExponentNotificationManager(getReactApplicationContext());
       manager.cancel(
           mManifest.getString(ExponentManifest.MANIFEST_ID_KEY),
-          notificationId
+          id
       );
       promise.resolve(true);
     } catch (JSONException e) {

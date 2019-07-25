@@ -29,7 +29,6 @@ public class ExpoFcmMessagingService extends FirebaseMessagingService {
 
     String experienceId = (String) remoteMessage.getData().get("experienceId");
     bundle.putString("experienceId", experienceId);
-
     bundle.putString("channelId", remoteMessage.getData().get("channelId"));
     bundle.putString("body", remoteMessage.getData().get("body"));
     bundle.putString("title", remoteMessage.getData().get("title"));
