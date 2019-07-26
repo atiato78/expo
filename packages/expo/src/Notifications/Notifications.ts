@@ -327,13 +327,6 @@ export function removeOnForegroundNotificationListener(listenerName: string) {
   _mailbox.removeOnForegroundNotificationListener(listenerName);
 }
 
-export async function setBadgeNumberAsync(number: number): Promise<void> {
-  if (!ExponentNotifications.setBadgeNumberAsync) {
-    throw new UnavailabilityError('Expo.Notifications', 'setBadgeNumberAsync');
-  }
-  return ExponentNotifications.setBadgeNumberAsync(number);
-}
-
 export async function scheduleNotificationWithCalendarAsync(
   notification: LocalNotification,
   options: {

@@ -25,17 +25,17 @@ export declare function addOnUserInteractionListener(listenerName: string, liste
 export declare function addOnForegroundNotificationListener(listenerName: string, listener: OnForegroundNotificationListener): void;
 export declare function removeOnUserInteractionListener(listenerName: string): void;
 export declare function removeOnForegroundNotificationListener(listenerName: string): void;
-scheduleNotificationWithCalendarAsync(notification: LocalNotification, options?: {
-    year?: number | undefined;
-    month?: number | undefined;
-    hour?: number | undefined;
-    day?: number | undefined;
-    minute?: number | undefined;
-    second?: number | undefined;
-    weekDay?: number | undefined;
-    repeat?: boolean | undefined;
+export declare function scheduleNotificationWithCalendarAsync(notification: LocalNotification, options?: {
+    year?: number;
+    month?: number;
+    hour?: number;
+    day?: number;
+    minute?: number;
+    second?: number;
+    weekDay?: number;
+    repeat?: boolean;
 }): Promise<string>;
-scheduleNotificationWithTimerAsync(notification: LocalNotification, options: {
+export declare function scheduleNotificationWithTimerAsync(notification: LocalNotification, options: {
     interval: number;
-    repeat?: boolean | undefined;
+    repeat?: boolean;
 }): Promise<string>;

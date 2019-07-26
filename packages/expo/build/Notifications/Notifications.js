@@ -1,40 +1,10 @@
 import Constants from 'expo-constants';
 import invariant from 'invariant';
 import { AsyncStorage, Platform } from 'react-native';
-import { CodedError, RCTDeviceEventEmitter, UnavailabilityError } from '@unimodules/core';
+import { CodedError, UnavailabilityError } from '@unimodules/core';
 import ExponentNotifications from './ExponentNotifications';
-<<<<<<< HEAD
-let _emitter;
-let _initialNotification;
-function _maybeInitEmitter() {
-    if (!_emitter) {
-        _emitter = new EventEmitter();
-        RCTDeviceEventEmitter.addListener('Exponent.notification', _emitNotification);
-    }
-}
-function _emitNotification(notification) {
-    if (typeof notification === 'string') {
-        notification = JSON.parse(notification);
-    }
-    /* Don't mutate the original notification */
-    notification = { ...notification };
-    if (typeof notification.data === 'string') {
-        try {
-            notification.data = JSON.parse(notification.data);
-        }
-        catch (e) {
-            // It's actually just a string, that's fine
-        }
-    }
-    _emitter.emit('notification', notification);
-}
-||||||| merged common ancestors
-import { Mailbox, } from './Mailbox';
-const _mailbox = new Mailbox();
-=======
 import { Mailbox } from './Mailbox';
 const _mailbox = new Mailbox();
->>>>>>> fixed several bugs
 function _processNotification(notification) {
     notification = Object.assign({}, notification);
     if (!notification.data) {
@@ -224,86 +194,6 @@ export async function scheduleLocalNotificationAsync(notification, options = {})
         if (nativeNotification.channelId) {
             _channel = await _legacyReadChannel(nativeNotification.channelId);
         }
-<<<<<<< HEAD
-        if (IS_USING_NEW_BINARY) {
-            // delete the legacy channel from AsyncStorage so this codepath isn't triggered anymore
-            _legacyDeleteChannel(nativeNotification.channelId);
-            return ExponentNotifications.scheduleLocalNotificationWithChannel(nativeNotification, options, _channel);
-        }
-        else {
-            // TODO: remove this codepath before releasing, it will never be triggered on SDK 28+
-            // channel does not actually exist, so add its settings to the individual notification
-            if (_channel) {
-                nativeNotification.sound = _channel.sound;
-                nativeNotification.priority = _channel.priority;
-                nativeNotification.vibrate = _channel.vibrate;
-            }
-            return ExponentNotifications.scheduleLocalNotification(nativeNotification, options);
-        }
-        return ExponentNotifications.setBadgeNumberAsync(number);
-    },
-};
-//# sourceMappingURL=Notifications.js.map
-||||||| merged common ancestors
-        if (IS_USING_NEW_BINARY) {
-            // delete the legacy channel from AsyncStorage so this codepath isn't triggered anymore
-            _legacyDeleteChannel(nativeNotification.channelId);
-            return ExponentNotifications.scheduleLocalNotificationWithChannel(nativeNotification, options, _channel);
-        }
-        else {
-            // TODO: remove this codepath before releasing, it will never be triggered on SDK 28+
-            // channel does not actually exist, so add its settings to the individual notification
-            if (_channel) {
-                nativeNotification.sound = _channel.sound;
-                nativeNotification.priority = _channel.priority;
-                nativeNotification.vibrate = _channel.vibrate;
-            }
-            return ExponentNotifications.scheduleLocalNotification(nativeNotification, options);
-        }
-    }
-}
-/* Dismiss currently shown notification with ID (Android only) */
-export async function dismissNotificationAsync(notificationId) {
-    if (!ExponentNotifications.dismissNotification) {
-        throw new UnavailabilityError('Expo.Notifications', 'dismissNotification');
-    }
-    return await ExponentNotifications.dismissNotification(notificationId);
-}
-/* Dismiss all currently shown notifications (Android only) */
-export async function dismissAllNotificationsAsync() {
-    if (!ExponentNotifications.dismissAllNotifications) {
-        throw new UnavailabilityError('Expo.Notifications', 'dismissAllNotifications');
-    }
-    return await ExponentNotifications.dismissAllNotifications();
-}
-/* Cancel scheduled notification notification with ID */
-export function cancelScheduledNotificationAsync(notificationId) {
-    return ExponentNotifications.cancelScheduledNotificationAsync(notificationId);
-}
-/* Cancel all scheduled notifications */
-export function cancelAllScheduledNotificationsAsync() {
-    return ExponentNotifications.cancelAllScheduledNotificationsAsync();
-}
-export async function setBadgeNumberAsync(number) {
-    if (!ExponentNotifications.setBadgeNumberAsync) {
-        throw new UnavailabilityError('Expo.Notifications', 'setBadgeNumberAsync');
-    }
-    return ExponentNotifications.setBadgeNumberAsync(number);
-}
-export function addOnUserInteractionListener(listenerName, listener) {
-    _mailbox.addOnUserInteractionListener(listenerName, listener);
-}
-export function addOnForegroundNotificationListener(listenerName, listener) {
-    _mailbox.addOnForegroundNotificationListener(listenerName, listener);
-}
-export function removeOnUserInteractionListener(listenerName) {
-    _mailbox.removeOnUserInteractionListener(listenerName);
-}
-export function removeOnForegroundNotificationListener(listenerName) {
-    _mailbox.removeOnForegroundNotificationListener(listenerName);
-}
-//# sourceMappingURL=Notifications.js.map
-=======
         // delete the legacy channel from AsyncStorage so this codepath isn't triggered anymore
         _legacyDeleteChannel(nativeNotification.channelId);
         return ExponentNotifications.scheduleLocalNotificationWithChannel(nativeNotification, options, _channel);
@@ -324,11 +214,14 @@ export async function dismissAllNotificationsAsync() {
     return await ExponentNotifications.dismissAllNotifications();
 }
 /* Cancel scheduled notification notification with ID */
-export function cancelScheduledNotificationAsync(notificationId) {
+export async function cancelScheduledNotificationAsync(notificationId) {
+    if (Platform.OS === 'android' && typeof notificationId === 'string') {
+        return ExponentNotifications.cancelScheduledNotificationWithStringIdAsync(notificationId);
+    }
     return ExponentNotifications.cancelScheduledNotificationAsync(notificationId);
 }
 /* Cancel all scheduled notifications */
-export function cancelAllScheduledNotificationsAsync() {
+export async function cancelAllScheduledNotificationsAsync() {
     return ExponentNotifications.cancelAllScheduledNotificationsAsync();
 }
 export async function setBadgeNumberAsync(number) {
@@ -349,5 +242,26 @@ export function removeOnUserInteractionListener(listenerName) {
 export function removeOnForegroundNotificationListener(listenerName) {
     _mailbox.removeOnForegroundNotificationListener(listenerName);
 }
+export async function scheduleNotificationWithCalendarAsync(notification, options = {}) {
+    const areOptionsValid = (options.month == null || isInRangeInclusive(options.month, 1, 12)) &&
+        (options.day == null || isInRangeInclusive(options.day, 1, 31)) &&
+        (options.hour == null || isInRangeInclusive(options.hour, 0, 23)) &&
+        (options.minute == null || isInRangeInclusive(options.minute, 0, 59)) &&
+        (options.second == null || isInRangeInclusive(options.second, 0, 59)) &&
+        (options.weekDay == null || isInRangeInclusive(options.weekDay, 1, 7)) &&
+        (options.weekDay == null || options.day == null);
+    if (!areOptionsValid) {
+        throw new CodedError('WRONG_OPTIONS', 'Options in scheduleNotificationWithCalendarAsync call were incorrect!');
+    }
+    return ExponentNotifications.scheduleNotificationWithCalendar(notification, options);
+}
+export async function scheduleNotificationWithTimerAsync(notification, options) {
+    if (options.interval < 1) {
+        throw new CodedError('WRONG_OPTIONS', 'Interval must be not less then 1');
+    }
+    return ExponentNotifications.scheduleNotificationWithTimer(notification, options);
+}
+function isInRangeInclusive(variable, min, max) {
+    return (variable >= min && variable <= max);
+}
 //# sourceMappingURL=Notifications.js.map
->>>>>>> several fixes
