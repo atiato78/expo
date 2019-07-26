@@ -215,9 +215,6 @@ export async function dismissAllNotificationsAsync() {
 }
 /* Cancel scheduled notification notification with ID */
 export async function cancelScheduledNotificationAsync(notificationId) {
-    if (Platform.OS === 'android' && typeof notificationId === 'string') {
-        return ExponentNotifications.cancelScheduledNotificationWithStringIdAsync(notificationId);
-    }
     return ExponentNotifications.cancelScheduledNotificationAsync(notificationId);
 }
 /* Cancel all scheduled notifications */

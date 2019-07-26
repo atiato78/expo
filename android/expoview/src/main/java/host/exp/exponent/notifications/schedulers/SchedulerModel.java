@@ -10,7 +10,7 @@ public interface SchedulerModel {
 
   String getOwnerExperienceId();
 
-  int getNotificationId();
+  int getId();
 
   String getIdAsString();
 

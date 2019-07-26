@@ -18,6 +18,7 @@ import org.json.JSONException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import host.exp.exponent.notifications.helpers.ExpoCronDefinitionBuilder;
 import host.exp.exponent.notifications.managers.SchedulersManagerProxy;
@@ -37,11 +38,8 @@ public class CalendarSchedulerModel extends BaseModel implements SchedulerModel 
   // -- model fields --
 
   @Column
-  @PrimaryKey(autoincrement = true)
+  @PrimaryKey
   int id;
-
-  @Column
-  int notificationId;
 
   @Column
   String experienceId;
@@ -59,7 +57,7 @@ public class CalendarSchedulerModel extends BaseModel implements SchedulerModel 
 
   @Override
   public String getIdAsString() {
-    return Integer.valueOf(id).toString() + this.getClass().getSimpleName();
+    return Integer.valueOf(id).toString();
   }
 
   @Override
@@ -74,7 +72,7 @@ public class CalendarSchedulerModel extends BaseModel implements SchedulerModel 
 
   @Override
   public String saveAndGetId() {
-    save(); // get id from database
+    this.id = Math.abs(new Random().nextInt(Integer.MAX_VALUE));
     details.put(SchedulersManagerProxy.SCHEDULER_ID, getIdAsString());
     setDetails(details);
     save();
@@ -111,14 +109,6 @@ public class CalendarSchedulerModel extends BaseModel implements SchedulerModel 
 
   public void setId(int id) {
     this.id = id;
-  }
-
-  public int getNotificationId() {
-    return notificationId;
-  }
-
-  public void setNotificationId(int notificationId) {
-    this.notificationId = notificationId;
   }
 
   public String getExperienceId() {
@@ -159,6 +149,7 @@ public class CalendarSchedulerModel extends BaseModel implements SchedulerModel 
   }
 
   public HashMap<String, Object> getDetails() {
+    setSerializedDetails(this.serializedDetails);
     return details;
   }
 

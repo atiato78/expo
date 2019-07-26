@@ -244,7 +244,7 @@ public class ExponentNotificationManager {
     }
   }
 
-  public void schedule(String experienceId, int id, HashMap<String, Serializable> notification, long time, Long interval) throws ClassNotFoundException {
+  public void schedule(String experienceId, int id, HashMap notification, long time, Long interval) throws ClassNotFoundException {
     Intent notificationIntent = new Intent(mContext, ScheduledNotificationReceiver.class);
 
     notificationIntent.setType(experienceId);

@@ -293,9 +293,6 @@ export async function dismissAllNotificationsAsync(): Promise<void> {
 
   /* Cancel scheduled notification notification with ID */
 export async function cancelScheduledNotificationAsync(notificationId: LocalNotificationId): Promise<void> {
-  if (Platform.OS === 'android' && typeof notificationId === 'string') {
-    return ExponentNotifications.cancelScheduledNotificationWithStringIdAsync(notificationId);
-  }
   return ExponentNotifications.cancelScheduledNotificationAsync(notificationId);
 }
 

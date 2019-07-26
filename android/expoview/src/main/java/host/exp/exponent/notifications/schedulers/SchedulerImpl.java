@@ -31,7 +31,7 @@ public class SchedulerImpl implements Scheduler {
     }
 
     String experienceId = mSchedulerModel.getOwnerExperienceId();
-    int notificationId = mSchedulerModel.getNotificationId();
+    int notificationId = mSchedulerModel.getId();
     HashMap<String, Object> details = mSchedulerModel.getDetails();
 
     try {
@@ -54,7 +54,7 @@ public class SchedulerImpl implements Scheduler {
   @Override
   public void cancel() {
     String experienceId = mSchedulerModel.getOwnerExperienceId();
-    int notificationId = mSchedulerModel.getNotificationId();
+    int notificationId = mSchedulerModel.getId();
     getManager().cancel(experienceId, notificationId);
   }
 

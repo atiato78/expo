@@ -64,9 +64,6 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
   ExponentSharedPreferences mExponentSharedPreferences;
 
   @Inject
-  ExponentManifest mExponentManifest;
-
-  @Inject
   ExponentNetwork mExponentNetwork;
 
   private final JSONObject mManifest;
@@ -278,12 +275,13 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
   }
 
   @ReactMethod
-  public void dismissNotification(final int notificationId, final Promise promise) {
+  public void dismissNotification(final String notificationId, final Promise promise) {
     try {
+      int id = Integer.parseInt(notificationId);
       ExponentNotificationManager manager = new ExponentNotificationManager(getReactApplicationContext());
       manager.cancel(
           mManifest.getString(ExponentManifest.MANIFEST_ID_KEY),
-          notificationId
+          id
       );
       promise.resolve(true);
     } catch (JSONException e) {
@@ -303,22 +301,15 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
   }
 
   @ReactMethod
-  public void cancelScheduledNotificationAsync(final int notificationId, final Promise promise) {
+  public void cancelScheduledNotificationAsync(final String notificationId, final Promise promise) {
     try {
+      int id = Integer.parseInt(notificationId);
       ExponentNotificationManager manager = new ExponentNotificationManager(getReactApplicationContext());
-      manager.cancelScheduled(mManifest.getString(ExponentManifest.MANIFEST_ID_KEY), notificationId);
-      promise.resolve(null);
-    } catch (Exception e) {
-      promise.reject(e);
-    }
-  }
+      manager.cancelScheduled(mManifest.getString(ExponentManifest.MANIFEST_ID_KEY), id);
 
-  @ReactMethod
-  public void cancelScheduledNotificationWithStringIdAsync(final String id, final Promise promise) {
-    try {
       SchedulersManagerProxy.getInstance(getReactApplicationContext()
           .getApplicationContext())
-          .removeScheduler(id);
+          .removeScheduler(notificationId);
       promise.resolve(null);
     } catch (Exception e) {
       promise.reject(e);
@@ -346,7 +337,6 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
   @ReactMethod
   public void scheduleNotificationWithTimer(final ReadableMap data, final ReadableMap optionsMap, final Promise promise) {
     HashMap<String, Object> options = optionsMap.toHashMap();
-    int notificationId = Math.abs( new Random().nextInt() );
     HashMap<String, Object> hashMap = data.toHashMap();
     if (data.hasKey("categoryId")) {
       hashMap.put("categoryId", getScopedIdIfNotDetached(data.getString("categoryId")));
@@ -365,7 +355,6 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
 
     IntervalSchedulerModel intervalSchedulerModel = new IntervalSchedulerModel();
     intervalSchedulerModel.setExperienceId(experienceId);
-    intervalSchedulerModel.setNotificationId(notificationId);
     intervalSchedulerModel.setDetails(details);
     intervalSchedulerModel.setRepeat(options.containsKey("repeat") && (Boolean) options.get("repeat"));
     intervalSchedulerModel.setScheduledTime(System.currentTimeMillis() + ((Double) options.get("interval")).longValue());
@@ -389,7 +378,6 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
   @ReactMethod
   public void scheduleNotificationWithCalendar(final ReadableMap data, final ReadableMap optionsMap, final Promise promise) {
     HashMap<String, Object> options = optionsMap.toHashMap();
-    int notificationId = Math.abs( new Random().nextInt() );
     HashMap<String, Object> hashMap = data.toHashMap();
     if (data.hasKey("categoryId")) {
       hashMap.put("categoryId", getScopedIdIfNotDetached(data.getString("categoryId")));
@@ -410,7 +398,6 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
 
     CalendarSchedulerModel calendarSchedulerModel = new CalendarSchedulerModel();
     calendarSchedulerModel.setExperienceId(experienceId);
-    calendarSchedulerModel.setNotificationId(notificationId);
     calendarSchedulerModel.setDetails(details);
     calendarSchedulerModel.setRepeat(options.containsKey("repeat") && (Boolean) options.get("repeat"));
     calendarSchedulerModel.setCalendarData(cron.asString());
@@ -459,7 +446,7 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
         mManifest,
         new NotificationHelper.Listener() {
           public void onSuccess(int id) {
-            promise.resolve(id);
+            promise.resolve(Integer.valueOf(id).toString());
           }
 
           public void onFailure(Exception e) {
