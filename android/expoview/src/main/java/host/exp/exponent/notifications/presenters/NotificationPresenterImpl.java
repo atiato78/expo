@@ -21,6 +21,7 @@ import host.exp.exponent.notifications.presenters.modifiers.LinkModifier;
 import host.exp.exponent.notifications.presenters.modifiers.NotificationModifier;
 import host.exp.exponent.notifications.presenters.modifiers.SoundModifer;
 import host.exp.exponent.notifications.presenters.modifiers.TitleModifier;
+import host.exp.exponent.notifications.presenters.modifiers.VibrateModifier;
 import io.fabric.sdk.android.services.concurrency.AsyncTask;
 
 public class NotificationPresenterImpl implements NotificationPresenter {
@@ -57,6 +58,7 @@ public class NotificationPresenterImpl implements NotificationPresenter {
 
     mModifiers.add(new ExperienceIdModifier());
     mModifiers.add(new ChannelModifier());
+    mModifiers.add(new VibrateModifier());
     mModifiers.add(new StickyModifier());
     mModifiers.add(new TitleModifier());
     mModifiers.add(new BodyModifier());

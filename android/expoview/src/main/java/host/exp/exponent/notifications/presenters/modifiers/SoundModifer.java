@@ -12,8 +12,7 @@ public class SoundModifer implements NotificationModifier {
   @Override
   public void modify(NotificationCompat.Builder builder, Bundle notification, Context context, String experienceId) {
     if (Utils.isAndroidVersionBelowOreo() && notification.getBoolean("sound")) {
-      Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-      builder.setSound(uri);
+      builder.setDefaults(NotificationCompat.DEFAULT_SOUND);
     }
   }
 }
