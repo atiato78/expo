@@ -12,6 +12,9 @@ import host.exp.exponent.notifications.NotificationActionCenter;
 import host.exp.exponent.notifications.NotificationConstants;
 import host.exp.exponent.notifications.postoffice.PostOfficeProxy;
 
+import static host.exp.exponent.notifications.NotificationConstants.NOTIFICATION_EXPERIENCE_ID_KEY;
+import static host.exp.exponent.notifications.NotificationConstants.NOTIFICATION_STICKY;
+
 public class UserInteractionReceiver {
 
   private static volatile UserInteractionReceiver mInstance = null;
@@ -33,10 +36,10 @@ public class UserInteractionReceiver {
       return false;
     }
 
-    String experienceId = notification.getString("experienceId");
+    String experienceId = notification.getString(NOTIFICATION_EXPERIENCE_ID_KEY);
     Integer notificationIntId = notification.getInt("notificationIntId");
 
-    if (!notification.getBoolean("sticky")) {
+    if (!notification.getBoolean(NOTIFICATION_STICKY)) {
       ExponentNotificationManager manager = new ExponentNotificationManager(context);
       manager.cancel(experienceId, notificationIntId);
     }

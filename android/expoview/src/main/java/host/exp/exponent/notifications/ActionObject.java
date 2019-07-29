@@ -7,6 +7,15 @@ import com.raizlabs.android.dbflow.structure.BaseModel;
 
 import java.util.Map;
 
+import static host.exp.exponent.notifications.NotificationConstants.ACTION_BUTTON_TITLE;
+import static host.exp.exponent.notifications.NotificationConstants.ACTION_ID;
+import static host.exp.exponent.notifications.NotificationConstants.ACTION_IS_AUTHENTICATION_REQUIRED;
+import static host.exp.exponent.notifications.NotificationConstants.ACTION_IS_DESTRUCTIVE;
+import static host.exp.exponent.notifications.NotificationConstants.ACTION_PLACEHOLDER;
+import static host.exp.exponent.notifications.NotificationConstants.ACTION_SUBMIT_BUTTON_TITLE;
+import static host.exp.exponent.notifications.NotificationConstants.ACTION_TEXT_INPUT;
+import static host.exp.exponent.notifications.NotificationConstants.NOTIFICATION_CATEGORY;
+
 @Table(databaseName = ActionDatabase.NAME)
 public class ActionObject extends BaseModel {
   @Column
@@ -42,16 +51,16 @@ public class ActionObject extends BaseModel {
   }
 
   public ActionObject(Map<String, Object> map, int position) {
-    this.categoryId = (String) map.get("categoryId");
-    this.actionId = (String) map.get("actionId");
-    this.buttonTitle = (String) map.get("buttonTitle");
-    this.isDestructive = (Boolean) map.get("isDestructive");
-    this.isAuthenticationRequired = (Boolean) map.get("isAuthenticationRequired");
-    this.shouldShowTextInput = (map.get("textInput") != null);
-    if (this.shouldShowTextInput && map.get("textInput") instanceof Map) {
-      Map<String, Object> subMap = (Map<String, Object>) map.get("textInput");
-      this.placeholder = (String) subMap.get("placeholder");
-      this.submitButtonTitle = (String) subMap.get("submitButtonTitle");
+    this.categoryId = (String) map.get(NOTIFICATION_CATEGORY);
+    this.actionId = (String) map.get(ACTION_ID);
+    this.buttonTitle = (String) map.get(ACTION_BUTTON_TITLE);
+    this.isDestructive = (Boolean) map.get(ACTION_IS_DESTRUCTIVE);
+    this.isAuthenticationRequired = (Boolean) map.get(ACTION_IS_AUTHENTICATION_REQUIRED);
+    this.shouldShowTextInput = (map.get(ACTION_TEXT_INPUT) != null);
+    if (this.shouldShowTextInput && map.get(ACTION_TEXT_INPUT) instanceof Map) {
+      Map<String, Object> subMap = (Map<String, Object>) map.get(ACTION_TEXT_INPUT);
+      this.placeholder = (String) subMap.get(ACTION_PLACEHOLDER);
+      this.submitButtonTitle = (String) subMap.get(ACTION_SUBMIT_BUTTON_TITLE);
     }
     this.position = position;
   }

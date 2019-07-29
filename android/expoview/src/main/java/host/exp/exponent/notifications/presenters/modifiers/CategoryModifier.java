@@ -10,13 +10,15 @@ import host.exp.exponent.kernel.KernelConstants;
 import host.exp.exponent.notifications.IntentProvider;
 import host.exp.exponent.notifications.NotificationActionCenter;
 
+import static host.exp.exponent.notifications.NotificationConstants.NOTIFICATION_CATEGORY;
+
 public class CategoryModifier implements NotificationModifier {
   @Override
   public void modify(NotificationCompat.Builder builder, Bundle notification, Context context, String experienceId) {
-    if (notification.containsKey("categoryId")) {
-      String categoryId = getScopedIdIfNotDetached(notification.getString("categoryId"), experienceId);
+    if (notification.containsKey(NOTIFICATION_CATEGORY)) {
+      String categoryId = getScopedIdIfNotDetached(notification.getString(NOTIFICATION_CATEGORY), experienceId);
 
-      NotificationActionCenter.setCategory((String) notification.get("categoryId"), builder, context, new IntentProvider() {
+      NotificationActionCenter.setCategory((String) notification.get(NOTIFICATION_CATEGORY), builder, context, new IntentProvider() {
         @Override
         public Intent provide() {
           Class activityClass = KernelConstants.MAIN_ACTIVITY_CLASS;

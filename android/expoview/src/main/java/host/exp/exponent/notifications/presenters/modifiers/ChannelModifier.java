@@ -18,13 +18,17 @@ import host.exp.exponent.notifications.NotificationConstants;
 import host.exp.exponent.notifications.helpers.Utils;
 import host.exp.expoview.R;
 
+import static host.exp.exponent.notifications.NotificationConstants.NOTIFICATION_CHANNEL_ID;
+import static host.exp.exponent.notifications.NotificationConstants.NOTIFICATION_PRIORITY;
+import static host.exp.exponent.notifications.NotificationConstants.NOTIFICATION_SOUND;
+import static host.exp.exponent.notifications.NotificationConstants.NOTIFICATION_VIBRATE;
 import static host.exp.exponent.notifications.NotificationHelper.createChannel;
 
 public class ChannelModifier implements NotificationModifier {
   @Override
   public void modify(NotificationCompat.Builder builder, Bundle notification, Context context, String experienceId) {
     ExponentNotificationManager manager = new ExponentNotificationManager(context);
-    if (!notification.containsKey("channelId")) {
+    if (!notification.containsKey(NOTIFICATION_CHANNEL_ID)) {
       // make a default channel so that people don't have to explicitly create a channel to see notifications
       createChannel(
           context,
@@ -33,10 +37,10 @@ public class ChannelModifier implements NotificationModifier {
           context.getString(R.string.default_notification_channel_group),
           new HashMap()
       );
-      notification.putString("channelId", NotificationConstants.NOTIFICATION_DEFAULT_CHANNEL_ID);
+      notification.putString(NOTIFICATION_CHANNEL_ID, NotificationConstants.NOTIFICATION_DEFAULT_CHANNEL_ID);
     }
 
-    String channelId = notification.getString("channelId");
+    String channelId = notification.getString(NOTIFICATION_CHANNEL_ID);
     builder.setChannelId(ExponentNotificationManager.getScopedChannelId(experienceId, channelId));
 
     if (!Utils.isAndroidVersionBelowOreo()) {
@@ -55,9 +59,9 @@ public class ChannelModifier implements NotificationModifier {
       JSONObject storedChannelDetails = manager.readChannelSettings(experienceId, channelId);
       if (storedChannelDetails != null) {
 
-        if (!notification.containsKey("sound")) {
+        if (!notification.containsKey(NOTIFICATION_SOUND)) {
           notification.putBoolean(
-              "sound",
+              NOTIFICATION_SOUND,
               storedChannelDetails.optBoolean(NotificationConstants.NOTIFICATION_CHANNEL_SOUND, false)
           );
         }
@@ -81,11 +85,11 @@ public class ChannelModifier implements NotificationModifier {
             priority = NotificationCompat.PRIORITY_DEFAULT;
         }
 
-        if (!notification.containsKey("priorityBelowOreo")) {
-          notification.putInt("priorityBelowOreo", priority);
+        if (!notification.containsKey(NOTIFICATION_PRIORITY)) {
+          notification.putInt(NOTIFICATION_PRIORITY, priority);
         }
 
-        if (!notification.containsKey("vibrate")) {
+        if (!notification.containsKey(NOTIFICATION_VIBRATE)) {
           try {
             JSONArray vibrateJsonArray = storedChannelDetails.optJSONArray(NotificationConstants.NOTIFICATION_CHANNEL_VIBRATE);
             if (vibrateJsonArray != null) {
@@ -93,9 +97,9 @@ public class ChannelModifier implements NotificationModifier {
               for (int i = 0; i < vibrateJsonArray.length(); i++) {
                 pattern[i] = ((Double) vibrateJsonArray.getDouble(i)).intValue();
               }
-              notification.putLongArray("vibrate", pattern);
+              notification.putLongArray(NOTIFICATION_VIBRATE, pattern);
             } else if (storedChannelDetails.optBoolean(NotificationConstants.NOTIFICATION_CHANNEL_VIBRATE, false)) {
-              notification.putLongArray("vibrate", new long[]{0, 500});
+              notification.putLongArray(NOTIFICATION_VIBRATE, new long[]{0, 500});
             }
           } catch (Exception e) {
           }

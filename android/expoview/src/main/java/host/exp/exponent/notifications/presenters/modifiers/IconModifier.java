@@ -19,12 +19,14 @@ import java.util.concurrent.Executor;
 
 import host.exp.expoview.R;
 
+import static host.exp.exponent.notifications.NotificationConstants.NOTIFICATION_ICON;
+
 public class IconModifier implements NotificationModifier {
   @Override
   public void modify(NotificationCompat.Builder builder, Bundle notification, Context context, String experienceId) {
     builder.setSmallIcon(R.drawable.shell_notification_icon);
-    if (notification.containsKey("icon")) {
-      ImageRequest imageRequest = ImageRequest.fromUri(notification.getString("icon"));
+    if (notification.containsKey(NOTIFICATION_ICON)) {
+      ImageRequest imageRequest = ImageRequest.fromUri(notification.getString(NOTIFICATION_ICON));
       ImagePipeline imagePipeline = Fresco.getImagePipeline();
       DataSource<CloseableReference<CloseableImage>> dataSource = imagePipeline.fetchDecodedImage(imageRequest, null);
       dataSource.subscribe(
