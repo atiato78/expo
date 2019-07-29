@@ -18,7 +18,7 @@ public class CategoryModifier implements NotificationModifier {
     if (notification.containsKey(NOTIFICATION_CATEGORY)) {
       String categoryId = getScopedIdIfNotDetached(notification.getString(NOTIFICATION_CATEGORY), experienceId);
 
-      NotificationActionCenter.setCategory((String) notification.get(NOTIFICATION_CATEGORY), builder, context, new IntentProvider() {
+      NotificationActionCenter.setCategory(categoryId, builder, context, new IntentProvider() {
         @Override
         public Intent provide() {
           Class activityClass = KernelConstants.MAIN_ACTIVITY_CLASS;

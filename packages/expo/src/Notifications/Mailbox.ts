@@ -7,7 +7,7 @@ import {
   LocalNotificationId,
   OnUserInteractionListener,
   OnForegroundNotificationListener,
-  UserInteraction
+  UserInteraction,
 } from './Notifications.types';
 
 export class Mailbox {
@@ -17,15 +17,24 @@ export class Mailbox {
   constructor() {
     this.onUserInteractionListeners = new Map();
     this.onForegroundNotificationListeners = new Map();
-    DeviceEventEmitter.addListener('Exponent.onUserInteraction', this._onUserInteraction.bind(this));
-    DeviceEventEmitter.addListener('Exponent.onForegroundNotification', this._onForegroundNotification.bind(this));
+    DeviceEventEmitter.addListener(
+      'Exponent.onUserInteraction',
+      this._onUserInteraction.bind(this)
+    );
+    DeviceEventEmitter.addListener(
+      'Exponent.onForegroundNotification',
+      this._onForegroundNotification.bind(this)
+    );
   }
 
   addOnUserInteractionListener(listenerName: string, listener: OnUserInteractionListener) {
     this.onUserInteractionListeners.set(listenerName, listener);
   }
 
-  addOnForegroundNotificationListener(listenerName: string, listener: OnForegroundNotificationListener) {
+  addOnForegroundNotificationListener(
+    listenerName: string,
+    listener: OnForegroundNotificationListener
+  ) {
     this.onForegroundNotificationListeners.set(listenerName, listener);
   }
 
@@ -48,4 +57,4 @@ export class Mailbox {
       listener(userInteraction);
     }
   }
-};
+}

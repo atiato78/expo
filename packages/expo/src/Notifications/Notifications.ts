@@ -102,7 +102,7 @@ if (Platform.OS === 'android') {
   };
 }
 
-  // User passes set of actions titles.
+// User passes set of actions titles.
 export function createCategoryAsync(categoryId: string, actions: ActionType[]): Promise<void> {
   return ExponentNotifications.createCategoryAsync(categoryId, actions);
 }
@@ -111,7 +111,7 @@ export function deleteCategoryAsync(categoryId: string): Promise<void> {
   return ExponentNotifications.deleteCategoryAsync(categoryId);
 }
 
-  /* Re-export */
+/* Re-export */
 export function getExpoPushTokenAsync(): Promise<string> {
   if (!ExponentNotifications.getExponentPushTokenAsync) {
     throw new UnavailabilityError('Expo.Notifications', 'getExpoPushTokenAsync');
@@ -147,7 +147,7 @@ export function deleteChannelAndroidAsync(id: string): Promise<void> {
   return ExponentNotifications.deleteChannel(id);
 }
 
-  /* Shows a notification instantly */
+/* Shows a notification instantly */
 export async function presentLocalNotificationAsync(
   notification: LocalNotification
 ): Promise<LocalNotificationId> {
@@ -164,10 +164,7 @@ export async function presentLocalNotificationAsync(
 
     // delete the legacy channel from AsyncStorage so this codepath isn't triggered anymore
     _legacyDeleteChannel(nativeNotification.channelId);
-    return ExponentNotifications.presentLocalNotificationWithChannel(
-      nativeNotification,
-      _channel
-    );
+    return ExponentNotifications.presentLocalNotificationWithChannel(nativeNotification, _channel);
   }
 }
 
@@ -241,9 +238,7 @@ export async function scheduleLocalNotificationAsync(
     }
 
     if (options.intervalMs <= 0 || !Number.isInteger(options.intervalMs)) {
-      throw new Error(
-        `Pass an integer greater than zero as the value for the "intervalMs" option`
-      );
+      throw new Error(`Pass an integer greater than zero as the value for the "intervalMs" option`);
     }
   }
 
@@ -275,7 +270,7 @@ export async function scheduleLocalNotificationAsync(
   }
 }
 
-  /* Dismiss currently shown notification with ID (Android only) */
+/* Dismiss currently shown notification with ID (Android only) */
 export async function dismissNotificationAsync(notificationId: LocalNotificationId): Promise<void> {
   if (!ExponentNotifications.dismissNotification) {
     throw new UnavailabilityError('Expo.Notifications', 'dismissNotification');
@@ -283,7 +278,7 @@ export async function dismissNotificationAsync(notificationId: LocalNotification
   return await ExponentNotifications.dismissNotification(notificationId);
 }
 
-  /* Dismiss all currently shown notifications (Android only) */
+/* Dismiss all currently shown notifications (Android only) */
 export async function dismissAllNotificationsAsync(): Promise<void> {
   if (!ExponentNotifications.dismissAllNotifications) {
     throw new UnavailabilityError('Expo.Notifications', 'dismissAllNotifications');
@@ -291,12 +286,14 @@ export async function dismissAllNotificationsAsync(): Promise<void> {
   return await ExponentNotifications.dismissAllNotifications();
 }
 
-  /* Cancel scheduled notification notification with ID */
-export async function cancelScheduledNotificationAsync(notificationId: LocalNotificationId): Promise<void> {
+/* Cancel scheduled notification notification with ID */
+export async function cancelScheduledNotificationAsync(
+  notificationId: LocalNotificationId
+): Promise<void> {
   return ExponentNotifications.cancelScheduledNotificationAsync(notificationId);
 }
 
-  /* Cancel all scheduled notifications */
+/* Cancel all scheduled notifications */
 export async function cancelAllScheduledNotificationsAsync(): Promise<void> {
   return ExponentNotifications.cancelAllScheduledNotificationsAsync();
 }
@@ -308,11 +305,17 @@ export async function setBadgeNumberAsync(number: number): Promise<void> {
   return ExponentNotifications.setBadgeNumberAsync(number);
 }
 
-export function addOnUserInteractionListener(listenerName: string, listener: OnUserInteractionListener) {
+export function addOnUserInteractionListener(
+  listenerName: string,
+  listener: OnUserInteractionListener
+) {
   _mailbox.addOnUserInteractionListener(listenerName, listener);
 }
 
-export function addOnForegroundNotificationListener(listenerName: string, listener: OnForegroundNotificationListener) {
+export function addOnForegroundNotificationListener(
+  listenerName: string,
+  listener: OnForegroundNotificationListener
+) {
   _mailbox.addOnForegroundNotificationListener(listenerName, listener);
 }
 
@@ -370,43 +373,39 @@ export async function scheduleNotificationWithTimerAsync(
 }
 
 function isInRangeInclusive(variable: number, min: number, max: number): boolean {
-  return (variable >= min && variable <= max);
+  return variable >= min && variable <= max;
 }
 
-  /*
-  * Legacy code
-  */
+/*
+ * Legacy code
+ */
 
 let _emitter;
 
 function _maybeInitEmitter() {
- if (!_emitter) {
-   _emitter = new EventEmitter();
-   addOnUserInteractionListener('legacyListener',
-     (userInteraction: UserInteraction) => {
-       let legacyMsg: Notification = {
-         data:userInteraction,
-         origin:'selected',
-         remote:userInteraction.remote == true,
-         isMultiple:false,
-       }
+  if (!_emitter) {
+    _emitter = new EventEmitter();
+    addOnUserInteractionListener('legacyListener', (userInteraction: UserInteraction) => {
+      let legacyMsg: Notification = {
+        data: userInteraction,
+        origin: 'selected',
+        remote: userInteraction.remote == true,
+        isMultiple: false,
+      };
 
       _emitter.emit('notification', legacyMsg);
-     }
-   );
-   addOnForegroundNotificationListener('legacyListener',
-     (notification: LocalNotification) => {
-       let legacyMsg: Notification = {
-         data:notification,
-         origin:'selected',
-         remote:notification.remote == true,
-         isMultiple:false,
-       }
+    });
+    addOnForegroundNotificationListener('legacyListener', (notification: LocalNotification) => {
+      let legacyMsg: Notification = {
+        data: notification,
+        origin: 'selected',
+        remote: notification.remote == true,
+        isMultiple: false,
+      };
 
-       _emitter.emit('notification', legacyMsg);
-     }
-   );
- }
+      _emitter.emit('notification', legacyMsg);
+    });
+  }
 }
 
 export function addListener(listener: (notification: Notification) => unknown): EventSubscription {

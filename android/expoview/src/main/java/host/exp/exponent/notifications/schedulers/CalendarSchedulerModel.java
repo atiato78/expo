@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Random;
 
 import host.exp.exponent.notifications.helpers.ExpoCronDefinitionBuilder;
+import host.exp.exponent.notifications.helpers.HashMapSerializer;
 import host.exp.exponent.notifications.managers.SchedulersManagerProxy;
 import host.exp.exponent.notifications.managers.SchedulersDatabase;
 
