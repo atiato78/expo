@@ -21,6 +21,7 @@ export declare type LocalNotification = {
         link?: string;
     };
     web?: NotificationOptions;
+    remote?: boolean;
 };
 export declare type Channel = {
     name: string;

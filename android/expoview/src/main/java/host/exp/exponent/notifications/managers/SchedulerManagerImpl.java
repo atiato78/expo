@@ -137,9 +137,6 @@ class SchedulerManagerImpl implements SchedulersManager {
       for (Class schedulerClass : getSchedulerClasses()) {
         List<SchedulerModel> schedulers = new Select().from(schedulerClass).queryList();
         for (SchedulerModel schedulerModel : schedulers) {
-          if (schedulerModel.getDetails() == null) {
-            throw new RuntimeException("NIE!!!");
-          }
           SchedulerImpl scheduler = new SchedulerImpl(schedulerModel);
           mSchedulersMap.put(scheduler.getIdAsString(), scheduler);
         }

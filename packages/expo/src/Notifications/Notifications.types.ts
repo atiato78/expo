@@ -23,6 +23,7 @@ export type LocalNotification = {
     link?: string;
   };
   web?: NotificationOptions;
+  remote?: boolean;
 };
 
 export type Channel = {

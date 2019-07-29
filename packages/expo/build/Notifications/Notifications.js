@@ -1,4 +1,5 @@
 import Constants from 'expo-constants';
+import { EventEmitter } from 'fbemitter';
 import invariant from 'invariant';
 import { AsyncStorage, Platform } from 'react-native';
 import { CodedError, UnavailabilityError } from '@unimodules/core';
@@ -260,5 +261,36 @@ export async function scheduleNotificationWithTimerAsync(notification, options) 
 }
 function isInRangeInclusive(variable, min, max) {
     return (variable >= min && variable <= max);
+}
+/*
+* Legacy code
+*/
+let _emitter;
+function _maybeInitEmitter() {
+    if (!_emitter) {
+        _emitter = new EventEmitter();
+        addOnUserInteractionListener('legacyListener', (userInteraction) => {
+            let legacyMsg = {
+                data: userInteraction,
+                origin: 'selected',
+                remote: userInteraction.remote == true,
+                isMultiple: false,
+            };
+            _emitter.emit('notification', legacyMsg);
+        });
+        addOnForegroundNotificationListener('legacyListener', (notification) => {
+            let legacyMsg = {
+                data: notification,
+                origin: 'selected',
+                remote: notification.remote == true,
+                isMultiple: false,
+            };
+            _emitter.emit('notification', legacyMsg);
+        });
+    }
+}
+export function addListener(listener) {
+    _maybeInitEmitter();
+    return _emitter.addListener('notification', listener);
 }
 //# sourceMappingURL=Notifications.js.map

@@ -372,3 +372,44 @@ export async function scheduleNotificationWithTimerAsync(
 function isInRangeInclusive(variable: number, min: number, max: number): boolean {
   return (variable >= min && variable <= max);
 }
+
+  /*
+  * Legacy code
+  */
+
+let _emitter;
+
+function _maybeInitEmitter() {
+ if (!_emitter) {
+   _emitter = new EventEmitter();
+   addOnUserInteractionListener('legacyListener',
+     (userInteraction: UserInteraction) => {
+       let legacyMsg: Notification = {
+         data:userInteraction,
+         origin:'selected',
+         remote:userInteraction.remote == true,
+         isMultiple:false,
+       }
+
+      _emitter.emit('notification', legacyMsg);
+     }
+   );
+   addOnForegroundNotificationListener('legacyListener',
+     (notification: LocalNotification) => {
+       let legacyMsg: Notification = {
+         data:notification,
+         origin:'selected',
+         remote:notification.remote == true,
+         isMultiple:false,
+       }
+
+       _emitter.emit('notification', legacyMsg);
+     }
+   );
+ }
+}
+
+export function addListener(listener: (notification: Notification) => unknown): EventSubscription {
+  _maybeInitEmitter();
+  return _emitter.addListener('notification', listener);
+}

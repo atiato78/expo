@@ -1,4 +1,5 @@
-import { LocalNotification, Channel, ActionType, LocalNotificationId, OnUserInteractionListener, OnForegroundNotificationListener } from './Notifications.types';
+import { EventSubscription } from 'fbemitter';
+import { Notification, LocalNotification, Channel, ActionType, LocalNotificationId, OnUserInteractionListener, OnForegroundNotificationListener } from './Notifications.types';
 export declare function createCategoryAsync(categoryId: string, actions: ActionType[]): Promise<void>;
 export declare function deleteCategoryAsync(categoryId: string): Promise<void>;
 export declare function getExpoPushTokenAsync(): Promise<string>;
@@ -39,3 +40,4 @@ export declare function scheduleNotificationWithTimerAsync(notification: LocalNo
     interval: number;
     repeat?: boolean;
 }): Promise<string>;
+export declare function addListener(listener: (notification: Notification) => unknown): EventSubscription;
