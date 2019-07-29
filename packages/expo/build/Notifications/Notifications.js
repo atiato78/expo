@@ -114,7 +114,10 @@ export function deleteChannelAndroidAsync(id) {
     }
     return ExponentNotifications.deleteChannel(id);
 }
-/* Shows a notification instantly */
+/**
+ * @remarks
+ * Shows a notification instantly
+ */
 export async function presentLocalNotificationAsync(notification) {
     _validateNotification(notification);
     let nativeNotification = _processNotification(notification);
@@ -131,7 +134,10 @@ export async function presentLocalNotificationAsync(notification) {
         return ExponentNotifications.presentLocalNotificationWithChannel(nativeNotification, _channel);
     }
 }
-/* Schedule a notification at a later date */
+/**
+ * @remarks
+ * Schedule a notification at a later date
+ */
 export async function scheduleLocalNotificationAsync(notification, options = {}) {
     // set now at the beginning of the method, to prevent potential weird warnings when we validate
     // options.time later on
@@ -200,25 +206,37 @@ export async function scheduleLocalNotificationAsync(notification, options = {})
         return ExponentNotifications.scheduleLocalNotificationWithChannel(nativeNotification, options, _channel);
     }
 }
-/* Dismiss currently shown notification with ID (Android only) */
+/**
+ * @remarks
+ * Dismiss currently shown notification with ID (Android only)
+ */
 export async function dismissNotificationAsync(notificationId) {
     if (!ExponentNotifications.dismissNotification) {
         throw new UnavailabilityError('Expo.Notifications', 'dismissNotification');
     }
     return await ExponentNotifications.dismissNotification(notificationId);
 }
-/* Dismiss all currently shown notifications (Android only) */
+/**
+ * @remarks
+ * Dismiss all currently shown notifications (Android only)
+ */
 export async function dismissAllNotificationsAsync() {
     if (!ExponentNotifications.dismissAllNotifications) {
         throw new UnavailabilityError('Expo.Notifications', 'dismissAllNotifications');
     }
     return await ExponentNotifications.dismissAllNotifications();
 }
-/* Cancel scheduled notification notification with ID */
+/**
+ * @remarks
+ * Cancel scheduled notification notification with ID
+ */
 export async function cancelScheduledNotificationAsync(notificationId) {
     return ExponentNotifications.cancelScheduledNotificationAsync(notificationId);
 }
-/* Cancel all scheduled notifications */
+/**
+ * @remarks
+ * Cancel all scheduled notifications
+ */
 export async function cancelAllScheduledNotificationsAsync() {
     return ExponentNotifications.cancelAllScheduledNotificationsAsync();
 }
@@ -260,11 +278,11 @@ export async function scheduleNotificationWithTimerAsync(notification, options) 
     return ExponentNotifications.scheduleNotificationWithTimer(notification, options);
 }
 function isInRangeInclusive(variable, min, max) {
-    return (variable >= min && variable <= max);
+    return variable >= min && variable <= max;
 }
 /*
-* Legacy code
-*/
+ * Legacy code
+ */
 let _emitter;
 function _maybeInitEmitter() {
     if (!_emitter) {
@@ -281,7 +299,7 @@ function _maybeInitEmitter() {
         addOnForegroundNotificationListener('legacyListener', (notification) => {
             let legacyMsg = {
                 data: notification,
-                origin: 'selected',
+                origin: 'received',
                 remote: notification.remote == true,
                 isMultiple: false,
             };

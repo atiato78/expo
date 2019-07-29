@@ -29,5 +29,4 @@ export class Mailbox {
         }
     }
 }
-;
 //# sourceMappingURL=Mailbox.js.map

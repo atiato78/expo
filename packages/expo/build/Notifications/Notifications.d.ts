@@ -11,15 +11,39 @@ export declare function getDevicePushTokenAsync(config: {
 }>;
 export declare function createChannelAndroidAsync(id: string, channel: Channel): Promise<void>;
 export declare function deleteChannelAndroidAsync(id: string): Promise<void>;
+/**
+ * @remarks
+ * Shows a notification instantly
+ */
 export declare function presentLocalNotificationAsync(notification: LocalNotification): Promise<LocalNotificationId>;
+/**
+ * @remarks
+ * Schedule a notification at a later date
+ */
 export declare function scheduleLocalNotificationAsync(notification: LocalNotification, options?: {
     time?: Date | number;
     repeat?: 'minute' | 'hour' | 'day' | 'week' | 'month' | 'year';
     intervalMs?: number;
 }): Promise<LocalNotificationId>;
+/**
+ * @remarks
+ * Dismiss currently shown notification with ID (Android only)
+ */
 export declare function dismissNotificationAsync(notificationId: LocalNotificationId): Promise<void>;
+/**
+ * @remarks
+ * Dismiss all currently shown notifications (Android only)
+ */
 export declare function dismissAllNotificationsAsync(): Promise<void>;
+/**
+ * @remarks
+ * Cancel scheduled notification notification with ID
+ */
 export declare function cancelScheduledNotificationAsync(notificationId: LocalNotificationId): Promise<void>;
+/**
+ * @remarks
+ * Cancel all scheduled notifications
+ */
 export declare function cancelAllScheduledNotificationsAsync(): Promise<void>;
 export declare function setBadgeNumberAsync(number: number): Promise<void>;
 export declare function addOnUserInteractionListener(listenerName: string, listener: OnUserInteractionListener): void;

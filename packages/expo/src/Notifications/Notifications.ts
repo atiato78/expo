@@ -147,7 +147,11 @@ export function deleteChannelAndroidAsync(id: string): Promise<void> {
   return ExponentNotifications.deleteChannel(id);
 }
 
-/* Shows a notification instantly */
+/**
+ * @remarks
+ * Shows a notification instantly
+ */
+
 export async function presentLocalNotificationAsync(
   notification: LocalNotification
 ): Promise<LocalNotificationId> {
@@ -168,7 +172,10 @@ export async function presentLocalNotificationAsync(
   }
 }
 
-/* Schedule a notification at a later date */
+/**
+ * @remarks
+ * Schedule a notification at a later date
+ */
 export async function scheduleLocalNotificationAsync(
   notification: LocalNotification,
   options: {
@@ -270,30 +277,40 @@ export async function scheduleLocalNotificationAsync(
   }
 }
 
-/* Dismiss currently shown notification with ID (Android only) */
+/**
+ * @remarks
+ * Dismiss currently shown notification with ID (Android only)
+ */
 export async function dismissNotificationAsync(notificationId: LocalNotificationId): Promise<void> {
   if (!ExponentNotifications.dismissNotification) {
     throw new UnavailabilityError('Expo.Notifications', 'dismissNotification');
   }
   return await ExponentNotifications.dismissNotification(notificationId);
 }
-
-/* Dismiss all currently shown notifications (Android only) */
+/**
+ * @remarks
+ * Dismiss all currently shown notifications (Android only)
+ */
 export async function dismissAllNotificationsAsync(): Promise<void> {
   if (!ExponentNotifications.dismissAllNotifications) {
     throw new UnavailabilityError('Expo.Notifications', 'dismissAllNotifications');
   }
   return await ExponentNotifications.dismissAllNotifications();
 }
-
-/* Cancel scheduled notification notification with ID */
+/**
+ * @remarks
+ * Cancel scheduled notification notification with ID
+ */
 export async function cancelScheduledNotificationAsync(
   notificationId: LocalNotificationId
 ): Promise<void> {
   return ExponentNotifications.cancelScheduledNotificationAsync(notificationId);
 }
 
-/* Cancel all scheduled notifications */
+/**
+ * @remarks
+ * Cancel all scheduled notifications
+ */
 export async function cancelAllScheduledNotificationsAsync(): Promise<void> {
   return ExponentNotifications.cancelAllScheduledNotificationsAsync();
 }
