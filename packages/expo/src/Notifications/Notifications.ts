@@ -398,7 +398,7 @@ function _maybeInitEmitter() {
     addOnForegroundNotificationListener('legacyListener', (notification: LocalNotification) => {
       let legacyMsg: Notification = {
         data: notification,
-        origin: 'selected',
+        origin: 'received',
         remote: notification.remote == true,
         isMultiple: false,
       };
