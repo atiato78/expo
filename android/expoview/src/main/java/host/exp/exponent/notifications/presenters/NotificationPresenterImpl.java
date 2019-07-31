@@ -41,7 +41,7 @@ public class NotificationPresenterImpl implements NotificationPresenter {
       }
 
       NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(context);
-      notificationManagerCompat.notify(notificationId, builder.build());
+      notificationManagerCompat.notify(experienceId, notificationId, builder.build());
     });
 
   }
