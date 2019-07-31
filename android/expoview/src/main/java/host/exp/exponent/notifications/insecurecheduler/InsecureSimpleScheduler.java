@@ -19,7 +19,7 @@ import static host.exp.exponent.notifications.NotificationConstants.NOTIFICATION
 public class InsecureSimpleScheduler implements InsecureScheduler {
 
   @Override
-  public void schedule(String experienceId, int elapsedTime, int notificationId, HashMap notification, Context context) {
+  public void schedule(String experienceId, long elapsedTime, int notificationId, HashMap notification, Context context) {
     Intent notificationIntent = new Intent(context, ScheduledNotificationReceiver.class);
 
     notificationIntent.setType(experienceId);

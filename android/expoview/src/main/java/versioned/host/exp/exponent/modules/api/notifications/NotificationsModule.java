@@ -10,6 +10,8 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
+import android.service.notification.StatusBarNotification;
+
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -127,16 +129,11 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
     promise.resolve(null);
   }
 
-  private String getScopedIdIfNotDetached(String categoryId) {
+  private String getScopedIdIfNotDetached(String string) {
     if (!Constants.isStandaloneApp()) {
-      try {
-        String experienceId = mManifest.getString(ExponentManifest.MANIFEST_ID_KEY);
-        return experienceId + ":" + categoryId;
-      } catch (JSONException e) {
-        e.printStackTrace();
-      }
+      return mExperienceId + ":" + string;
     }
-    return categoryId;
+    return string;
   }
 
   @ReactMethod
@@ -263,62 +260,48 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
 
   @ReactMethod
   public void dismissNotification(final String notificationId, final Promise promise) {
-    try {
-      int id = Integer.parseInt(notificationId);
-      ExponentNotificationManager manager = new ExponentNotificationManager(getReactApplicationContext());
-      manager.cancel(
-          mManifest.getString(ExponentManifest.MANIFEST_ID_KEY),
-          id
-      );
-      promise.resolve(true);
-    } catch (JSONException e) {
-      promise.reject(e);
-    }
+    int id = Integer.parseInt(notificationId);
+    NotificationManager notificationManager = (NotificationManager) mReactContext
+        .getSystemService(Context.NOTIFICATION_SERVICE);
+    notificationManager.cancel(id);
+    promise.resolve(null);
   }
 
   @ReactMethod
   public void dismissAllNotifications(final Promise promise) {
-    try {
-      ExponentNotificationManager manager = new ExponentNotificationManager(getReactApplicationContext());
-      manager.cancelAll(mManifest.getString(ExponentManifest.MANIFEST_ID_KEY));
-      promise.resolve(true);
-    } catch (JSONException e) {
-      promise.reject(e);
+    NotificationManager notificationManager = (NotificationManager) mReactContext
+        .getSystemService(Context.NOTIFICATION_SERVICE);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      StatusBarNotification[] activeNotifications = notificationManager.getActiveNotifications();
+
+      for (StatusBarNotification notification : activeNotifications) {
+        if (notification.getTag().equals(mExperienceId)) {
+          notificationManager.cancel(notification.getId());
+        }
+      }
+
+      promise.resolve(null);
+    } else {
+      promise.reject("Function dismissAllNotifications is available from android 6.0");
     }
   }
 
   @ReactMethod
   public void cancelScheduledNotificationAsync(final String notificationId, final Promise promise) {
-    try {
-      int id = Integer.parseInt(notificationId);
-      ExponentNotificationManager manager = new ExponentNotificationManager(getReactApplicationContext());
-      manager.cancelScheduled(mManifest.getString(ExponentManifest.MANIFEST_ID_KEY), id);
+    SchedulersManagerProxy.getInstance(getReactApplicationContext()
+        .getApplicationContext())
+        .removeScheduler(notificationId);
 
-      SchedulersManagerProxy.getInstance(getReactApplicationContext()
-          .getApplicationContext())
-          .removeScheduler(notificationId);
-      promise.resolve(null);
-    } catch (Exception e) {
-      promise.reject(e);
-    }
+    dismissNotification(notificationId, promise);
   }
 
   @ReactMethod
   public void cancelAllScheduledNotificationsAsync(final Promise promise) {
-    try {
-      ExponentNotificationManager manager = new ExponentNotificationManager(getReactApplicationContext());
-      manager.cancelAllScheduled(mManifest.getString(ExponentManifest.MANIFEST_ID_KEY));
+    SchedulersManagerProxy
+        .getInstance(getReactApplicationContext().getApplicationContext())
+        .removeAll(mExperienceId);
 
-      String experienceId = mManifest.optString(ExponentManifest.MANIFEST_ID_KEY, null);
-
-      SchedulersManagerProxy
-          .getInstance(getReactApplicationContext().getApplicationContext())
-          .removeAll(experienceId);
-
-      promise.resolve(null);
-    } catch (Exception e) {
-      promise.reject(e);
-    }
+    dismissAllNotifications(promise);
   }
 
   @ReactMethod

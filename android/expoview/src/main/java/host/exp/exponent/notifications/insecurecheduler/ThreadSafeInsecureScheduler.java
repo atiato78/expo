@@ -19,7 +19,7 @@ public class ThreadSafeInsecureScheduler implements InsecureScheduler {
   }
 
   @Override
-  public void schedule(String experienceId, int elapsedTime, int notificationId, HashMap notification, Context context) {
+  public void schedule(String experienceId, long elapsedTime, int notificationId, HashMap notification, Context context) {
     mExecutor.execute(() -> insecureScheduler.schedule(experienceId, elapsedTime, notificationId, notification, context));
   }
 
