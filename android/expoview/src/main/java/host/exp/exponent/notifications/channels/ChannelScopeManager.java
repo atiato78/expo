@@ -10,7 +10,7 @@ public class ChannelScopeManager implements ChannelManager {
 
   ChannelManager nextChannelManager = ThreadSafeChannelManager.getInstance();
 
-  ChannelScopeManager(String experienceId) {
+  public ChannelScopeManager(String experienceId) {
     mExperienceId = experienceId;
   }
 

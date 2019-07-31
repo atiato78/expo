@@ -3,6 +3,12 @@
 package versioned.host.exp.exponent.modules.api.notifications;
 
 import com.cronutils.model.Cron;
+
+import android.app.NotificationChannel;
+import android.app.NotificationChannelGroup;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
@@ -42,6 +48,9 @@ import host.exp.exponent.notifications.ExponentNotificationManager;
 import host.exp.exponent.notifications.NotificationActionCenter;
 import host.exp.exponent.notifications.NotificationConstants;
 import host.exp.exponent.notifications.NotificationHelper;
+import host.exp.exponent.notifications.channels.ChannelManager;
+import host.exp.exponent.notifications.channels.ChannelPOJO;
+import host.exp.exponent.notifications.channels.ChannelScopeManager;
 import host.exp.exponent.notifications.schedulers.IntervalSchedulerModel;
 import host.exp.exponent.notifications.schedulers.SchedulerImpl;
 import host.exp.exponent.notifications.postoffice.Mailbox;
@@ -52,8 +61,14 @@ import host.exp.exponent.storage.ExponentSharedPreferences;
 import host.exp.exponent.notifications.exceptions.UnableToScheduleException;
 import host.exp.exponent.notifications.managers.SchedulersManagerProxy;
 import host.exp.exponent.notifications.schedulers.CalendarSchedulerModel;
+import host.exp.expoview.R;
 
 import static com.cronutils.model.field.expression.FieldExpressionFactory.on;
+import static host.exp.exponent.notifications.NotificationConstants.NOTIFICATION_CHANNEL_ID;
+import static host.exp.exponent.notifications.NotificationConstants.NOTIFICATION_DEFAULT_CHANNEL_ID;
+import static host.exp.exponent.notifications.NotificationConstants.NOTIFICATION_DEFAULT_CHANNEL_NAME;
+import static host.exp.exponent.notifications.NotificationConstants.NOTIFICATION_EXPERIENCE_ID_KEY;
+import static host.exp.exponent.notifications.NotificationConstants.NOTIFICATION_ID_KEY;
 import static host.exp.exponent.notifications.helpers.ExpoCronParser.createCronInstance;
 
 public class NotificationsModule extends ReactContextBaseJavaModule implements RegistryLifecycleListener, Mailbox {
@@ -72,6 +87,9 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
 
   private static final String ON_USER_INTERACTION_EVENT = "Exponent.onUserInteraction";
   private static final String ON_FOREGROUND_NOTIFICATION_EVENT = "Exponent.onForegroundNotification";
+
+  private String mExperienceId;
+  private ChannelManager mChannelManager;
 
   public NotificationsModule(ReactApplicationContext reactContext,
                              JSONObject manifest, Map<String, Object> experienceProperties) {
@@ -189,84 +207,53 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
 
   @ReactMethod
   public void createChannel(String channelId, final ReadableMap data, final Promise promise) {
-    String experienceId;
-    String channelName;
+    HashMap channelData = data.toHashMap();
+    channelData.put(NOTIFICATION_CHANNEL_ID, channelId);
 
-    try {
-      experienceId = mManifest.getString(ExponentManifest.MANIFEST_ID_KEY);
-    } catch (Exception e) {
-      promise.reject("E_FAILED_CREATING_CHANNEL", "Requires Experience ID");
-      return;
-    }
+    ChannelPOJO channelPOJO = ChannelPOJO.createChannelPOJO(channelData);
 
-    if (data.hasKey(NotificationConstants.NOTIFICATION_CHANNEL_NAME)) {
-      channelName = data.getString(NotificationConstants.NOTIFICATION_CHANNEL_NAME);
-    } else {
-      promise.reject("E_FAILED_CREATING_CHANNEL", "Requires channel name");
-      return;
-    }
-
-    try {
-      NotificationHelper.createChannel(
-          getReactApplicationContext(),
-          experienceId,
-          channelId,
-          channelName,
-          data.toHashMap());
-      promise.resolve(null);
-    } catch (Exception e) {
-      promise.reject("E_FAILED_CREATING_CHANNEL", "Could not create channel", e);
-    }
+    mChannelManager.addChannel(channelId, channelPOJO, getReactApplicationContext().getApplicationContext());
+    promise.resolve(null);
   }
 
   @ReactMethod
   public void deleteChannel(String channelId, final Promise promise) {
-    String experienceId;
-
-    try {
-      experienceId = mManifest.getString(ExponentManifest.MANIFEST_ID_KEY);
-    } catch (Exception e) {
-      promise.reject("E_FAILED_DELETING_CHANNEL", "Requires Experience ID");
-      return;
-    }
-
-    try {
-      NotificationHelper.deleteChannel(
-          getReactApplicationContext(),
-          experienceId,
-          channelId);
-      promise.resolve(null);
-    } catch (Exception e) {
-      promise.reject("E_FAILED_DELETING_CHANNEL", "Could not delete channel", e);
-    }
+    mChannelManager.deleteChannel(channelId, getReactApplicationContext().getApplicationContext());
+    promise.resolve(null);
   }
 
   @ReactMethod
-  public void presentLocalNotification(final ReadableMap data, final Promise promise) {
-    presentLocalNotificationWithChannel(data, null, promise);
+  public void createChannelGroup(String groupId, String groupName, final Promise promise) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      NotificationManager notificationManager =
+          (NotificationManager) mReactContext.getSystemService(Context.NOTIFICATION_SERVICE);
+      notificationManager.createNotificationChannelGroup(new NotificationChannelGroup(groupId, groupName));
+    }
+    promise.resolve(null);
   }
 
   @ReactMethod
-  public void presentLocalNotificationWithChannel(final ReadableMap data, final ReadableMap legacyChannelData, final Promise promise) {
-    String experienceId;
+  public void deleteChannelGroup(String groupId, final Promise promise) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      NotificationManager notificationManager =
+          (NotificationManager) mReactContext.getSystemService(Context.NOTIFICATION_SERVICE);
+      notificationManager.deleteNotificationChannelGroup(groupId);
+    }
+    promise.resolve(null);
+  }
 
+  @ReactMethod
+  public void presentLocalNotification(final ReadableMap data, final ReadableMap legacyChannelData, final Promise promise) {
     Bundle bundle = new MapArguments(data.toHashMap()).toBundle();
-
-    try {
-      experienceId = mManifest.getString(ExponentManifest.MANIFEST_ID_KEY);
-      bundle.putString("experienceId", experienceId);
-    } catch (Exception e) {
-      promise.reject("E_FAILED_PRESENTING_NOTIFICATION", "Requires Experience ID");
-      return;
-    }
+    bundle.putString(NOTIFICATION_EXPERIENCE_ID_KEY, mExperienceId);
 
     Integer notificationId = Math.abs( new Random().nextInt() );
-    bundle.putString("notificationId", notificationId.toString());
+    bundle.putString(NOTIFICATION_ID_KEY, notificationId.toString());
 
     NotificationPresenter notificationPresenter = new NotificationPresenterImpl();
     notificationPresenter.presentNotification(
         getReactApplicationContext().getApplicationContext(),
-        experienceId,
+        mExperienceId,
         bundle,
         notificationId
     );
@@ -456,23 +443,31 @@ public class NotificationsModule extends ReactContextBaseJavaModule implements R
   }
 
   public void onCreate(ModuleRegistry moduleRegistry) {
-    String experienceId = "";
     try {
-      experienceId = mManifest.getString(ExponentManifest.MANIFEST_ID_KEY);
+      mExperienceId = mManifest.getString(ExponentManifest.MANIFEST_ID_KEY);
     } catch (JSONException e) {
       e.printStackTrace();
     }
-    PostOfficeProxy.getInstance().registerModuleAndGetPendingDeliveries(experienceId, this);
+
+    createDefaultChannel();
+
+    mChannelManager = new ChannelScopeManager(mExperienceId);
+
+    PostOfficeProxy.getInstance().registerModuleAndGetPendingDeliveries(mExperienceId, this);
+  }
+
+  private void createDefaultChannel() {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      CharSequence name = NOTIFICATION_DEFAULT_CHANNEL_NAME;
+      int importance = NotificationManager.IMPORTANCE_DEFAULT;
+      NotificationChannel channel = new NotificationChannel(NOTIFICATION_DEFAULT_CHANNEL_ID, name, importance);
+      NotificationManager notificationManager = mReactContext.getSystemService(NotificationManager.class);
+      notificationManager.createNotificationChannel(channel);
+    }
   }
 
   public void onDestory() {
-    String experienceId = "";
-    try {
-      experienceId = mManifest.getString(ExponentManifest.MANIFEST_ID_KEY);
-    } catch (JSONException e) {
-      e.printStackTrace();
-    }
-    PostOfficeProxy.getInstance().unregisterModule(experienceId);
+    PostOfficeProxy.getInstance().unregisterModule(mExperienceId);
   }
 
   @Override

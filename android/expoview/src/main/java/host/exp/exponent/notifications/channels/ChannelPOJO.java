@@ -33,7 +33,7 @@ public class ChannelPOJO implements Serializable {
 
   private ChannelPOJO() {}
 
-  static ChannelPOJO ChannelPOJO(HashMap<String, Object> map) {
+  public static ChannelPOJO createChannelPOJO(HashMap<String, Object> map) {
     Builder builder = new ChannelPOJO.Builder();
 
     if (map.containsKey(NOTIFICATION_CHANNEL_PRIORITY)) {

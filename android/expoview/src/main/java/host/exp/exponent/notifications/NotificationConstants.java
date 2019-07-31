@@ -17,6 +17,7 @@ public class NotificationConstants {
   public static final String NOTIFICATION_INPUT_TEXT = "userText";
 
   public static final String NOTIFICATION_DEFAULT_CHANNEL_ID = "expo-default";
+  public static final String NOTIFICATION_DEFAULT_CHANNEL_NAME = "Expo notifications";
   public static final String NOTIFICATION_EXPERIENCE_CHANNEL_ID = "expo-experience";
   public static final String NOTIFICATION_EXPERIENCE_CHANNEL_GROUP_ID = "expo-experience-group";
   public static final String NOTIFICATION_CHANNEL_NAME = "name";
@@ -27,7 +28,6 @@ public class NotificationConstants {
   public static final String NOTIFICATION_CHANNEL_VIBRATE = "vibrate";
   public static final String NOTIFICATION_CHANNEL_BADGE = "badge";
   public static final String NOTIFICATION_CHANNEL_GROUP_ID = "groupId";
-  public static final String NOTIFICATION_CHANNEL_ID = "channelId";
 
   public static final String NOTIFICATION_CHANNEL_PRIORITY_MAX = "max";
   public static final String NOTIFICATION_CHANNEL_PRIORITY_HIGH = "high";

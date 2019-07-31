@@ -49,7 +49,7 @@ public class AndroidAwareChannelManager  implements ChannelManager {
   @Override
   public Future<ChannelPOJO> getPropertiesForChannelId(String channelId, final Context context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-      Future<ChannelPOJO> channelPOJOFuture = nextChannelManager.getPropertiesForChannelId(channelId, context));
+      Future<ChannelPOJO> channelPOJOFuture = nextChannelManager.getPropertiesForChannelId(channelId, context);
 
       try {
         if (channelPOJOFuture.get() != null) {
